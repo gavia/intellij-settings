@@ -6,6 +6,7 @@
     <EXCLUDED_PACKAGE NAME="com.sun.xml.internal.bind.v2.runtime.property.Property" />
     <EXCLUDED_PACKAGE NAME="org.parboiled.common.ImmutableList" />
   </component>
+  <component name="DaemonCodeAnalyzerSettings" profile="My Inspections" />
   <component name="JavaCodeFoldingSettings">
     <option name="collapseConstructorGenericParameters" value="false" />
     <option name="collapseSuppressWarnings" value="false" />

@@ -7,24 +7,45 @@
             <id />
           </State>
           <State>
-            <id>Class structureJava</id>
+            <id>Class metricsJava</id>
           </State>
           <State>
-            <id>Code style issuesJava</id>
+            <id>Control flow issuesJava</id>
+          </State>
+          <State>
+            <id>Groovy</id>
           </State>
           <State>
             <id>Java</id>
           </State>
           <State>
-            <id>Java EE issues</id>
+            <id>JavaScript</id>
           </State>
           <State>
-            <id>Plugin DevKit</id>
+            <id>JavaScript function metricsJavaScript</id>
+          </State>
+          <State>
+            <id>Method MetricsGroovy</id>
+          </State>
+          <State>
+            <id>Method metricsJava</id>
+          </State>
+          <State>
+            <id>Numeric issuesJava</id>
+          </State>
+          <State>
+            <id>Potentially confusing code constructsGroovy</id>
+          </State>
+          <State>
+            <id>Potentially confusing code constructsJavaScript</id>
+          </State>
+          <State>
+            <id>Probable bugsJava</id>
           </State>
         </expanded-state>
         <selected-state>
           <State>
-            <id>Ant inspections</id>
+            <id>ParametersPerMethod</id>
           </State>
         </selected-state>
       </profile-state>
@@ -42,6 +63,56 @@
         <selected-state>
           <State>
             <id>Java</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+    <entry key="My Inspections">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>Class metricsJava</id>
+          </State>
+          <State>
+            <id>Control flow issuesJava</id>
+          </State>
+          <State>
+            <id>Groovy</id>
+          </State>
+          <State>
+            <id>Java</id>
+          </State>
+          <State>
+            <id>JavaScript</id>
+          </State>
+          <State>
+            <id>JavaScript function metricsJavaScript</id>
+          </State>
+          <State>
+            <id>Method MetricsGroovy</id>
+          </State>
+          <State>
+            <id>Method metricsJava</id>
+          </State>
+          <State>
+            <id>Numeric issuesJava</id>
+          </State>
+          <State>
+            <id>Potentially confusing code constructsGroovy</id>
+          </State>
+          <State>
+            <id>Potentially confusing code constructsJavaScript</id>
+          </State>
+          <State>
+            <id>Probable bugsJava</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>ParametersPerMethod</id>
           </State>
         </selected-state>
       </profile-state>

@@ -1,5 +1,5 @@
-<inspections profile_name="Default" version="1.0">
-  <option name="myName" value="Default" />
+<inspections profile_name="My Inspections" version="1.0">
+  <option name="myName" value="My Inspections" />
   <option name="myLocal" value="true" />
   <inspection_tool class="Anonymous2MethodRef" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="ConstantConditions" enabled="true" level="WEAK WARNING" enabled_by_default="true">
@@ -66,6 +66,10 @@
     <option name="m_includeLibraryClasses" value="false" />
     <option name="m_limit" value="10" />
   </inspection_tool>
+  <inspection_tool class="MethodMayBeStatic" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+    <option name="m_onlyPrivateOrFinal" value="false" />
+    <option name="m_ignoreEmptyMethods" value="true" />
+  </inspection_tool>
   <inspection_tool class="MismatchedCollectionQueryUpdate" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <option name="queryNames">
       <value />
@@ -92,6 +96,9 @@
     <option name="REPORT_NULLS_PASSED_TO_NON_ANNOTATED_METHOD" value="true" />
   </inspection_tool>
   <inspection_tool class="PackageDotHtmlMayBePackageInfo" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="ParametersPerMethod" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+    <option name="m_limit" value="3" />
+  </inspection_tool>
   <inspection_tool class="SimplifiableConditionalExpression" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="SimplifiableIfStatement" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="SqlDialectInspection" enabled="false" level="WARNING" enabled_by_default="false" />
@@ -118,6 +125,7 @@
     <option name="m_ignoreAnnotatedVariables" value="false" />
   </inspection_tool>
   <inspection_tool class="UnnecessarySemicolon" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="UnnecessaryThis" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="UnusedAssignment" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <option name="REPORT_PREFIX_EXPRESSIONS" value="false" />
     <option name="REPORT_POSTFIX_EXPRESSIONS" value="true" />
