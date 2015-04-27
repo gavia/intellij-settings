@@ -2,6 +2,9 @@
   <option name="myName" value="My Inspections" />
   <option name="myLocal" value="true" />
   <inspection_tool class="Anonymous2MethodRef" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="AutoCloseableResource" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="CollectionsFieldAccessReplaceableByMethodCall" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="ConditionalExpressionWithIdenticalBranches" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="ConstantConditions" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <option name="SUGGEST_NULLABLE_ANNOTATIONS" value="false" />
     <option name="DONT_REPORT_TRUE_ASSERT_STATEMENTS" value="false" />
@@ -12,8 +15,13 @@
   <inspection_tool class="Convert2Lambda" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="Convert2MethodRef" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="CyclomaticComplexity" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-    <option name="m_limit" value="10" />
+    <option name="m_limit" value="5" />
   </inspection_tool>
+  <inspection_tool class="DeclareCollectionAsInterface" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+    <option name="ignoreLocalVariables" value="false" />
+    <option name="ignorePrivateMethodsAndFields" value="false" />
+  </inspection_tool>
+  <inspection_tool class="DefaultNotLastCaseInSwitch" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="Deprecation" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="IGNORE_INSIDE_DEPRECATED" value="true" />
   </inspection_tool>
@@ -21,7 +29,11 @@
     <option name="m_reportEmptyBlocks" value="true" />
     <option name="commentsAreContent" value="true" />
   </inspection_tool>
+  <inspection_tool class="EnumSwitchStatementWhichMissesCases" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+    <option name="ignoreSwitchStatementsWithDefault" value="true" />
+  </inspection_tool>
   <inspection_tool class="FieldCanBeLocal" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="FieldMayBeStatic" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="GroovyOverlyLongMethod" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <option name="m_limit" value="20" />
   </inspection_tool>
@@ -82,10 +94,14 @@
     <option name="ignoreObjectMethods" value="false" />
     <option name="ignoreAnonymousClassMethods" value="false" />
   </inspection_tool>
+  <inspection_tool class="NewExceptionWithoutArguments" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="NonCommentSourceStatements" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-    <option name="m_limit" value="30" />
+    <option name="m_limit" value="10" />
   </inspection_tool>
-  <inspection_tool class="NullableProblems" enabled="false" level="WARNING" enabled_by_default="false">
+  <inspection_tool class="NonFinalFieldInImmutable" enabled="true" level="WARNING" enabled_by_default="true" />
+  <inspection_tool class="NonFinalUtilityClass" enabled="true" level="WARNING" enabled_by_default="true" />
+  <inspection_tool class="NullThrown" enabled="true" level="WARNING" enabled_by_default="true" />
+  <inspection_tool class="NullableProblems" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <option name="REPORT_NULLABLE_METHOD_OVERRIDES_NOTNULL" value="true" />
     <option name="REPORT_NOT_ANNOTATED_METHOD_OVERRIDES_NOTNULL" value="true" />
     <option name="REPORT_NOTNULL_PARAMETER_OVERRIDES_NULLABLE" value="true" />
@@ -96,12 +112,17 @@
     <option name="REPORT_NULLS_PASSED_TO_NON_ANNOTATED_METHOD" value="true" />
   </inspection_tool>
   <inspection_tool class="PackageDotHtmlMayBePackageInfo" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="ParameterCanBeLocal" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="ParametersPerMethod" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <option name="m_limit" value="3" />
   </inspection_tool>
+  <inspection_tool class="PublicConstructor" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="RedundantMethodOverride" enabled="true" level="INFO" enabled_by_default="true" />
   <inspection_tool class="SimplifiableConditionalExpression" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="SimplifiableIfStatement" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="SizeReplaceableByIsEmpty" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="SqlDialectInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+  <inspection_tool class="StaticFieldReferenceOnSubclass" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="StringConcatenationInsideStringBufferAppend" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="SuspiciousNameCombination" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <group names="x,width,left,right" />
@@ -109,6 +130,7 @@
   </inspection_tool>
   <inspection_tool class="SystemOutErr" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="ThrowableResultOfMethodCallIgnored" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="ThrowsRuntimeException" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="UNUSED_SYMBOL" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <option name="LOCAL_VARIABLE" value="true" />
     <option name="FIELD" value="true" />
@@ -117,8 +139,12 @@
     <option name="PARAMETER" value="true" />
     <option name="REPORT_PARAMETER_FOR_PUBLIC_METHODS" value="true" />
   </inspection_tool>
+  <inspection_tool class="UnclearBinaryExpression" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="UnnecessaryContinue" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="UnnecessaryEnumModifier" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+  <inspection_tool class="UnnecessaryFullyQualifiedName" enabled="true" level="WARNING" enabled_by_default="true">
+    <option name="m_ignoreJavadoc" value="false" />
+  </inspection_tool>
   <inspection_tool class="UnnecessaryInterfaceModifier" enabled="false" level="WARNING" enabled_by_default="false" />
   <inspection_tool class="UnnecessaryLocalVariable" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <option name="m_ignoreImmediatelyReturnedVariables" value="false" />
@@ -136,5 +162,12 @@
     <option name="ADD_APPLET_TO_ENTRIES" value="true" />
     <option name="ADD_SERVLET_TO_ENTRIES" value="true" />
     <option name="ADD_NONJAVA_TO_ENTRIES" value="true" />
+  </inspection_tool>
+  <inspection_tool class="UseOfClone" enabled="true" level="WARNING" enabled_by_default="true" />
+  <inspection_tool class="UtilityClassWithoutPrivateConstructor" enabled="true" level="WARNING" enabled_by_default="true">
+    <option name="ignorableAnnotations">
+      <value />
+    </option>
+    <option name="ignoreClassesWithOnlyMain" value="false" />
   </inspection_tool>
 </inspections>
