@@ -139,7 +139,7 @@
     <option name="PARAMETER" value="true" />
     <option name="REPORT_PARAMETER_FOR_PUBLIC_METHODS" value="true" />
   </inspection_tool>
-  <inspection_tool class="UnclearBinaryExpression" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="UnclearBinaryExpression" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
   <inspection_tool class="UnnecessaryContinue" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="UnnecessaryEnumModifier" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
   <inspection_tool class="UnnecessaryFullyQualifiedName" enabled="true" level="WARNING" enabled_by_default="true">
