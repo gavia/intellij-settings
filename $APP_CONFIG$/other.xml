@@ -226,7 +226,7 @@
         </expanded-state>
         <selected-state>
           <State>
-            <id>AmbiguousFieldAccess</id>
+            <id>NewExceptionWithoutArguments</id>
           </State>
         </selected-state>
       </profile-state>
