@@ -1,0 +1,10 @@
+<application>
+  <component name="PathMacrosImpl">
+    <macro name="MAVEN_REPOSITORY" value="C:/Users/timothym/.m2/repository" />
+    <macro name="PARENT-1-PROJECT_LOC" value="C:/build/v9_0/srcjava" />
+    <ignoredMacro name="MESSAGE" />
+    <ignoredMacro name="FILE_PATH" />
+    <ignoredMacro name="LINE" />
+    <ignoredMacro name="COLUMN" />
+  </component>
+</application>

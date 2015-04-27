@@ -1,0 +1,15 @@
+<application>
+  <component name="dataSourceStorage" format="xml">
+    <data-source source="LOCAL" name="SQL Server -" uuid="a3f9639b-d323-4fae-b429-7139e533d192">
+      <driver-ref>sqlserver.ms</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
+      <jdbc-url>jdbc:sqlserver://Fsysql02\fsy_dev_test;databaseName=Superstream_Dev2</jdbc-url>
+      <vm-options>-Djava.library.path=&quot;C:\Program Files (x86)\JetBrains\IntelliJ IDEA 13.1.2\jre\jre\bin&quot;</vm-options>
+      <driver-properties>
+        <property name="integratedSecurity" value="true" />
+      </driver-properties>
+      <libraries />
+    </data-source>
+  </component>
+</application>

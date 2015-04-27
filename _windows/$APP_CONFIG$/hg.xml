@@ -1,0 +1,11 @@
+<application>
+  <component name="HgGlobalSettings">
+    <option name="myHgExecutable" value="C:\Program Files\TortoiseHg\hg.exe" />
+    <option name="myRememberedUserNames">
+      <map>
+        <entry key="wpmverctl01:5000/AcurityWebServices" value="timothym" />
+        <entry key="wpmverctl01:5000/acurity/" value="timothym" />
+      </map>
+    </option>
+  </component>
+</application>

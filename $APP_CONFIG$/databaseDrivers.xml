@@ -1,0 +1,104 @@
+<application>
+  <component name="LocalDatabaseDriverManager">
+    <driver id="db2.base" name="DB2" dialect="DB2">
+      <option name="auto-sync" value="false" />
+      <driver id="db2" name="DB2 LUW" dialect="DB2">
+        <property name="retrieveMessagesFromServerOnGetMessage" value="true" />
+        <library>
+          <url>file://$USER_HOME$/.IntelliJIdea13/config/jdbc-drivers/db2-driver-license.txt</url>
+        </library>
+        <library>
+          <url>file://$USER_HOME$/.IntelliJIdea13/config/jdbc-drivers/db2jcc4-4.9.78.jar</url>
+        </library>
+      </driver>
+      <driver id="db2.jtopen" name="JTOpen (DB2 iSeries)" dialect="DB2">
+        <library>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/jtopen-driver-license.txt</url>
+        </library>
+        <library>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/jt400.jar</url>
+        </library>
+      </driver>
+    </driver>
+    <driver id="derby" name="Derby" dialect="Derby">
+      <driver id="derby.embedded" name="Embedded">
+        <option name="auto-sync" value="true" />
+      </driver>
+      <driver id="derby.remote" name="Remote">
+        <option name="auto-sync" value="true" />
+      </driver>
+    </driver>
+    <driver id="sqlserver" name="SQL Server" dialect="TSQL">
+      <option name="auto-sync" value="false" />
+      <driver id="sqlserver.jtds" name="jTds" />
+      <driver id="sqlserver.ms" name="Microsoft">
+        <library>
+          <url>file://$USER_HOME$/.IntelliJIdea13/config/jdbc-drivers/sqlserver-driver-license.txt</url>
+        </library>
+        <library>
+          <url>file://$USER_HOME$/.IntelliJIdea13/config/jdbc-drivers/sqljdbc4-4.0.2206.100.jar</url>
+        </library>
+      </driver>
+    </driver>
+    <driver id="sybase" name="Sybase" dialect="Sybase">
+      <option name="auto-sync" value="false" />
+      <driver id="sybase.jtds" name="jTds" />
+      <driver id="sybase.ase" name="Native" />
+    </driver>
+    <driver id="mysql" name="MySQL" dialect="MySQL">
+      <option name="auto-sync" value="true" />
+      <property name="zeroDateTimeBehavior" value="convertToNull" />
+      <property name="tinyInt1isBit" value="false" />
+      <property name="characterEncoding" value="utf8" />
+      <property name="characterSetResults" value="utf8" />
+      <property name="yearIsDateType" value="false" />
+    </driver>
+    <driver id="oracle" name="Oracle" dialect="Oracle">
+      <option name="auto-sync" value="false" />
+      <option name="auto-commit" value="false" />
+    </driver>
+    <driver id="postgresql" name="PostgreSQL" dialect="PostgreSQL">
+      <option name="auto-sync" value="true" />
+    </driver>
+    <driver id="hsqldb" name="HSQLDB" dialect="HSQLDB">
+      <driver id="hsqldb.embedded" name="Embedded">
+        <option name="auto-sync" value="true" />
+      </driver>
+      <driver id="hsqldb.remote" name="Remote">
+        <option name="auto-sync" value="true" />
+      </driver>
+      <driver id="hsqldb.in-memory" name="In-memory">
+        <option name="auto-sync" value="true" />
+      </driver>
+    </driver>
+    <driver id="h2" name="H2" dialect="H2">
+      <driver id="h2.embedded" name="Embedded">
+        <option name="auto-sync" value="true" />
+      </driver>
+      <driver id="h2.remote" name="Remote">
+        <option name="auto-sync" value="true" />
+      </driver>
+      <driver id="h2.in-memory" name="In-memory">
+        <option name="auto-sync" value="true" />
+      </driver>
+    </driver>
+    <driver id="sqlite" name="SQLite" dialect="SQLite">
+      <option name="auto-sync" value="true" />
+      <driver id="sqlite.xerial" name="Xerial">
+        <library>
+          <url>file://$USER_HOME$/.IntelliJIdea13/config/jdbc-drivers/xerial-sqlite-license.txt</url>
+        </library>
+        <library>
+          <url>file://$USER_HOME$/.IntelliJIdea13/config/jdbc-drivers/sqlite-jdbc-3.7.6.3-20110609.081603-3.jar</url>
+        </library>
+      </driver>
+      <driver id="sqlite.zentus" name="Zentus" />
+    </driver>
+    <driver id="java.sql.Driver" name="as400" instantiable="true" driver-class="com.ibm.as400.access.AS400JDBCDriver">
+      <url-template>jdbc:driver://{host}:{port}/{database}</url-template>
+      <library>
+        <url>file://$USER_HOME$/.IntelliJIdea13/config/jdbc-drivers/jt400-7.1.0.6.jar</url>
+      </library>
+    </driver>
+  </component>
+</application>
