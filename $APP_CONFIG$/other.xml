@@ -220,7 +220,7 @@
         </expanded-state>
         <selected-state>
           <State>
-            <id>JSMethodCanBeStatic</id>
+            <id>MethodCoupling</id>
           </State>
         </selected-state>
       </profile-state>
