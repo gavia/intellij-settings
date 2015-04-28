@@ -32,6 +32,9 @@
   <action id="GotoImplementation">
     <keyboard-shortcut first-keystroke="control alt B" />
   </action>
+  <action id="GotoSymbol">
+    <keyboard-shortcut first-keystroke="shift control S" />
+  </action>
   <action id="Hotswap">
     <keyboard-shortcut first-keystroke="F5" />
   </action>
@@ -48,6 +51,7 @@
   <action id="IntroduceVariable">
     <keyboard-shortcut first-keystroke="shift alt L" />
   </action>
+  <action id="IpnbCodeCellAction" />
   <action id="JumpToLastChange" />
   <action id="MethodHierarchy.ImplementMethodAction" />
   <action id="NextTab">
