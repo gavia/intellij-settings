@@ -122,6 +122,9 @@
             <id>FlexUnit inspections</id>
           </State>
           <State>
+            <id>General</id>
+          </State>
+          <State>
             <id>GeneralJavaScript</id>
           </State>
           <State>
@@ -188,6 +191,9 @@
             <id>Probable bugsJava</id>
           </State>
           <State>
+            <id>Properties Files</id>
+          </State>
+          <State>
             <id>Python</id>
           </State>
           <State>
@@ -220,7 +226,7 @@
         </expanded-state>
         <selected-state>
           <State>
-            <id>MethodCoupling</id>
+            <id>SSBasedInspection</id>
           </State>
         </selected-state>
       </profile-state>
