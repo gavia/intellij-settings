@@ -1,6 +1,10 @@
 <keymap version="1" name="My Keymap" parent="Eclipse">
   <action id="AddToFavoritesPopup" />
   <action id="ChangeSignature" />
+  <action id="CloseActiveTab" />
+  <action id="CloseEditor">
+    <keyboard-shortcut first-keystroke="control W" />
+  </action>
   <action id="Console.TableResult.Reload" />
   <action id="EditorAddOrRemoveCaret">
     <mouse-shortcut keystroke="control button2" />
