@@ -226,7 +226,7 @@
         </expanded-state>
         <selected-state>
           <State>
-            <id>UnclearBinaryExpression</id>
+            <id>PublicConstructor</id>
           </State>
         </selected-state>
       </profile-state>
