@@ -1,0 +1,1657 @@
+Index: src/main/java/au/com/finsyn/workbench/manage/model/ManageWorkbenchLinesModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/model/ManageWorkbenchLinesModel.java	(revision 27673:a0d0167dc1636af798b3973528961d3732e94247)
++++ src/main/java/au/com/finsyn/workbench/manage/model/ManageWorkbenchLinesModel.java	(revision 27673+:a0d0167dc163+)
+@@ -17,6 +17,9 @@
+ 
+ import javax.swing.SwingUtilities;
+ 
++import javafx.beans.property.adapter.JavaBeanObjectPropertyBuilder;
++import javafx.beans.property.adapter.ReadOnlyJavaBeanObjectPropertyBuilder;
++import javafx.beans.value.ObservableValue;
+ import org.apache.commons.lang3.StringUtils;
+ import org.hibernate.criterion.Restrictions;
+ 
+@@ -301,6 +304,18 @@
+ 		Object oldValue = this.selectedWorkbenchLine;
+ 		this.selectedWorkbenchLine = selectedWorkbenchLine;
+ 		firePropertyChange(SELECTED_WORKBENCH_LINE, oldValue, selectedWorkbenchLine);
++	}
++
++	public ObservableValue<WorkbenchLines> selectedWorkbenchLinesObservable() {
++		try {
++			return ReadOnlyJavaBeanObjectPropertyBuilder.<WorkbenchLines>create()
++                    .bean(this)
++                    .name(SELECTED_WORKBENCH_LINE)
++                    .build();
++		} catch (NoSuchMethodException e) {
++			throw new RuntimeException("Unable to find getter for bound property \"" + SELECTED_WORKBENCH_LINE + "\".",
++					e);
++		}
+ 	}
+ 
+ 	public void setSelectedContributionLine(ContributionLines selectedContributionLine) {
+Index: src/main/java/jSSS/cdelegation/AcurityCommandGeneric.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/jSSS/cdelegation/AcurityCommandGeneric.java	(revision 27673:a0d0167dc1636af798b3973528961d3732e94247)
++++ src/main/java/jSSS/cdelegation/AcurityCommandGeneric.java	(revision 27673+:a0d0167dc163+)
+@@ -1,5 +1,9 @@
+ package jSSS.cdelegation;
+ 
++import au.com.finsyn.swing.dialogs.Dialogs;
++import au.com.finsyn.swing.dialogs.MessageDialog.MessageType;
++import au.com.finsyn.util.AcurityLogging;
++import au.com.finsyn.util.exceptions.ExceptionHandler;
+ import jSSS.jcore.jSSSApplication;
+ import jSSS.jcore.functions.IjSSSFunction;
+ import jSSS.jcore.functions.jSSSMultiFunctionTask;
+@@ -17,11 +21,13 @@
+ import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.Map;
++import java.util.Optional;
+ import java.util.regex.Pattern;
+ 
+ import javax.swing.JOptionPane;
+ 
+ import au.com.finsyn.util.ParamChecker;
++import org.apache.commons.logging.Log;
+ 
+ /**
+  * Class representing an Acurity "Electronic Processing Data File". When querying Acurity for data a Data File consists at the
+@@ -38,8 +44,10 @@
+  * For a detailed description of Control lines and Header lines and Data lines, see the Acurity help file (search for
+  * "Electronic Processing").
+  */
+-public class AcurityCommandGeneric implements Task, IjSSSFunction
+-{
++public class AcurityCommandGeneric implements Task, IjSSSFunction {
++
++	private static final Log LOG = AcurityLogging.getInstance().getLogger(AcurityCommandGeneric.class);
++
+ 	/**
+ 	 * Use the Division from the Fund Record if {@link AcurityJob#FND} is specified. Otherwise use division 0 (zero)
+ 	 */
+@@ -132,6 +140,7 @@
+ 	public static final String CONTROL_LINE_TST = "TST";
+ 	
+ 	public static final String _newline = System.getProperty("line.separator");
++	private static String message;
+ 
+ 	private final Map<String, String> _controlLineParameters = new LinkedHashMap<String, String>();
+ 	private final Map<String, String> _userDefinedControlLineParameters = new LinkedHashMap<String, String>();
+@@ -870,28 +879,38 @@
+ 	 * @param result
+ 	 * @return true if no errors, false if errors.
+ 	 */
+-	public static boolean checkForErrorsAndShowDialog(Object result)
+-	{
+-		if (!hasErrors(result))
+-		{
+-			return true; //no errors
++	public static boolean checkForErrorsAndShowDialog(Object result) {
++		if (!hasErrors(result)) {
++			return true;
++		} else {
++			Optional<Exception> resultException = extractExceptionFromResult(result);
++
++			if (resultException.isPresent()) {
++				if (resultException.get() instanceof AcurityCommandException) {
++					Dialogs.show(null, MessageType.ERROR, ((AcurityCommandException) resultException.get()).getFormattedMessage(), "Running API process failed.");
++				} else {
++					message = "Running API process failed. " + ((Throwable) result).getMessage();
++					LOG.error(message, resultException.get());
++					Dialogs.show(MessageType.ERROR, message, "Failed");
+-		}
++				}
+-		else if (result instanceof AcurityCommandException)
+-		{
+-			jSSSApp.displayJOptionPaneMessage(((AcurityCommandException) result).getFormattedMessage(), "Running API process failed.", JOptionPane.ERROR_MESSAGE);
++			} else {
++				String message = "Running API process failed. Unexpected Response ["
++						+ result.getClass().toString() + "]";
++
++				LOG.error(message);
++				Dialogs.show(MessageType.ERROR, message, "Failed");
+-		}
++			}
+-		else if (result instanceof Throwable)
+-		{
+-			jSSSLogger.severe(result);
+-			jSSSApp.displayJOptionPaneMessage("Running API process failed. " + ((Throwable) result).getMessage(), "Failed", JOptionPane.ERROR_MESSAGE);
++
++			return false;
+ 		}
+-		else
+-		{
+-			jSSSLogger.severe(result);
+-			jSSSApp.displayJOptionPaneMessage("Running API process failed. Unexpected Response ["
+-					+ result.getClass().toString() + "]", "Failed", JOptionPane.ERROR_MESSAGE);
+-		}
++	}
+-		return false;
++
++	public static Optional<Exception> extractExceptionFromResult(Object result) {
++		if (result instanceof Throwable) {
++			ExceptionHandler.handleError((Throwable) result);
++		}
++
++		return result instanceof Exception ? Optional.of((Exception) result) : Optional.empty();
+ 	}
+ 	
+ 	/**
+\ No newline at end of file
+Index: src/main/java/jSSS/util/DateUtil.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/jSSS/util/DateUtil.java	(revision 27673:a0d0167dc1636af798b3973528961d3732e94247)
++++ src/main/java/jSSS/util/DateUtil.java	(revision 27673+:a0d0167dc163+)
+@@ -1,9 +1,12 @@
+ package jSSS.util;
+ 
++import au.com.finsyn.util.annotations.ReturnTypesAreNonnullByDefault;
+ import jSSS.jcore.jSSSApplication;
+ import javafx.util.StringConverter;
++import org.hibernate.annotations.Immutable;
+ import org.joda.time.Interval;
+ 
++import javax.annotation.ParametersAreNonnullByDefault;
+ import java.text.DateFormat;
+ import java.text.ParseException;
+ import java.text.SimpleDateFormat;
+@@ -278,4 +281,5 @@
+             }
+         }
+     }
++
+ }
+Index: src/main/java/au/com/finsyn/workbench/manage/view/ManageWorkbenchLinesPopupMenu.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/view/ManageWorkbenchLinesPopupMenu.java	(revision 27673:a0d0167dc1636af798b3973528961d3732e94247)
++++ src/main/java/au/com/finsyn/workbench/manage/view/ManageWorkbenchLinesPopupMenu.java	(revision 27673+:a0d0167dc163+)
+@@ -1,5 +1,6 @@
+ package au.com.finsyn.workbench.manage.view;
+ 
++import au.com.finsyn.workbench.manage.view.setperiod.SetPeriodDatesAction;
+ import jSSS.jcore.swing.table.export.CopyAction;
+ import au.com.finsyn.workbench.manage.model.ManageWorkbenchLinesModel;
+ import au.com.finsyn.xmlcustomisation.customisablecomponents.XmlCustomisablePopupMenu;
+@@ -21,6 +22,7 @@
+ 		add(new RejectWorkbenchLineAction(table, model));
+ 		add(new PeriodEndDateModifyAction(table, model));
+ 		add(new CreateSuperStreamErrorAction(table, model));
++		add(new SetPeriodDatesAction(table, model));
+ 		add(new Separator());
+ 		add(new WorkbenchLineViewDetailsAction(table, model));
+ 		add(new Separator());
+Index: src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodDatesAction.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodDatesAction.java	(revision 27673+:a0d0167dc163+)
++++ src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodDatesAction.java	(revision 27673+:a0d0167dc163+)
+@@ -0,0 +1,160 @@
++package au.com.finsyn.workbench.manage.view.setperiod;
++
++import au.com.finsyn.hibernate.AcurityEntityCloner;
++import au.com.finsyn.hibernate.AcurityEntityCloner.AcurityEntityClonerException;
++import au.com.finsyn.hibernate.generated.entities.WorkbenchLines;
++import au.com.finsyn.swing.dialogs.Dialogs;
++import au.com.finsyn.swing.dialogs.MessageDialog.MessageType;
++import au.com.finsyn.swing.ui.ProgressDialog;
++import au.com.finsyn.util.AcurityLogging;
++import au.com.finsyn.util.annotations.ReturnTypesAreNonnullByDefault;
++import au.com.finsyn.util.exceptions.ExceptionHandler;
++import au.com.finsyn.util.time.DateRange;
++import au.com.finsyn.util.time.DateRange.DateRangeException;
++import au.com.finsyn.workbench.manage.model.ManageWorkbenchLinesModel;
++import au.com.finsyn.workbench.manage.model.ManageWorkbenchLinesTableModel;
++import au.com.finsyn.workbench.manage.view.ManageWorkbenchLinesSplitTable;
++import au.com.finsyn.xmlcustomisation.customisablecomponents.XmlCustomisablePopupMenuAction;
++import com.google.common.collect.ImmutableSet;
++import jSSS.cdelegation.AcurityCommandGeneric;
++import jSSS.cdelegation.AcurityCommandUpdate;
++import org.apache.commons.logging.Log;
++
++import javax.annotation.ParametersAreNonnullByDefault;
++import javax.swing.*;
++import java.awt.event.ActionEvent;
++import java.util.Collection;
++import java.util.concurrent.ExecutionException;
++import java.util.function.Consumer;
++
++/**
++ * TODO add documentation
++ *
++ * @author timothym
++ */
++@ParametersAreNonnullByDefault
++@ReturnTypesAreNonnullByDefault
++public class SetPeriodDatesAction extends XmlCustomisablePopupMenuAction {
++
++    private static final Log LOG = AcurityLogging.getInstance().getLogger(SetPeriodDatesAction.class);
++
++    private static final String NAME = "setDates";
++
++    private final ManageWorkbenchLinesSplitTable table;
++    private final ManageWorkbenchLinesModel model;
++    private final ExceptionHandler exceptionHandler;
++
++    public SetPeriodDatesAction(ManageWorkbenchLinesSplitTable table, ManageWorkbenchLinesModel model) {
++        super("Set period start/end dates",
++                model.getCustomisation()
++                        .getTableCustomisation(ManageWorkbenchLinesTableModel.MANAGE_WORKBENCH_LINES_MAIN_TABLE_NAME));
++
++        this.table = table;
++        this.model = model;
++	    exceptionHandler = this.model.getExceptionHandler();
++    }
++
++    @Override
++    public String getName() {
++        return NAME;
++    }
++
++    @Override
++    public void actionPerformed(ActionEvent e) {
++        WorkbenchLines selectedWorkbenchLine = model.getSelectedWorkbenchLine();
++
++        if (selectedWorkbenchLine == null || table.getSelectedRow() < 0) {
++            // There is no selected line
++            return;
++        }
++
++        computeLinesToUpdate(selectedWorkbenchLine, this::displaySetPeriodDatesDialog);
++    }
++
++    private void computeLinesToUpdate(WorkbenchLines workbenchLines,
++                                      Consumer<ImmutableSet<WorkbenchLines>> resultCallback) {
++        new RetrieveLinesToUpdateTask(workbenchLines) {
++            @Override
++            protected void onTaskCompleted() {
++                try {
++                    resultCallback.accept(get());
++                } catch (InterruptedException e) {
++                    LOG.warn("FC line retrieval task was interrupted", e);
++                } catch (ExecutionException e) {
++                    exceptionHandler.handleRecoverableException(e.getCause(),
++                            "An error was encountered while retrieving the associated contribution lines");
++                }
++            }
++        }.execute(new ProgressDialog(table, "Finding associated contribution lines"));
++    }
++
++    private void displaySetPeriodDatesDialog(ImmutableSet<WorkbenchLines> workbenchLines) {
++
++        if (workbenchLines.isEmpty()) {
++            // TODO improve this message
++            Dialogs.show(table, MessageType.INFORMATION,
++                    "There are no posted contribution lines for this workbench line.");
++        } else {
++            SetPeriodsDialog setPeriodsDialog =
++                    new SetPeriodsDialog(workbenchLines.size(), countJoinedFCLines(workbenchLines));
++            setPeriodDatesFromDialog(workbenchLines, setPeriodsDialog);
++        }
++    }
++
++    private static int countJoinedFCLines(Collection<WorkbenchLines> workbenchLines) {
++        return (int) workbenchLines
++                .stream()
++                .flatMap(fwLine -> fwLine.getContributionLines().stream())
++                .count();
++    }
++
++    private void setPeriodDatesFromDialog(ImmutableSet<WorkbenchLines> workbenchLines, SetPeriodsDialog setPeriodsDialog) {
++        int dialogResult = setPeriodsDialog.showDialog();
++
++        if (dialogResult == JOptionPane.OK_OPTION) {
++            try {
++                updatePeriodDatesInDatabase(workbenchLines, setPeriodsDialog.getDateRange());
++            } catch (DateRangeException e) {
++                Dialogs.show(table, MessageType.ERROR, "Invalid dates provided: " + e.getMessage());
++
++                // Tail recursion is its own reward
++                setPeriodDatesFromDialog(workbenchLines, setPeriodsDialog);
++            }
++        }
++    }
++
++    private void updatePeriodDatesInDatabase(ImmutableSet<WorkbenchLines> workbenchLines, DateRange dateRange) {
++        try {
++            AcurityCommandUpdate updateCommand = constructUpdateCommand(workbenchLines, dateRange);
++
++		    updateCommand.postTask(this::handleUpdateResponse);
++
++	    } catch (AcurityEntityClonerException e) {
++		    model.getExceptionHandler().handleRecoverableException(e, "An exception occurred while performing update");
++	    }
++    }
++
++    private static AcurityCommandUpdate constructUpdateCommand(ImmutableSet<WorkbenchLines> workbenchLines,
++                                                               DateRange dateRange)
++		    throws AcurityEntityClonerException {
++        ImmutableSet<WorkbenchLines> modifiedFWLines = AcurityEntityCloner.clone(workbenchLines);
++        setPeriodDates(modifiedFWLines, dateRange);
++
++        AcurityCommandUpdate updateCommand = new AcurityCommandUpdate("Updating period dates");
++
++        modifiedFWLines.forEach(updateCommand::addEntityToSave);
++        return updateCommand;
++    }
++
++	private void handleUpdateResponse(Object result) {
++		AcurityCommandGeneric.checkForErrorsAndShowDialog(result);
++		model.refreshTable();
++	}
++
++    private static void setPeriodDates(Collection<WorkbenchLines> workbenchLines, DateRange dateRange) {
++        workbenchLines.forEach(fwLine -> {
++            fwLine.setFWd_Period_Start(dateRange.getStartDateAsSQLDate());
++            fwLine.setFWd_Period_End(dateRange.getEndDateAsSQLDate());
++        });
++    }
++}
+Index: src/main/java/jSSS/util/StringUtil.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/jSSS/util/StringUtil.java	(revision 27673:a0d0167dc1636af798b3973528961d3732e94247)
++++ src/main/java/jSSS/util/StringUtil.java	(revision 27673+:a0d0167dc163+)
+@@ -336,4 +336,23 @@
+ 	public static String returnEmptyIfNull(@Nullable String string) {
+ 		return string == null ? "" : string;
+ 	}
++
++	public static String renderWithPlural(int number, String singular, String plural) {
++		return number == 1 ? number + " " + singular : number + " " + plural;
++	}
++
++	public static String renderWithGuessedPlural(int number, String nounSingular) {
++
++		String guessedPlural;
++
++		if (StringUtils.endsWithIgnoreCase(nounSingular, "s")) {
++			guessedPlural = nounSingular + "es";
++		} else if (StringUtils.endsWithIgnoreCase(nounSingular, "y")) {
++			guessedPlural = nounSingular.substring(0, nounSingular.length() - 1) + "ies";
++		} else {
++			guessedPlural = nounSingular + "s";
++		}
++
++		return renderWithPlural(number, nounSingular, guessedPlural);
++	}
+ }
+Index: src/main/java/au/com/finsyn/hibernate/EntityFieldInfo.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/hibernate/EntityFieldInfo.java	(revision 27673:a0d0167dc1636af798b3973528961d3732e94247)
++++ src/main/java/au/com/finsyn/hibernate/EntityFieldInfo.java	(revision 27673+:a0d0167dc163+)
+@@ -6,6 +6,7 @@
+ import javax.annotation.Nullable;
+ import javax.annotation.ParametersAreNonnullByDefault;
+ import javax.annotation.concurrent.Immutable;
++import java.util.Collection;
+ import java.util.Objects;
+ import java.util.Optional;
+ import java.util.OptionalInt;
+@@ -23,135 +24,143 @@
+ @Immutable
+ public class EntityFieldInfo<E extends AcurityEntity> {
+ 
+-    private final Class<E> parentEntityClass;
+-    private final String name;
+-    private final Class<?> dataType;
+-    private final EntityFieldType entityFieldType;
+-    private final BiConsumer<? super E, Object> setter;
+-    private final Function<? super E, Object> getter;
+-    private final Optional<String> electronicCode;
+-    private final Optional<GroupAndType> codeGroupAndType;
+-    private final OptionalInt length;
+-    private final Optional<String> cVariableName;
+-    private final Optional<String> readableName;
++	private final Class<E> parentEntityClass;
++	private final String name;
++	private final Class<?> dataType;
++	private final EntityFieldType entityFieldType;
++	private final BiConsumer<? super E, Object> setter;
++	private final Function<? super E, Object> getter;
++	private final Optional<String> electronicCode;
++	private final Optional<GroupAndType> codeGroupAndType;
++	private final OptionalInt length;
++	private final Optional<String> cVariableName;
++	private final Optional<String> readableName;
+ 
+-    public EntityFieldInfo(
+-            Class<E> parentEntityClass,
+-            String name,
+-            Class<?> dataType,
+-            EntityFieldType entityFieldType,
+-            BiConsumer<? super E, Object> setter,
+-            Function<? super E, Object> getter,
+-            @Nullable String electronicCode,
+-            @Nullable GroupAndType codeGroupAndType,
+-            @Nullable Integer length,
+-            @Nullable String cVariableName,
+-            @Nullable String readableName) {
+-        this.parentEntityClass = parentEntityClass;
+-        this.name = Objects.requireNonNull(name);
+-        this.dataType = Objects.requireNonNull(dataType);
+-        this.entityFieldType = Objects.requireNonNull(entityFieldType);
+-        this.setter = Objects.requireNonNull(setter);
+-        this.getter = Objects.requireNonNull(getter);
+-        this.electronicCode = Optional.ofNullable(electronicCode);
+-        this.codeGroupAndType = Optional.ofNullable(codeGroupAndType);
+-        this.length = length != null ? OptionalInt.of(length) : OptionalInt.empty();
+-        this.cVariableName = Optional.ofNullable(cVariableName);
+-        this.readableName = Optional.ofNullable(readableName);
+-    }
++	public EntityFieldInfo(
++			Class<E> parentEntityClass,
++			String name,
++			Class<?> dataType,
++			EntityFieldType entityFieldType,
++			BiConsumer<? super E, Object> setter,
++			Function<? super E, Object> getter,
++			@Nullable String electronicCode,
++			@Nullable GroupAndType codeGroupAndType,
++			@Nullable Integer length,
++			@Nullable String cVariableName,
++			@Nullable String readableName) {
++		this.parentEntityClass = parentEntityClass;
++		this.name = Objects.requireNonNull(name);
++		this.dataType = Objects.requireNonNull(dataType);
++		this.entityFieldType = Objects.requireNonNull(entityFieldType);
++		this.setter = Objects.requireNonNull(setter);
++		this.getter = Objects.requireNonNull(getter);
++		this.electronicCode = Optional.ofNullable(electronicCode);
++		this.codeGroupAndType = Optional.ofNullable(codeGroupAndType);
++		this.length = length != null ? OptionalInt.of(length) : OptionalInt.empty();
++		this.cVariableName = Optional.ofNullable(cVariableName);
++		this.readableName = Optional.ofNullable(readableName);
++	}
+ 
+-    public EntityFieldInfo(
+-            Class<E> parentEntityClass,
+-            String name,
+-            Class<?> dataType,
+-            EntityFieldType entityFieldType,
+-            BiConsumer<? super E, Object> setter,
+-            Function<? super E, Object> getter,
+-            @Nullable String electronicCode,
+-            @Nullable GroupAndType codeGroupAndType,
+-            @Nullable Integer length) {
+-        this(parentEntityClass, name, dataType, entityFieldType, setter, getter, electronicCode, codeGroupAndType, length, null, null);
+-    }
++	public EntityFieldInfo(
++			Class<E> parentEntityClass,
++			String name,
++			Class<?> dataType,
++			EntityFieldType entityFieldType,
++			BiConsumer<? super E, Object> setter,
++			Function<? super E, Object> getter,
++			@Nullable String electronicCode,
++			@Nullable GroupAndType codeGroupAndType,
++			@Nullable Integer length) {
++		this(parentEntityClass, name, dataType, entityFieldType, setter, getter, electronicCode, codeGroupAndType, length, null, null);
++	}
+ 
+-    public String getName() {
+-        return name;
+-    }
++	public String getName() {
++		return name;
++	}
+ 
+-    public Class<?> getDataType() {
+-        return dataType;
++	public Class<?> getDataType() {
++		return dataType;
++	}
++
++	public boolean isCollectionDataType() {
++		return Collection.class.isAssignableFrom(dataType);
++	}
++
++	public boolean isAcurityEntityDataType() {
++		return AcurityEntity.class.isAssignableFrom(dataType);
+-    }
++	}
+ 
+-    public EntityFieldType getEntityFieldType() {
+-        return this.entityFieldType;
+-    }
++	public EntityFieldType getEntityFieldType() {
++		return this.entityFieldType;
++	}
+ 
+-    public BiConsumer<? super E, Object> getSetter() {
+-        return setter;
+-    }
++	public BiConsumer<? super E, Object> getSetter() {
++		return setter;
++	}
+ 
+-    public Function<? super E, Object> getGetter() {
+-        return getter;
+-    }
++	public Function<? super E, Object> getGetter() {
++		return getter;
++	}
+ 
+-    public Optional<String> getElectronicCode() {
+-        return electronicCode;
+-    }
++	public Optional<String> getElectronicCode() {
++		return electronicCode;
++	}
+ 
+-    public Optional<GroupAndType> getCodeGroupAndType() {
+-        return codeGroupAndType;
+-    }
++	public Optional<GroupAndType> getCodeGroupAndType() {
++		return codeGroupAndType;
++	}
+ 
+-    /**
+-     * This will return a non-empty {@link OptionalInt} if and only if the {@link EntityFieldType} is
+-     * {@link EntityFieldType#DATABASE_COLUMN}.
+-     */
+-    public OptionalInt getLength() {
+-        return length;
+-    }
++	/**
++	 * This will return a non-empty {@link OptionalInt} if and only if the {@link EntityFieldType} is
++	 * {@link EntityFieldType#DATABASE_COLUMN}.
++	 */
++	public OptionalInt getLength() {
++		return length;
++	}
+ 
+-    /**
+-     * This will return a non-empty {@link Optional} if the corresponding variable in the C header has a name.
+-     */
+-    public Optional<String> getCVariableName() {
+-        return cVariableName;
+-    }
++	/**
++	 * This will return a non-empty {@link Optional} if the corresponding variable in the C header has a name.
++	 */
++	public Optional<String> getCVariableName() {
++		return cVariableName;
++	}
+ 
+-    /**
+-     * This will return a non-empty {@link Optional} if the corresponding column in the C header has a readable name.
+-     */
+-    public Optional<String> getReadableName() {
+-        return readableName;
+-    }
++	/**
++	 * This will return a non-empty {@link Optional} if the corresponding column in the C header has a readable name.
++	 */
++	public Optional<String> getReadableName() {
++		return readableName;
++	}
+ 
+-    public static enum EntityFieldType {DATABASE_COLUMN, JOINED_ENTITY}
++	public static enum EntityFieldType {DATABASE_COLUMN, JOINED_ENTITY}
+ 
+-    /**
+-     * Returns the field info map for the given entity, or an empty optional if {@link #getDummyInstance(Class)} was
+-     * unable to create an instance.
+-     */
+-    @SuppressWarnings("unchecked")
+-    public static <T extends AcurityEntity> Optional<ImmutableMap<String,
+-            EntityFieldInfo<T>>> getFieldInfoMap(Class<? extends T> entityClass) {
+-        return AcurityEntity.getDummyInstance(entityClass)
+-                .map(entity -> (ImmutableMap<String, EntityFieldInfo<T>>) entity.getFieldInfo());
+-    }
++	/**
++	 * Returns the field info map for the given entity, or an empty optional if {@link #getDummyInstance(Class)} was
++	 * unable to create an instance.
++	 */
++	@SuppressWarnings("unchecked")
++	public static <T extends AcurityEntity> Optional<ImmutableMap<String,
++			EntityFieldInfo<T>>> getFieldInfoMap(Class<? extends T> entityClass) {
++		return AcurityEntity.getDummyInstance(entityClass)
++				.map(entity -> (ImmutableMap<String, EntityFieldInfo<T>>) entity.getFieldInfo());
++	}
+ 
+-    /**
+-     * Attempts to retrieve an {@link EntityFieldInfo} based solely on the name of a field by inferring the entity class
+-     * from the name and then performing a lookup using that class' field info map. An empty {@link Optional} is
+-     * returned if either step fails.
+-     */
+-    public static Optional<EntityFieldInfo<? extends AcurityEntity>> forField(String fieldName) {
+-        return AcurityEntityUtils.getAcurityEntityFromFieldName(fieldName)
+-                .flatMap(EntityFieldInfo::getFieldInfoMap)
+-                .map(fieldInfoMap -> fieldInfoMap.get(fieldName.toUpperCase()));
+-    }
++	/**
++	 * Attempts to retrieve an {@link EntityFieldInfo} based solely on the name of a field by inferring the entity class
++	 * from the name and then performing a lookup using that class' field info map. An empty {@link Optional} is
++	 * returned if either step fails.
++	 */
++	public static Optional<EntityFieldInfo<? extends AcurityEntity>> forField(String fieldName) {
++		return AcurityEntityUtils.getAcurityEntityFromFieldName(fieldName)
++				.flatMap(EntityFieldInfo::getFieldInfoMap)
++				.map(fieldInfoMap -> fieldInfoMap.get(fieldName.toUpperCase()));
++	}
+ 
+-    @Override
+-    public String toString() {
+-        return "EntityFieldInfo{" +
+-                "parentEntityClass=" + parentEntityClass +
+-                ", name='" + name + '\'' +
+-                '}';
+-    }
++	@Override
++	public String toString() {
++		return "EntityFieldInfo{" +
++				"parentEntityClass=" + parentEntityClass +
++				", name='" + name + '\'' +
++				'}';
++	}
+ }
+Index: src/main/java/au/com/finsyn/hibernate/AcurityEntityCloner.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/hibernate/AcurityEntityCloner.java	(revision 27673+:a0d0167dc163+)
++++ src/main/java/au/com/finsyn/hibernate/AcurityEntityCloner.java	(revision 27673+:a0d0167dc163+)
+@@ -0,0 +1,159 @@
++package au.com.finsyn.hibernate;
++
++import au.com.finsyn.util.annotations.ReturnTypesAreNonnullByDefault;
++import au.com.finsyn.util.datastructures.GuavaCollectors;
++import com.google.common.collect.ImmutableList;
++import com.google.common.collect.ImmutableSet;
++import org.apache.commons.beanutils.BeanUtils;
++
++import javax.annotation.ParametersAreNonnullByDefault;
++import javax.annotation.concurrent.Immutable;
++import java.lang.reflect.InvocationTargetException;
++import java.util.*;
++import java.util.function.Supplier;
++
++/**
++ * TODO add documentation
++ *
++ * @author timothym
++ */
++@ParametersAreNonnullByDefault
++@ReturnTypesAreNonnullByDefault
++@Immutable
++public final class AcurityEntityCloner {
++
++	private AcurityEntityCloner() {
++	}
++
++	public static <E extends AcurityEntity> ImmutableSet<E> clone(Set<E> entityCollection)
++			throws AcurityEntityClonerException {
++
++		Collection<E> clonedCollection =
++				cloneIntoMutableCollection(entityCollection, () -> new ArrayList<>(entityCollection.size()));
++
++		return ImmutableSet.copyOf(clonedCollection);
++	}
++
++	public static <E extends AcurityEntity> ImmutableList<E> clone(List<E> entityCollection)
++			throws AcurityEntityClonerException {
++
++		List<E> clonedCollection =
++				cloneIntoMutableCollection(entityCollection, () -> new ArrayList<>(entityCollection.size()));
++
++		return ImmutableList.copyOf(clonedCollection);
++	}
++
++	public static <E extends AcurityEntity, C extends Collection<E>> C cloneIntoMutableCollection(
++			C entityCollection, Supplier<C> mutableCollectionSupplier) throws AcurityEntityClonerException {
++
++		C clonedEntities = mutableCollectionSupplier.get();
++
++		for (E originalEntity: entityCollection) {
++			clonedEntities.add(clone(originalEntity));
++		}
++
++		return clonedEntities;
++	}
++
++	@SuppressWarnings("unchecked")
++	public static <T extends AcurityEntity> T clone(T acurityEntity) throws AcurityEntityClonerException {
++		try {
++			AcurityEntity clonedEntity = (AcurityEntity) BeanUtils.cloneBean(acurityEntity);
++
++			// The entity itself has been cloned, but any joined entities haven't been. The following clones any joined
++			// entities
++
++			ImmutableSet<EntityFieldInfo<AcurityEntity>> joinedEntityFieldsInfo =
++					extractFieldsForNonnullJoinedEntities(clonedEntity);
++
++			for (EntityFieldInfo<AcurityEntity> joinedFieldInfo : joinedEntityFieldsInfo) {
++				replaceJoinedFieldWithClone(clonedEntity, joinedFieldInfo);
++			}
++
++			return (T) clonedEntity;
++		} catch (InvocationTargetException | IllegalAccessException |
++				InstantiationException | NoSuchMethodException e) {
++			throw new AcurityEntityClonerException("An error occured while cloning an Acurity entity", e);
++		}
++	}
++
++	private static void replaceJoinedFieldWithClone(AcurityEntity returnedEntity,
++	                                                EntityFieldInfo<AcurityEntity> joinedFieldInfo)
++			throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException,
++			AcurityEntityClonerException {
++
++		if (joinedFieldInfo.isAcurityEntityDataType()) {
++			replaceJoinedEntityWithClone(returnedEntity, joinedFieldInfo);
++
++		} else if (joinedFieldInfo.isCollectionDataType()) {
++			replaceJoinedCollectionWithClone(returnedEntity, joinedFieldInfo);
++
++		}
++	}
++
++	@SuppressWarnings("unchecked")
++	private static ImmutableSet<EntityFieldInfo<AcurityEntity>> extractFieldsForNonnullJoinedEntities(
++			AcurityEntity clonedEntity) {
++
++		return clonedEntity.getFieldInfo().values()
++				.stream()
++				.filter(entityFieldInfo -> entityFieldInfo.getEntityFieldType()
++						== EntityFieldInfo.EntityFieldType.JOINED_ENTITY)
++				.filter(entityFieldInfo -> entityFieldInfo.isAcurityEntityDataType()
++						|| entityFieldInfo.isCollectionDataType())
++				.map(entityFieldInfo -> (EntityFieldInfo<AcurityEntity>) entityFieldInfo)
++				.filter(entityFieldInfo -> entityFieldInfo.getGetter().apply(clonedEntity) != null)
++				.collect(GuavaCollectors.<EntityFieldInfo<AcurityEntity>>toSet());
++	}
++
++	private static void replaceJoinedEntityWithClone(AcurityEntity entity,
++	                                                 EntityFieldInfo<AcurityEntity> joinedFieldInfo)
++			throws AcurityEntityClonerException {
++
++		AcurityEntity clone = clone((AcurityEntity) joinedFieldInfo.getGetter().apply(entity));
++
++		joinedFieldInfo.getSetter().accept(entity, clone);
++	}
++
++	private static void replaceJoinedCollectionWithClone(AcurityEntity returnedEntity,
++	                                                     EntityFieldInfo<AcurityEntity> joinedFieldInfo)
++			throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException,
++			AcurityEntityClonerException {
++
++		Collection<AcurityEntity> clonedJoinedCollection = deepCloneJoinedCollection(returnedEntity, joinedFieldInfo);
++
++		joinedFieldInfo.getSetter().accept(returnedEntity, clonedJoinedCollection);
++	}
++
++	private static Collection<AcurityEntity> deepCloneJoinedCollection(AcurityEntity entity,
++	                                                                   EntityFieldInfo<AcurityEntity> joinedCollectionField)
++			throws AcurityEntityClonerException, IllegalAccessException, InstantiationException {
++
++		@SuppressWarnings("unchecked")
++		Collection<AcurityEntity> originalEntities =
++				(Collection<AcurityEntity>) joinedCollectionField.getGetter().apply(entity);
++
++		if (originalEntities instanceof List) {
++			return clone((List<AcurityEntity>) originalEntities);
++		} else if (originalEntities instanceof Set) {
++			return clone((Set<AcurityEntity>) originalEntities);
++		} else {
++			Supplier<Collection<AcurityEntity>> newCollectionSupplier = () -> {
++				try {
++					return originalEntities.getClass().newInstance();
++				} catch (InstantiationException | IllegalAccessException e) {
++					throw new RuntimeException("Unable to instantiate joined collection class "
++							+ originalEntities.getClass().getName(), e);
++				}
++			};
++
++			return cloneIntoMutableCollection(originalEntities, newCollectionSupplier);
++		}
++	}
++
++	public static class AcurityEntityClonerException extends Exception {
++		public AcurityEntityClonerException(String message, Throwable cause) {
++			super(message, cause);
++		}
++	}
++}
+Index: src/test/java/au/com/finsyn/hibernate/AcurityEntityClonerTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/test/java/au/com/finsyn/hibernate/AcurityEntityClonerTest.java	(revision 27673+:a0d0167dc163+)
++++ src/test/java/au/com/finsyn/hibernate/AcurityEntityClonerTest.java	(revision 27673+:a0d0167dc163+)
+@@ -0,0 +1,55 @@
++package au.com.finsyn.hibernate;
++
++import au.com.finsyn.hibernate.generated.entities.MemberDetails;
++import au.com.finsyn.hibernate.generated.entities.PersonalDetails;
++import org.junit.Test;
++
++import static org.junit.Assert.*;
++
++public class AcurityEntityClonerTest {
++
++    @Test
++    public void testClone() throws Exception {
++        String givenName = "Jane";
++        String surname = "Doe";
++        String clientNumber = "00000001";
++        String fund = "FUND";
++        String memberNumber = "000001";
++
++        PersonalDetails clientRecord = new PersonalDetails();
++
++        clientRecord.setD2i_Identity(1);
++        clientRecord.setD2z_Given_Names(givenName);
++        clientRecord.setD2z_Surname(surname);
++        clientRecord.setD2z_Client(clientNumber);
++
++        MemberDetails memberDetails = new MemberDetails();
++
++        memberDetails.setMDi_Identity(1);
++        memberDetails.setMDz_Fund(fund);
++        memberDetails.setMDz_Member(memberNumber);
++        memberDetails.setMDz_Acct_No(clientNumber);
++        memberDetails.setMDz_Given_Names(givenName);
++        memberDetails.setMDz_Surname(surname);
++
++        memberDetails.setClient(clientRecord);
++
++        MemberDetails clonedMemberDetails = AcurityEntityCloner.clone(memberDetails);
++
++        assertFalse(memberDetails == clonedMemberDetails);
++        assertTrue(memberDetails.equals(clonedMemberDetails));
++
++        assertEquals(givenName, clonedMemberDetails.getMDz_Given_Names());
++        assertEquals(surname, clonedMemberDetails.getMDz_Surname());
++        assertEquals(clientNumber, clonedMemberDetails.getMDz_Acct_No());
++        assertEquals(fund, clonedMemberDetails.getMDz_Fund());
++        assertEquals(memberNumber, clonedMemberDetails.getMDz_Member());
++
++        assertFalse(clonedMemberDetails.getClient() == clientRecord);
++        assertTrue(clonedMemberDetails.getClient().equals(clientRecord));
++
++        assertEquals(givenName, clonedMemberDetails.getClient().getD2z_Given_Names());
++        assertEquals(surname, clonedMemberDetails.getClient().getD2z_Surname());
++        assertEquals(clientNumber, clonedMemberDetails.getClient().getD2z_Client());
++    }
++}
+\ No newline at end of file
+Index: src/main/java/au/com/finsyn/workbench/manage/view/setperiod/RetrieveLinesToUpdateTask.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/view/setperiod/RetrieveLinesToUpdateTask.java	(revision 27673+:a0d0167dc163+)
++++ src/main/java/au/com/finsyn/workbench/manage/view/setperiod/RetrieveLinesToUpdateTask.java	(revision 27673+:a0d0167dc163+)
+@@ -0,0 +1,114 @@
++package au.com.finsyn.workbench.manage.view.setperiod;
++
++import au.com.finsyn.hibernate.generated.entities.ContributionLines;
++import au.com.finsyn.hibernate.generated.entities.WorkbenchLines;
++import au.com.finsyn.hibernate.tools.FundAndMember;
++import au.com.finsyn.hibernate.tools.JoinSpec;
++import au.com.finsyn.hibernate.tools.querybuilder.ParameterisedSQLFragment;
++import au.com.finsyn.hibernate.tools.querybuilder.SQLQueryBuilder;
++import au.com.finsyn.swing.util.workers.CancellableDatabaseTask;
++import au.com.finsyn.util.annotations.ReturnTypesAreNonnullByDefault;
++import au.com.finsyn.util.datastructures.GuavaCollectors;
++import au.com.finsyn.util.function.Predicates;
++import com.google.common.collect.ImmutableList;
++import com.google.common.collect.ImmutableSet;
++import org.hibernate.Session;
++
++import javax.annotation.ParametersAreNonnullByDefault;
++import java.util.Collection;
++import java.util.List;
++import java.util.Optional;
++
++/**
++ * TODO add documentation
++ *
++ * @author timothym
++ */
++@ParametersAreNonnullByDefault
++@ReturnTypesAreNonnullByDefault
++class RetrieveLinesToUpdateTask extends CancellableDatabaseTask<ImmutableSet<WorkbenchLines>, Void> {
++
++    private static final JoinSpec fcToFWJoin = JoinSpec.fromAnnotation(ContributionLines.class, WorkbenchLines.class).get();
++    private static final JoinSpec fwToFCJoin = JoinSpec.fromAnnotation(WorkbenchLines.class, ContributionLines.class).get();
++
++    private final WorkbenchLines selectedFWLine;
++
++    public RetrieveLinesToUpdateTask(WorkbenchLines selectedFWLine) {
++        this.selectedFWLine = selectedFWLine;
++    }
++
++    @Override
++    protected ImmutableSet<WorkbenchLines> performTask(Session session) throws Exception {
++        FundAndMember fundAndMember = FundAndMember.fromWorkbenchLine(selectedFWLine);
++
++        Optional<ParameterisedSQLFragment> matchesDivsAndTransRefsFragment =
++                constructMatchesDivsAndTransRefsFilter(selectedFWLine);
++
++        if (!matchesDivsAndTransRefsFragment.isPresent()) {
++            // There are no divs or trans refs, so we'll only ever get an empty list.
++            return ImmutableSet.of();
++        }
++
++        ParameterisedSQLFragment matchingFCLinesSubSelect =
++                constructFCLinesSubSelect(fundAndMember, matchesDivsAndTransRefsFragment.get());
++
++        SQLQueryBuilder query = constructFWLinesQuery(matchingFCLinesSubSelect);
++
++        List<WorkbenchLines> results = query.constructAcurityEntitySqlExecutor(WorkbenchLines.class)
++                .setSession(session)
++                .execute()
++                .getResults();
++
++        return ImmutableSet.copyOf(results);
++    }
++
++    private static Optional<ParameterisedSQLFragment> constructMatchesDivsAndTransRefsFilter(
++            WorkbenchLines selectedFWLine) {
++        ImmutableSet<DivisionAndTransactionRef> divisionsAndTransRefs =
++                extractDivisionsAndTransRefs(selectedFWLine.getContributionLines());
++
++        ImmutableList<ParameterisedSQLFragment> fcMatchesDivsAndTransRefsFragments = divisionsAndTransRefs
++                .stream()
++                .map(DivisionAndTransactionRef::renderFilterForMatchingFCLine)
++                .collect(GuavaCollectors.<ParameterisedSQLFragment>toList());
++
++        return ParameterisedSQLFragment.bracketedJoin(fcMatchesDivsAndTransRefsFragments, "OR");
++    }
++
++    private static ParameterisedSQLFragment constructFCLinesSubSelect(
++            FundAndMember fundAndMember,
++            ParameterisedSQLFragment matchesDivsAndTransRefsFragment) {
++        return new ParameterisedSQLFragment()
++                .append("SELECT DISTINCT FWi_Identity")
++                .append("FROM").append(JoinSpec.constructFromClause(ContributionLines.class, fcToFWJoin))
++                .append("WHERE")
++                .append("FCz_Fund =").appendParameter(fundAndMember.getFund()).append("AND")
++                .append("FCz_Member =").appendParameter(fundAndMember.getMember()).append("AND")
++                .append(matchesDivsAndTransRefsFragment);
++    }
++
++    private static SQLQueryBuilder constructFWLinesQuery(ParameterisedSQLFragment selectFCLines) {
++        return new SQLQueryBuilder()
++                .append("SELECT *")
++                .append("FROM").append(JoinSpec.constructFromClause(WorkbenchLines.class, fwToFCJoin))
++                .append("WHERE")
++                .append("FWi_Identity IN (").append(selectFCLines).append(")")
++                .setMaxResults(null);
++    }
++
++    private static ImmutableSet<DivisionAndTransactionRef> extractDivisionsAndTransRefs(
++            Collection<ContributionLines> fcLines) {
++        return fcLines
++                .stream()
++                .filter(Predicates.isNotNull())
++                .filter(RetrieveLinesToUpdateTask::isPostedFCLineWithTransRef)
++                .map(fcLine -> new DivisionAndTransactionRef(fcLine.getFCz_Division(), fcLine.getFCl_Trans_Ref()))
++                .collect(GuavaCollectors.<DivisionAndTransactionRef>toSet());
++    }
++
++    private static boolean isPostedFCLineWithTransRef(ContributionLines fcLine) {
++        return fcLine.getFCz_Status() != null
++                && fcLine.getFCz_Status().trim().equalsIgnoreCase("Y")
++                && fcLine.getFCl_Trans_Ref() != 0;
++    }
++}
+Index: src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodsDialog.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodsDialog.java	(revision 27673+:a0d0167dc163+)
++++ src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodsDialog.java	(revision 27673+:a0d0167dc163+)
+@@ -0,0 +1,72 @@
++package au.com.finsyn.workbench.manage.view.setperiod;
++
++import au.com.finsyn.hibernate.generated.entities.WorkbenchLines;
++import au.com.finsyn.swing.components.DialogJPanel;
++import au.com.finsyn.swing.components.JideDatePicker;
++import au.com.finsyn.swing.components.LabelLikeJTextArea;
++import au.com.finsyn.util.annotations.ReturnTypesAreNonnullByDefault;
++import au.com.finsyn.util.time.DateRange;
++import jSSS.util.StringUtil;
++import javafx.beans.value.ObservableValue;
++import net.miginfocom.swing.MigLayout;
++
++import javax.annotation.ParametersAreNonnullByDefault;
++import javax.swing.*;
++import java.util.Date;
++
++/**
++ * TODO add documentation
++ *
++ * @author timothym
++ */
++@ParametersAreNonnullByDefault
++@ReturnTypesAreNonnullByDefault
++public class SetPeriodsDialog extends DialogJPanel {
++
++    private final int numFWLinesChanged;
++    private final int numFCLinesChanged;
++
++    private final ObservableValue<Date> startDate;
++    private final ObservableValue<Date> endDate;
++
++    private final JideDatePicker startDatePicker;
++    private final JideDatePicker endDatePicker;
++
++    public SetPeriodsDialog(int numFWLinesChanged, int numFCLinesChanged) {
++        super("Set Period");
++
++        this.numFWLinesChanged = numFWLinesChanged;
++        this.numFCLinesChanged = numFCLinesChanged;
++
++        startDatePicker = new JideDatePicker();
++        endDatePicker = new JideDatePicker();
++
++        startDate = startDatePicker.selectedOldDateProperty();
++        endDate = endDatePicker.selectedOldDateProperty();
++    }
++
++    @Override
++    public JComponent createContentPanel() {
++        JPanel returnedPanel = new JPanel(new MigLayout("", "[][]", "[][][]"));
++
++        returnedPanel.add(new JLabel("Start Date:"), "cell 0 0");
++        returnedPanel.add(startDatePicker, "cell 1 0");
++        startDatePicker.setToolTipText(WorkbenchLines.FWD_PERIOD_START.getName());
++
++        returnedPanel.add(new JLabel("End Date:"), "cell 0 1");
++        returnedPanel.add(endDatePicker, "cell 1 1");
++        startDatePicker.setToolTipText(WorkbenchLines.FWD_PERIOD_END.getName());
++
++        // TODO sort out the nomenclature for this message
++        returnedPanel.add(new LabelLikeJTextArea("This will update "
++				        + StringUtil.renderWithGuessedPlural(numFWLinesChanged, "workbench line") + " and "
++				        + StringUtil.renderWithGuessedPlural(numFCLinesChanged, "contribution line") + "."),
++		        "cell 0 2, spanx");
++
++        return returnedPanel;
++    }
++
++    public DateRange getDateRange() {
++        return DateRange.fromOldDates(startDate.getValue(), endDate.getValue());
++    }
++}
+Index: src/test/java/jSSS/util/StringUtilTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/test/java/jSSS/util/StringUtilTest.java	(revision 27673:a0d0167dc1636af798b3973528961d3732e94247)
++++ src/test/java/jSSS/util/StringUtilTest.java	(revision 27673+:a0d0167dc163+)
+@@ -30,4 +30,28 @@
+                 ImmutableList.of("To", "be", "or", "not", "to", "be", "\"that    is   the question\""),
+                 StringUtil.quotedWordSplit("To be     or    not  to    be \"that    is   the question\""));
+     }
++
++    @Test
++    public void testRenderWithPlural() throws Exception {
++	    assertEquals("1 apple", StringUtil.renderWithPlural(1, "apple", "apples"));
++	    assertEquals("2 apples", StringUtil.renderWithPlural(2, "apple", "apples"));
++
++	    assertEquals("1 class", StringUtil.renderWithPlural(1, "class", "classes"));
++	    assertEquals("2 classes", StringUtil.renderWithPlural(2, "class", "classes"));
++
++	    assertEquals("1 monkey", StringUtil.renderWithPlural(1, "monkey", "monkeys"));
++	    assertEquals("2 monkeys", StringUtil.renderWithPlural(2, "monkey", "monkeys"));
++    }
++
++    @Test
++    public void testRenderWithGuessedPlural() throws Exception {
++	    assertEquals("1 apple", StringUtil.renderWithGuessedPlural(1, "apple"));
++	    assertEquals("2 apples", StringUtil.renderWithGuessedPlural(2, "apple"));
++
++	    assertEquals("1 class", StringUtil.renderWithGuessedPlural(1, "class"));
++	    assertEquals("2 classes", StringUtil.renderWithGuessedPlural(2, "class"));
++
++	    assertEquals("1 monkey", StringUtil.renderWithGuessedPlural(1, "monkey"));
++	    assertEquals("2 monkeies", StringUtil.renderWithGuessedPlural(2, "monkey"));
++    }
+ }
+\ No newline at end of file
+Index: src/main/java/au/com/finsyn/workbench/manage/view/setperiod/DivisionAndTransactionRef.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/view/setperiod/DivisionAndTransactionRef.java	(revision 27673+:a0d0167dc163+)
++++ src/main/java/au/com/finsyn/workbench/manage/view/setperiod/DivisionAndTransactionRef.java	(revision 27673+:a0d0167dc163+)
+@@ -0,0 +1,34 @@
++package au.com.finsyn.workbench.manage.view.setperiod;
++
++import au.com.finsyn.hibernate.tools.querybuilder.ParameterisedSQLFragment;
++import au.com.finsyn.util.Pair;
++import au.com.finsyn.util.annotations.ReturnTypesAreNonnullByDefault;
++
++import javax.annotation.ParametersAreNonnullByDefault;
++
++/**
++ * TODO add documentation
++ *
++ * @author timothym
++ */
++@ParametersAreNonnullByDefault
++@ReturnTypesAreNonnullByDefault
++class DivisionAndTransactionRef extends Pair<String, Long> {
++    public DivisionAndTransactionRef(String division, Long transaction) {
++        super(division, transaction);
++    }
++
++    public String getDivision() {
++        return this.getFirst();
++    }
++
++    public Long getTransaction() {
++        return this.getSecond();
++    }
++
++    public ParameterisedSQLFragment renderFilterForMatchingFCLine() {
++        return new ParameterisedSQLFragment()
++                .append("FCz_Division =").appendParameter(this.getDivision()).append("AND")
++                .append("FCl_Trans_Ref =").appendParameter(this.getTransaction());
++    }
++}
+Index: src/main/java/au/com/finsyn/hibernate/AcurityEntityUtils.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/hibernate/AcurityEntityUtils.java	(revision 27673:a0d0167dc1636af798b3973528961d3732e94247)
++++ src/main/java/au/com/finsyn/hibernate/AcurityEntityUtils.java	(revision 27673+:a0d0167dc163+)
+@@ -9,27 +9,26 @@
+ import au.com.finsyn.util.AcurityLogging;
+ import au.com.finsyn.util.RegexUtils;
+ import au.com.finsyn.util.datastructures.CollectionUtils;
++import au.com.finsyn.util.datastructures.GuavaCollectors;
++import com.google.common.collect.ImmutableList;
++import com.google.common.collect.ImmutableSet;
+ import jSSS.util.StringUtil;
++import org.apache.commons.beanutils.BeanUtils;
+ import org.apache.commons.lang3.StringUtils;
+ import org.apache.commons.logging.Log;
+ import org.hibernate.HibernateException;
+ 
+ import javax.annotation.Nullable;
+ import javax.management.ReflectionException;
++import java.lang.reflect.InvocationTargetException;
+ import java.text.SimpleDateFormat;
+-import java.util.Arrays;
+-import java.util.Collection;
+-import java.util.List;
+-import java.util.NoSuchElementException;
+-import java.util.Objects;
+-import java.util.Optional;
+-import java.util.Set;
++import java.util.*;
+ import java.util.function.Predicate;
+ import java.util.regex.Pattern;
+ import java.util.stream.Collectors;
+ 
+-public class AcurityEntityUtils {
++public final class AcurityEntityUtils {
+-    private static final Log LOG = AcurityLogging.getInstance().getLogger(AcurityEntityUtils.class);
++	private static final Log LOG = AcurityLogging.getInstance().getLogger(AcurityEntityUtils.class);
+ 
+ 	public static final String USER_DEFINED_PREFIX = "ZZ";
+ 
+@@ -132,24 +131,24 @@
+ 		return RegexUtils.captureFirst(REMOVE_FIRST_PART_FROM_MULTI_PART_IDENTIFIER_REGEX, multiPartIdentifier);
+ 	}
+ 
+-    /**
+-     * Strips any multipart identifiers from the given string, returning the fieldName itself. If the given
+-     * {@code String} is {@code null} or does not appear to be a multipart identifier, it is returned without
+-     * modification.
+-     */
+-    public static String stripMultiPartIdentifier(String multiPartIdentifier) {
+-        if (multiPartIdentifier == null) {
+-            return null;
+-        }
++	/**
++	 * Strips any multipart identifiers from the given string, returning the fieldName itself. If the given
++	 * {@code String} is {@code null} or does not appear to be a multipart identifier, it is returned without
++	 * modification.
++	 */
++	public static String stripMultiPartIdentifier(String multiPartIdentifier) {
++		if (multiPartIdentifier == null) {
++			return null;
++		}
+ 
+-        final String REMOVE_MULTIPART_IDENTIFIER_REGEX = ".*\\.(\\w{2}[a-z]_\\w+)";
++		final String REMOVE_MULTIPART_IDENTIFIER_REGEX = ".*\\.(\\w{2}[a-z]_\\w+)";
+ 
+-        if (multiPartIdentifier.matches(REMOVE_MULTIPART_IDENTIFIER_REGEX)) {
+-            return RegexUtils.captureFirst(REMOVE_MULTIPART_IDENTIFIER_REGEX, multiPartIdentifier);
+-        } else {
+-            return multiPartIdentifier;
+-        }
+-    }
++		if (multiPartIdentifier.matches(REMOVE_MULTIPART_IDENTIFIER_REGEX)) {
++			return RegexUtils.captureFirst(REMOVE_MULTIPART_IDENTIFIER_REGEX, multiPartIdentifier);
++		} else {
++			return multiPartIdentifier;
++		}
++	}
+ 	
+ 	/**
+ 	 * Takes a multi-part identifier and returns the {@link AcurityEntity} that matches the first part of the multi-part identifier.
+@@ -232,20 +231,20 @@
+ 	 * This method works by simply taking the first two characters and searching 
+ 	 * {@link AnnotatedClassList#tableCodeToClassMap} for the matching entity, so there is 
+ 	 * no guarantee that the given field actually exists on the entity.
+-     * <p>
+-     * Note that this method is case-insensitive.
++	 * <p>
++	 * Note that this method is case-insensitive.
+ 	 * 
+ 	 * @return the matching {@link AcurityEntity} class, or <code>null</code> if no matching class can be found.
+ 	 */
+ 	public static Optional<Class<? extends AcurityEntity>> getAcurityEntityFromFieldName(String fieldName) {
+ 		if (StringUtils.isBlank(fieldName)
+-                || fieldName.trim().length() < 2
+-                || fieldName.trim().startsWith(USER_DEFINED_PREFIX)) {
++				|| fieldName.trim().length() < 2
++				|| fieldName.trim().startsWith(USER_DEFINED_PREFIX)) {
+ 			return Optional.empty(); // No matching AcurityEntity
+ 		} else {
+-            return Optional.ofNullable(AnnotatedClassList.tableCodeToClassMap.get(
+-                    fieldName.toUpperCase().substring(0, 2))
+-            );
++			return Optional.ofNullable(AnnotatedClassList.tableCodeToClassMap.get(
++					fieldName.toUpperCase().substring(0, 2))
++			);
+ 		}
+ 	}
+ 	
+@@ -348,7 +347,7 @@
+ 			throw new NullPointerException();
+ 		}
+ 		
+-        return AcurityEntity.getDummyInstance(entityClass).get().retrieveAllFieldNames();
++		return AcurityEntity.getDummyInstance(entityClass).get().retrieveAllFieldNames();
+ 	}
+ 
+ 	/**
+@@ -394,28 +393,28 @@
+ 		return false;
+ 	}
+ 
+-    /**
+-     * Tests whether all of the given field names represent valid fields of the given entity.
+-     * @throws IllegalArgumentException if any of the given field names are not valid fields of the given entity.
+-     */
+-    public static void testValidDatabaseFieldOfEntity(Class<? extends AcurityEntity> entityClass,
+-                                                      Collection<String> fieldNames) {
+-        Collection<String> invalidFields = fieldNames.stream()
+-                .filter(fieldName -> !AcurityEntityUtils.isValidDatabaseFieldOfEntity(entityClass, fieldName))
+-                .collect(Collectors.toSet());
++	/**
++	 * Tests whether all of the given field names represent valid fields of the given entity.
++	 * @throws IllegalArgumentException if any of the given field names are not valid fields of the given entity.
++	 */
++	public static void testValidDatabaseFieldOfEntity(Class<? extends AcurityEntity> entityClass,
++													  Collection<String> fieldNames) {
++		Collection<String> invalidFields = fieldNames.stream()
++				.filter(fieldName -> !AcurityEntityUtils.isValidDatabaseFieldOfEntity(entityClass, fieldName))
++				.collect(Collectors.toSet());
+ 
+-        if (!invalidFields.isEmpty()) {
+-            throw new IllegalArgumentException(StringUtils.join(invalidFields, ", ")
+-                    + " are not valid fields of "
+-                    + AcurityNamingStrategy.INSTANCE.classToTableName(entityClass));
+-        }
+-    }
++		if (!invalidFields.isEmpty()) {
++			throw new IllegalArgumentException(StringUtils.join(invalidFields, ", ")
++					+ " are not valid fields of "
++					+ AcurityNamingStrategy.INSTANCE.classToTableName(entityClass));
++		}
++	}
+ 	
+ 	/**
+ 	 * Checks the given field name to determine whether it is a valid multi-part database field of the given entity.
+ 	 */
+ 	public static boolean isValidMultiPartDatabaseFieldOfEntity(Class<? extends AcurityEntity> entityClass,
+-                                                                String fieldName) {
++																String fieldName) {
+ 		if (entityClass == null || fieldName == null) {
+ 			throw new NullPointerException();
+ 		}
+@@ -437,31 +436,31 @@
+ 		}
+ 	}
+ 
+-    /**
+-     * Converts a character to a boolean representation, assuming it is a "Y/N" field common in Acurity Entities. If the
+-     * given character is not either {@code 'Y'} or {@code 'N'}, this method returns an empty {@link Optional}.
+-     */
+-    public static Optional<Boolean> yNCharToBoolean(Character character) {
+-        if (character == 'Y') {
+-            return Optional.of(Boolean.TRUE);
+-        } else if (character == 'N') {
+-            return Optional.of(Boolean.FALSE);
+-        } else {
+-            return Optional.empty();
+-        }
+-    }
++	/**
++	 * Converts a character to a boolean representation, assuming it is a "Y/N" field common in Acurity Entities. If the
++	 * given character is not either {@code 'Y'} or {@code 'N'}, this method returns an empty {@link Optional}.
++	 */
++	public static Optional<Boolean> yNCharToBoolean(Character character) {
++		if (character == 'Y') {
++			return Optional.of(Boolean.TRUE);
++		} else if (character == 'N') {
++			return Optional.of(Boolean.FALSE);
++		} else {
++			return Optional.empty();
++		}
++	}
+ 
+-    /**
+-     * Converts the given {@link Boolean} to {@code 'Y'} or {@code 'N'} for {@code true} or {@code false} values
+-     * respectively. Returns {@code null} if {@code null} is passed in.
+-     */
+-    public static Character toYNCharacter(Boolean booleanValue) {
+-        if (booleanValue == null) {
+-            return null;
+-        } else {
+-            return booleanValue ? 'Y' : 'N';
+-        }
+-    }
++	/**
++	 * Converts the given {@link Boolean} to {@code 'Y'} or {@code 'N'} for {@code true} or {@code false} values
++	 * respectively. Returns {@code null} if {@code null} is passed in.
++	 */
++	public static Character toYNCharacter(Boolean booleanValue) {
++		if (booleanValue == null) {
++			return null;
++		} else {
++			return booleanValue ? 'Y' : 'N';
++		}
++	}
+ 
+ 	/**
+ 	 * Like {@link #toYNCharacter(Boolean)}, except that the result is converted to a String.
+@@ -470,67 +469,67 @@
+ 		return String.valueOf(toYNCharacter(booleanValue));
+ 	}
+ 
+-    /**
+-     * Returns a formatted, single-string representation of the "Last Modified" information taken from the
+-     * XXz_Mod_User, XXd_Mod_Date, and XXt_Mod_Time fields of the given {@link AcurityEntity}. An empty {@link Optional}
+-     * is returned if the given entity has no such fields or if any of them are null.
+-     *
+-     * @throws NullPointerException if entity is {@code null}
+-     */
+-    public static Optional<String> lastModifiedString(AcurityEntity entity) {
+-        Objects.requireNonNull(entity);
++	/**
++	 * Returns a formatted, single-string representation of the "Last Modified" information taken from the
++	 * XXz_Mod_User, XXd_Mod_Date, and XXt_Mod_Time fields of the given {@link AcurityEntity}. An empty {@link Optional}
++	 * is returned if the given entity has no such fields or if any of them are null.
++	 *
++	 * @throws NullPointerException if entity is {@code null}
++	 */
++	public static Optional<String> lastModifiedString(AcurityEntity entity) {
++		Objects.requireNonNull(entity);
+ 
+-        try {
+-            String user = (String) ReflectionDataHandler.get(entity.getTableCode() + "z_Mod_User", entity);
+-            java.sql.Date date = (java.sql.Date) ReflectionDataHandler.get(entity.getTableCode() + "d_Mod_Date", entity);
+-            java.sql.Time time = (java.sql.Time) ReflectionDataHandler.get(entity.getTableCode() + "t_Mod_Time", entity);
++		try {
++			String user = (String) ReflectionDataHandler.get(entity.getTableCode() + "z_Mod_User", entity);
++			java.sql.Date date = (java.sql.Date) ReflectionDataHandler.get(entity.getTableCode() + "d_Mod_Date", entity);
++			java.sql.Time time = (java.sql.Time) ReflectionDataHandler.get(entity.getTableCode() + "t_Mod_Time", entity);
+ 
+-            return lastModifiedString(user, date, time);
+-        } catch (ReflectionException e) {
+-            return Optional.empty();
+-        } catch (ClassCastException e) {
+-            LOG.warn(e.getClass().getName() + " thrown when trying to parse last modified string from Acurity entity",
+-                    e);
+-            return Optional.empty();
+-        }
+-    }
++			return lastModifiedString(user, date, time);
++		} catch (ReflectionException e) {
++			return Optional.empty();
++		} catch (ClassCastException e) {
++			LOG.warn(e.getClass().getName() + " thrown when trying to parse last modified string from Acurity entity",
++					e);
++			return Optional.empty();
++		}
++	}
+ 
+-    /**
+-     * Returns a formatted, single-string representation of the "Last Modified" information generally taken from the
+-     * XXz_Mod_User, XXd_Mod_Date, and XXt_Mod_Time fields of an {@link AcurityEntity}. An empty {@link Optional} is
+-     * returned if any of the given fields hava value of {@code null}.
+-     */
+-    public static Optional<String> lastModifiedString(String user, java.sql.Date date, java.sql.Time time) {
+-        if (user != null && date != null && time != null) {
+-            SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
+-            SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm a");
++	/**
++	 * Returns a formatted, single-string representation of the "Last Modified" information generally taken from the
++	 * XXz_Mod_User, XXd_Mod_Date, and XXt_Mod_Time fields of an {@link AcurityEntity}. An empty {@link Optional} is
++	 * returned if any of the given fields hava value of {@code null}.
++	 */
++	public static Optional<String> lastModifiedString(String user, java.sql.Date date, java.sql.Time time) {
++		if (user != null && date != null && time != null) {
++			SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
++			SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm a");
+ 
+-            String str = 	user.trim() + " " +
+-                            dateFormatter.format(date) + " " +
+-                            timeFormatter.format(time);
++			String str = 	user.trim() + " " +
++							dateFormatter.format(date) + " " +
++							timeFormatter.format(time);
+ 
+-            return Optional.of(str);
+-        } else {
+-            return Optional.empty();
+-        }
+-    }
+-    
+-    /**
+-     * Takes a header code and converts it to a table code. Not every table code is identical to
+-     * the header code. This is a hardcoded hack to fix issue SR-6762 but if header codes are changed
+-     * in C side then this method may need to be altered.
+-     */
+-    public static String convertHeaderToTableCode(String aHeaderCode) {
+-    	switch (aHeaderCode)
+-    	{
+-    		case "IT": return "IR";
+-    		case "IR": return "IN";
+-    		case "DN": return "DX";
+-    		case "TF": return "PY";
+-    		case "R3": return "RO";
+-    	}
+-    	return aHeaderCode;
+-    }
++			return Optional.of(str);
++		} else {
++			return Optional.empty();
++		}
++	}
++
++	/**
++	 * Takes a header code and converts it to a table code. Not every table code is identical to
++	 * the header code. This is a hardcoded hack to fix issue SR-6762 but if header codes are changed
++	 * in C side then this method may need to be altered.
++	 */
++	public static String convertHeaderToTableCode(String aHeaderCode) {
++		switch (aHeaderCode)
++		{
++			case "IT": return "IR";
++			case "IR": return "IN";
++			case "DN": return "DX";
++			case "TF": return "PY";
++			case "R3": return "RO";
++		}
++		return aHeaderCode;
++	}
+ 
+ 	/**
+ 	 * Returns the table code for the given entity.
+@@ -566,30 +565,30 @@
+ 		return RegexUtils.capture(GENERAL_FIELD_NAME_PATTERN, string);
+ 	}
+ 
+-    /**
+-     * Returns the {@link EntityFieldInfo} for the relation from one class to another, or an empty {@link Optional} if
+-     * none exists.
+-     */
+-    public static <T extends AcurityEntity> Optional<EntityFieldInfo<? super T>> getRelationFieldInfo(
+-            Class<? extends T> from,
+-            Class<? extends AcurityEntity> to) {
+-        return Optional.ofNullable(EntityFieldInfo.getFieldInfoMap(from).get().get(to.getSimpleName().toUpperCase()));
+-    }
++	/**
++	 * Returns the {@link EntityFieldInfo} for the relation from one class to another, or an empty {@link Optional} if
++	 * none exists.
++	 */
++	public static <T extends AcurityEntity> Optional<EntityFieldInfo<? super T>> getRelationFieldInfo(
++			Class<? extends T> from,
++			Class<? extends AcurityEntity> to) {
++		return Optional.ofNullable(EntityFieldInfo.getFieldInfoMap(from).get().get(to.getSimpleName().toUpperCase()));
++	}
+ 
+-    /**
+-     * Returns true if and only if there exists an {@link EntityFieldInfo} for the relation from the class {@code from}
+-     * to the class {@code to}, and the relation is stored in a collection. This is equivalent to saying that the
+-     * relation from {@code from} to {@code to} is defined in the entity as being a "to many" relationship.
+-     * <p>
+-     * Note that this method will return {@code false} whenever the above is not true, including when there is no
+-     * relation at all.
+-     */
+-    public static <T extends AcurityEntity> boolean isToManyRelation(Class<? extends T> from,
+-                                                                     Class<? extends AcurityEntity> to) {
+-        return getRelationFieldInfo(from, to)
+-                .map(fieldInfo -> Collection.class.isAssignableFrom(fieldInfo.getDataType()))
+-                .orElse(false);
+-    }
++	/**
++	 * Returns true if and only if there exists an {@link EntityFieldInfo} for the relation from the class {@code from}
++	 * to the class {@code to}, and the relation is stored in a collection. This is equivalent to saying that the
++	 * relation from {@code from} to {@code to} is defined in the entity as being a "to many" relationship.
++	 * <p>
++	 * Note that this method will return {@code false} whenever the above is not true, including when there is no
++	 * relation at all.
++	 */
++	public static <T extends AcurityEntity> boolean isToManyRelation(Class<? extends T> from,
++																	 Class<? extends AcurityEntity> to) {
++		return getRelationFieldInfo(from, to)
++				.map(fieldInfo -> Collection.class.isAssignableFrom(fieldInfo.getDataType()))
++				.orElse(false);
++	}
+ 
+ 	public static <T extends AcurityEntity> boolean hasToManyRelationJoins(Class<? extends T> from,
+ 																		   @Nullable Collection<JoinSpec> joins) {
+@@ -604,40 +603,40 @@
+ 		return hasToManyRelation(from, joinedTables);
+ 	}
+ 
+-    /**
+-     * Returns true if the relation from the given class to any of the given collection of classes is a "to many"
+-     * relation as defined for method {@link #isToManyRelation(Class, Class)}
+-     */
+-    public static <T extends AcurityEntity> boolean hasToManyRelation(
+-            Class<? extends T> from,
+-            @Nullable Collection<Class<? extends AcurityEntity>> to) {
+-        return to != null &&
+-                to.stream()
+-                        .map(toEntity -> isToManyRelation(from, toEntity))
+-                        .reduce(Boolean::logicalOr)
+-                        .orElse(false);
+-    }
++	/**
++	 * Returns true if the relation from the given class to any of the given collection of classes is a "to many"
++	 * relation as defined for method {@link #isToManyRelation(Class, Class)}
++	 */
++	public static <T extends AcurityEntity> boolean hasToManyRelation(
++			Class<? extends T> from,
++			@Nullable Collection<Class<? extends AcurityEntity>> to) {
++		return to != null &&
++				to.stream()
++						.map(toEntity -> isToManyRelation(from, toEntity))
++						.reduce(Boolean::logicalOr)
++						.orElse(false);
++	}
+ 
+-    /**
+-     * Uses the {@link EntityFieldInfo} field info to clone the values from one {@link AcurityEntity} to another.
+-     */
+-    @SuppressWarnings("unchecked")
+-    public static <T extends AcurityEntity> void cloneFields(T from, T to) {
+-        to.getFieldInfo().forEach(
+-                (fieldName, fieldInfo) -> {
+-                    Object value = ((EntityFieldInfo<T>) from.getFieldInfo().get(fieldName)).getGetter().apply(from);
+-                    ((EntityFieldInfo<T>) fieldInfo).getSetter().accept(to, value);
+-                }
+-        );
+-    }
++	/**
++	 * Uses the {@link EntityFieldInfo} field info to clone the values from one {@link AcurityEntity} to another.
++	 */
++	@SuppressWarnings("unchecked")
++	public static <T extends AcurityEntity> void cloneFields(T from, T to) {
++		to.getFieldInfo().forEach(
++				(fieldName, fieldInfo) -> {
++					Object value = ((EntityFieldInfo<T>) from.getFieldInfo().get(fieldName)).getGetter().apply(from);
++					((EntityFieldInfo<T>) fieldInfo).getSetter().accept(to, value);
++				}
++		);
++	}
+ 
+-    /**
+-     * Attempts to compute the table name for the given entity class. This method uses
+-     * {@link AcurityEntity#getDummyInstance(Class)} and then {@link AcurityEntity#getInstanceTableName()} to determine
+-     * the table name, and so will throw a {@link NoSuchElementException} if {@code getDummyInstance(Class)} returns an
+-     * empty {@link Optional}.
+-     */
+-    public static String getTableName(Class<? extends AcurityEntity> table) {
+-        return AcurityEntity.getDummyInstance(table).get().getInstanceTableName();
+-    }
++	/**
++	 * Attempts to compute the table name for the given entity class. This method uses
++	 * {@link AcurityEntity#getDummyInstance(Class)} and then {@link AcurityEntity#getInstanceTableName()} to determine
++	 * the table name, and so will throw a {@link NoSuchElementException} if {@code getDummyInstance(Class)} returns an
++	 * empty {@link Optional}.
++	 */
++	public static String getTableName(Class<? extends AcurityEntity> table) {
++		return AcurityEntity.getDummyInstance(table).get().getInstanceTableName();
++	}
+ }
