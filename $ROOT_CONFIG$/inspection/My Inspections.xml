@@ -111,6 +111,9 @@
     <option name="REPORT_ANNOTATION_NOT_PROPAGATED_TO_OVERRIDERS" value="true" />
     <option name="REPORT_NULLS_PASSED_TO_NON_ANNOTATED_METHOD" value="true" />
   </inspection_tool>
+  <inspection_tool class="ObsoleteCollection" enabled="true" level="WARNING" enabled_by_default="true">
+    <option name="ignoreRequiredObsoleteCollectionTypes" value="false" />
+  </inspection_tool>
   <inspection_tool class="PackageDotHtmlMayBePackageInfo" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="ParameterCanBeLocal" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="ParametersPerMethod" enabled="true" level="WEAK WARNING" enabled_by_default="true">
