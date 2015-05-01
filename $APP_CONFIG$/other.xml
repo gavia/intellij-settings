@@ -74,7 +74,13 @@
             <id />
           </State>
           <State>
-            <id>Code style issuesJava</id>
+            <id>CSS</id>
+          </State>
+          <State>
+            <id>Code style issuesJavaScript</id>
+          </State>
+          <State>
+            <id>Django</id>
           </State>
           <State>
             <id>Error handlingJava</id>
@@ -83,24 +89,39 @@
             <id>General</id>
           </State>
           <State>
-            <id>Google Web Toolkit issues</id>
-          </State>
-          <State>
-            <id>Inheritance issuesJava</id>
+            <id>HAML</id>
           </State>
           <State>
             <id>Java</id>
           </State>
           <State>
-            <id>Javadoc issuesJava</id>
+            <id>JavaScript</id>
           </State>
           <State>
-            <id>TestNG</id>
+            <id>Manifest</id>
+          </State>
+          <State>
+            <id>Portability issuesJava</id>
+          </State>
+          <State>
+            <id>Probable bugsCSS</id>
+          </State>
+          <State>
+            <id>Probable bugsJavaScript</id>
+          </State>
+          <State>
+            <id>Properties Files</id>
+          </State>
+          <State>
+            <id>Python</id>
+          </State>
+          <State>
+            <id>Scala: Scaladoc</id>
           </State>
         </expanded-state>
         <selected-state>
           <State>
-            <id>Ant inspections</id>
+            <id>SSBasedInspection</id>
           </State>
         </selected-state>
       </profile-state>
