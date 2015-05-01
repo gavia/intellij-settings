@@ -1,0 +1,29 @@
+Index: src/main/java/au/com/finsyn/workbench/manage/model/ContributionDetailsTableModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/model/ContributionDetailsTableModel.java	(revision 27705:a6995256ede76ada7d4e4e8f31b1ffe81236cce5)
++++ src/main/java/au/com/finsyn/workbench/manage/model/ContributionDetailsTableModel.java	(revision 27705+:a6995256ede7+)
+@@ -68,9 +68,18 @@
+ 	}
+ 
+     public static boolean shouldDisplayContributionLine(ContributionLines c ) {
+-        return (!WorkbenchCommonUtils.isRefundedContributionLine(c)
+-                && !WorkbenchCommonUtils.CONTRIBUTION_REFUND_RELATED_STATUS.contains(getContributionLineStatus(c)));
++	    return !WorkbenchCommonUtils.isRefundedContributionLine(c)
++			    && !ContributionLineStatuses.REFUNDED.getCode().equals(c.getFCz_Status())
++			    && !ContributionLineStatuses.REVERSING.getCode().equals(c.getFCz_Status())
++			    && !ContributionLineStatuses.REVERSED.getCode().equals(c.getFCz_Status())
++			    && !isDummyRefundingLine(c);
++    }
++	
++	public static boolean isDummyRefundingLine(ContributionLines fcLine) {
++		return fcLine.getFCz_Status().equals(ContributionLineStatuses.REFUNDING.getCode())
++				&& fcLine.getFCs_Orig_Sequence() != 0
++				&& fcLine.getFCs_Orig_Sequence() != fcLine.getFCs_Sequence();
+-    }
++	}
+ 
+ 	public DefaultTotalsTableModel getTotalsTableModel() {
+ 		return totalsTableModel;
