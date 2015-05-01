@@ -6,6 +6,9 @@
     <keyboard-shortcut first-keystroke="control W" />
   </action>
   <action id="Console.TableResult.Reload" />
+  <action id="ConvertIndentsToTabs">
+    <keyboard-shortcut first-keystroke="shift control T" />
+  </action>
   <action id="EditorAddOrRemoveCaret">
     <mouse-shortcut keystroke="control button2" />
   </action>
@@ -29,6 +32,8 @@
     <keyboard-shortcut first-keystroke="shift alt A" />
   </action>
   <action id="FileChooser.TogglePathShowing" />
+  <action id="GotoChangedFile" />
+  <action id="GotoClass" />
   <action id="GotoImplementation">
     <keyboard-shortcut first-keystroke="control alt B" />
   </action>
@@ -51,6 +56,7 @@
   <action id="IntroduceVariable">
     <keyboard-shortcut first-keystroke="shift alt L" />
   </action>
+  <action id="IpnbAddCellAboveAction" />
   <action id="IpnbCodeCellAction" />
   <action id="JumpToLastChange" />
   <action id="MethodHierarchy.ImplementMethodAction" />
