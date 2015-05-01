@@ -6,9 +6,6 @@
     <keyboard-shortcut first-keystroke="control W" />
   </action>
   <action id="Console.TableResult.Reload" />
-  <action id="ConvertIndentsToTabs">
-    <keyboard-shortcut first-keystroke="shift control T" />
-  </action>
   <action id="EditorAddOrRemoveCaret">
     <mouse-shortcut keystroke="control button2" />
   </action>
@@ -33,7 +30,6 @@
   </action>
   <action id="FileChooser.TogglePathShowing" />
   <action id="GotoChangedFile" />
-  <action id="GotoClass" />
   <action id="GotoImplementation">
     <keyboard-shortcut first-keystroke="control alt B" />
   </action>
