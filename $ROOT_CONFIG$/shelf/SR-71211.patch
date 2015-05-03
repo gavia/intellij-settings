@@ -1,0 +1,147 @@
+Index: src/main/java/au/com/finsyn/workbench/manage/model/ContributionDetailsTableModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/model/ContributionDetailsTableModel.java	(revision 27708:2a08672fee68ad503694015a4a0d06e1454f951d)
++++ src/main/java/au/com/finsyn/workbench/manage/model/ContributionDetailsTableModel.java	(revision 27708+:2a08672fee68+)
+@@ -67,10 +67,19 @@
+ 		super.setHibernateData(filteredList);
+ 	}
+ 
+-    public static boolean shouldDisplayContributionLine(ContributionLines c ) {
++	public static boolean shouldDisplayContributionLine(ContributionLines c ) {
+-        return (!WorkbenchCommonUtils.isRefundedContributionLine(c)
+-                && !WorkbenchCommonUtils.CONTRIBUTION_REFUND_RELATED_STATUS.contains(getContributionLineStatus(c)));
++		return !WorkbenchCommonUtils.isRefundedContributionLine(c)
++				&& !ContributionLineStatuses.REFUNDED.getCode().equals(c.getFCz_Status())
++				&& !ContributionLineStatuses.REVERSING.getCode().equals(c.getFCz_Status())
++				&& !ContributionLineStatuses.REVERSED.getCode().equals(c.getFCz_Status())
++				&& !isDummyRefundingLine(c);
++	}
++	
++	public static boolean isDummyRefundingLine(ContributionLines fcLine) {
++		return fcLine.getFCz_Status().equals(ContributionLineStatuses.REFUNDING.getCode())
++				&& fcLine.getFCs_Orig_Sequence() != 0
++				&& fcLine.getFCs_Orig_Sequence() != fcLine.getFCs_Sequence();
+-    }
++	}
+ 
+ 	public DefaultTotalsTableModel getTotalsTableModel() {
+ 		return totalsTableModel;
+Index: src/main/java/au/com/finsyn/workbench/manage/model/refund/RefundTableModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/model/refund/RefundTableModel.java	(revision 27708:2a08672fee68ad503694015a4a0d06e1454f951d)
++++ src/main/java/au/com/finsyn/workbench/manage/model/refund/RefundTableModel.java	(revision 27708+:2a08672fee68+)
+@@ -1,25 +1,5 @@
+ package au.com.finsyn.workbench.manage.model.refund;
+ 
+-import au.com.finsyn.swing.dialogs.Dialogs;
+-import jSSS.cdelegation.AcurityCommandGeneric;
+-import jSSS.cdelegation.AcurityCommandUpdate;
+-import jSSS.jcore.swing.worker.GenericTask;
+-import jSSS.jcore.swing.worker.TaskListener;
+-import jSSS.util.jSSSLogger;
+-
+-import java.lang.reflect.InvocationTargetException;
+-import java.math.BigDecimal;
+-import java.util.LinkedList;
+-import java.util.List;
+-
+-import javax.swing.JOptionPane;
+-import javax.swing.SwingUtilities;
+-import javax.swing.event.TableModelEvent;
+-import javax.swing.event.TableModelListener;
+-import javax.swing.table.TableModel;
+-
+-import org.apache.commons.beanutils.PropertyUtils;
+-
+ import au.com.finsyn.formtools.SaveMarshall;
+ import au.com.finsyn.formtools.SaveProviderHelper;
+ import au.com.finsyn.hibernate.AcurityEntity;
+@@ -27,10 +7,25 @@
+ import au.com.finsyn.hibernate.tools.AbstractHibernateRowDataTableModel;
+ import au.com.finsyn.hibernate.tools.RowDataInterface;
+ import au.com.finsyn.hibernate.tools.RowDataReflectionGetterWithLookUp;
++import au.com.finsyn.swing.dialogs.Dialogs;
+ import au.com.finsyn.swing.tables.DefaultTotalsTableModel;
+ import au.com.finsyn.workbench.manage.ContributionLineWithDerivedFields;
+ import au.com.finsyn.xmlcustomisation.tables.XmlCustomisableTableModelSaveProvider;
+ import au.com.finsyn.xmlcustomisation.tables.XmlTableCustomisation;
++import jSSS.cdelegation.AcurityCommandGeneric;
++import jSSS.cdelegation.AcurityCommandUpdate;
++import jSSS.jcore.swing.worker.TaskListener;
++import jSSS.util.jSSSLogger;
++import org.apache.commons.beanutils.PropertyUtils;
++
++import javax.swing.*;
++import javax.swing.event.TableModelEvent;
++import javax.swing.event.TableModelListener;
++import javax.swing.table.TableModel;
++import java.lang.reflect.InvocationTargetException;
++import java.math.BigDecimal;
++import java.util.LinkedList;
++import java.util.List;
+ 
+ 
+ public class RefundTableModel extends XmlCustomisableTableModelSaveProvider<ContributionLines>
+Index: src/main/java/au/com/finsyn/workbench/manage/model/SearchOptionsModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/model/SearchOptionsModel.java	(revision 27708:2a08672fee68ad503694015a4a0d06e1454f951d)
++++ src/main/java/au/com/finsyn/workbench/manage/model/SearchOptionsModel.java	(revision 27708+:2a08672fee68+)
+@@ -8,6 +8,7 @@
+ import javax.swing.SwingUtilities;
+ 
+ import org.apache.commons.lang3.StringUtils;
++import org.hibernate.criterion.Conjunction;
+ import org.hibernate.criterion.Criterion;
+ import org.hibernate.criterion.DetachedCriteria;
+ import org.hibernate.criterion.Junction;
+@@ -204,10 +205,12 @@
+ 			statusFilter.add(Restrictions.eq("FCz_Status", ContributionLineStatuses.MATCHED.getCode()));
+ 			statusFilter.add(Restrictions.eq("FCz_Status", ContributionLineStatuses.UNMATCHED.getCode()));
+ 			statusFilter.add(Restrictions.eq("FCz_Status", ContributionLineStatuses.MATCHED_STATIC_DATA_UNPROCESSED.getCode()));
++			statusFilter.add(nonDummyRefundingContributionsCriterion());
+ 		}
+ 		if (isShowRejected())
+ 		{
+ 			statusFilter.add(Restrictions.eq("FCz_Status", ContributionLineStatuses.REJECTED.getCode()));
++			statusFilter.add(nonDummyRefundingContributionsCriterion());
+ 		}
+ 
+ 		DetachedCriteria subSelectForFilter = DetachedCriteria.forClass(ContributionLines.class);
+@@ -226,7 +229,7 @@
+ 		//   FW has only FS lines with status Q
+ 		
+ 		Junction statusOrCriterion = Restrictions.disjunction();
+- 		
++
+ 		statusOrCriterion.add(Property.forName("FWi_Identity").in(subSelectForFilter))
+ 						.add(Property.forName("FWi_Identity").in(subSelectForStaticDataStatus()))
+ 						.add(Restrictions.and(Restrictions.isEmpty("contributionLines"), Restrictions.isEmpty("staticDataLines")))
+@@ -246,8 +249,18 @@
+ 		criterion.add(statusOrCriterion);
+ 		
+ 		return criterion;
++	}
++
++	private static Criterion nonDummyRefundingContributionsCriterion() {
++
++		Conjunction isDummyRefundingRCLineCriterion = Restrictions.and(
++				Restrictions.eq("FCz_Status", "B"),
++				Restrictions.ne("FCs_Orig_Sequence", 0),
++				Restrictions.neProperty("FCs_Orig_Sequence", "FCs_Sequence"));
++
++		return Restrictions.not(isDummyRefundingRCLineCriterion);
+ 	}
+-	
++
+ 	private DetachedCriteria subSelectForStaticDataRecordWithIsNotStatusQ()
+ 	{
+ 		DetachedCriteria subSelectForFilter = DetachedCriteria.forClass(StaticDataLines.class);
