@@ -1,0 +1,27 @@
+Index: src/main/java/au/com/finsyn/workbench/manage/model/ProcessSelectedRecordsTask.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/model/ProcessSelectedRecordsTask.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/main/java/au/com/finsyn/workbench/manage/model/ProcessSelectedRecordsTask.java	(revision 27717+:0acb24383d65+)
+@@ -34,6 +34,8 @@
+ import au.com.finsyn.workbench.WorkbenchCommonUtils.StaticDataLineStatuses;
+ import au.com.finsyn.workbench.WorkbenchCommonUtils.WorkbenchLineStatuses;
+ 
++import javax.swing.*;
++
+ public class ProcessSelectedRecordsTask extends GenericTask {
+ 	private static final String fwTable = AcurityNamingStrategy.INSTANCE.classToTableName(WorkbenchLines.class);
+ 	private static final String fcTable = AcurityNamingStrategy.INSTANCE.classToTableName(ContributionLines.class);
+@@ -118,7 +120,8 @@
+ 	public static Object processWorkbenchFilesAndShowErrors(Collection<FileRegister> fileRegisters, String batchCode) {
+ 		for (FileRegister fg : fileRegisters) {
+ 			Object result = processWorkbenchFile(fg, batchCode);
+-			if (!AcurityCommandGeneric.checkForErrorsAndShowDialog(result)) {
++			if (AcurityCommandGeneric.hasErrors(result)) {
++				SwingUtilities.invokeLater(() -> AcurityCommandGeneric.checkForErrorsAndShowDialog(result));
+ 				return result;
+ 			}
+ 		}
+\ No newline at end of file

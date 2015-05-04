@@ -1,0 +1,15 @@
+Index: src/main/java/au/com/finsyn/hibernate/tools/querybuilder/ParameterisedSQLFragment.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/hibernate/tools/querybuilder/ParameterisedSQLFragment.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/main/java/au/com/finsyn/hibernate/tools/querybuilder/ParameterisedSQLFragment.java	(revision 27717+:0acb24383d65+)
+@@ -444,6 +444,7 @@
+ 
+         for (Object value : values) {
+             returnedFragment.append(delimiter).appendParameter(value);
++	        delimiter = ",";
+         }
+ 
+         returnedFragment.append(")");
