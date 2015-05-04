@@ -1,0 +1,2187 @@
+Index: src/main/java/au/com/finsyn/workbench/WorkbenchCommonUtils.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/WorkbenchCommonUtils.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/main/java/au/com/finsyn/workbench/WorkbenchCommonUtils.java	(revision 27717+:0acb24383d65+)
+@@ -15,6 +15,7 @@
+ import jSSS.util.jSSSLogger;
+ import org.apache.commons.lang3.StringUtils;
+ 
++import javax.annotation.Nonnull;
+ import javax.swing.*;
+ import java.awt.*;
+ import java.util.*;
+@@ -22,7 +23,7 @@
+ import java.util.concurrent.ExecutionException;
+ import java.util.concurrent.Future;
+ 
+-public class WorkbenchCommonUtils {
++public final class WorkbenchCommonUtils {
+     public static final String WORKBENCH_DIVISION = "T";
+     public static final String CLEARINGHOUSE_FLAG = "Z";
+     public static final String CLEARINGHOUSE_DESCRIPTION = "Clearing House";
+@@ -46,6 +47,16 @@
+                     ContributionLineStatuses.POSTED,
+                     ContributionLineStatuses.WARNING)
+     );
++
++	private WorkbenchCommonUtils() {
++	}
++
++	public static boolean hasAllocatedStatus(@Nonnull ContributionLines fcLine) {
++	    return CONTRIBUTION_ALLOCATED_STATUS
++			    .stream()
++			    .map(ContributionLineStatuses::getCode)
++			    .anyMatch(postedStatus -> fcLine.getFCz_Status().trim().equalsIgnoreCase(postedStatus));
++    }
+ 
+     public static final Set<ContributionLineStatuses> CONTRIBUTION_UNALLOCATED_STATUS = new HashSet<ContributionLineStatuses>(
+             Arrays.asList(
+\ No newline at end of file
+Index: src/main/java/jSSS/cdelegation/AcurityCommandGeneric.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/jSSS/cdelegation/AcurityCommandGeneric.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/main/java/jSSS/cdelegation/AcurityCommandGeneric.java	(revision 27717+:0acb24383d65+)
+@@ -1,8 +1,13 @@
+ package jSSS.cdelegation;
+ 
+-import jSSS.jcore.jSSSApplication;
++import au.com.finsyn.swing.dialogs.Dialogs;
++import au.com.finsyn.swing.dialogs.MessageDialog.MessageType;
++import au.com.finsyn.util.AcurityLogging;
++import au.com.finsyn.util.ParamChecker;
++import au.com.finsyn.util.exceptions.ExceptionHandler;
+ import jSSS.jcore.functions.IjSSSFunction;
+ import jSSS.jcore.functions.jSSSMultiFunctionTask;
++import jSSS.jcore.jSSSApplication;
+ import jSSS.jcore.swing.worker.Task;
+ import jSSS.jcore.swing.worker.TaskListener;
+ import jSSS.jgui.ConfigFileConstants;
+@@ -10,19 +15,16 @@
+ import jSSS.jgui.jSSSApp;
+ import jSSS.util.StringUtil;
+ import jSSS.util.jSSSDate;
+-import jSSS.util.jSSSLogger;
+ import jSSS.util.jSSSTokenizerImpl;
++import org.apache.commons.logging.Log;
+ 
+ import java.util.ArrayList;
+ import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.Map;
++import java.util.Optional;
+ import java.util.regex.Pattern;
+ 
+-import javax.swing.JOptionPane;
+-
+-import au.com.finsyn.util.ParamChecker;
+-
+ /**
+  * Class representing an Acurity "Electronic Processing Data File". When querying Acurity for data a Data File consists at the
+  * minimum of one Control Line and one EOF indicator, example:
+@@ -38,8 +40,10 @@
+  * For a detailed description of Control lines and Header lines and Data lines, see the Acurity help file (search for
+  * "Electronic Processing").
+  */
+-public class AcurityCommandGeneric implements Task, IjSSSFunction
+-{
++public class AcurityCommandGeneric implements Task, IjSSSFunction {
++
++	private static final Log LOG = AcurityLogging.getInstance().getLogger(AcurityCommandGeneric.class);
++
+ 	/**
+ 	 * Use the Division from the Fund Record if {@link AcurityJob#FND} is specified. Otherwise use division 0 (zero)
+ 	 */
+@@ -870,30 +874,54 @@
+ 	 * @param result
+ 	 * @return true if no errors, false if errors.
+ 	 */
+-	public static boolean checkForErrorsAndShowDialog(Object result)
+-	{
+-		if (!hasErrors(result))
+-		{
+-			return true; //no errors
++	public static boolean checkForErrorsAndShowDialog(Object result) {
++		if (!hasErrors(result)) {
++			return true;
++		} else {
++			Optional<Exception> resultException = extractExceptionFromResult(result);
++
++			if (resultException.isPresent()) {
++				logAndDisplayExceptionResult(resultException.get());
++			} else {
++				logAndDisplayUnexpectedResult(result);
+-		}
++			}
+-		else if (result instanceof AcurityCommandException)
+-		{
+-			jSSSApp.displayJOptionPaneMessage(((AcurityCommandException) result).getFormattedMessage(), "Running API process failed.", JOptionPane.ERROR_MESSAGE);
++
++			return false;
+ 		}
+-		else if (result instanceof Throwable)
+-		{
+-			jSSSLogger.severe(result);
+-			jSSSApp.displayJOptionPaneMessage("Running API process failed. " + ((Throwable) result).getMessage(), "Failed", JOptionPane.ERROR_MESSAGE);
+-		}
++	}
+-		else
+-		{
+-			jSSSLogger.severe(result);
+-			jSSSApp.displayJOptionPaneMessage("Running API process failed. Unexpected Response ["
+-					+ result.getClass().toString() + "]", "Failed", JOptionPane.ERROR_MESSAGE);
++
++	public static Optional<Exception> extractExceptionFromResult(Object result) {
++		if (result instanceof Throwable) {
++			ExceptionHandler.handleError((Throwable) result);
+ 		}
+-		return false;
++
++		return result instanceof Exception ? Optional.of((Exception) result) : Optional.empty();
++	}
++
++	private static void logAndDisplayExceptionResult(Exception result) {
++		String message;
++		String dialogTitle;
++
++		if (result instanceof AcurityCommandException) {
++			message = ((AcurityCommandException) result).getFormattedMessage();
++			dialogTitle = "Running API process failed.";
++		} else {
++			message = "Running API process failed. " + result.getMessage();
++			dialogTitle = "Failed";
++		}
++
++		LOG.error(message, result);
++		Dialogs.show(null, MessageType.ERROR, message, dialogTitle);
++	}
++
++	private static void logAndDisplayUnexpectedResult(Object result) {
++		String message = "Running API process failed. Unexpected Response ["
++				+ result.getClass().toString() + "]";
++
++		LOG.error(message);
++		Dialogs.show(MessageType.ERROR, message, "Failed");
+ 	}
+-	
++
+ 	/**
+ 	 * 
+ 	 * @param result
+\ No newline at end of file
+Index: src/main/java/au/com/finsyn/workbench/manage/view/ManageWorkbenchLinesPopupMenu.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/view/ManageWorkbenchLinesPopupMenu.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/main/java/au/com/finsyn/workbench/manage/view/ManageWorkbenchLinesPopupMenu.java	(revision 27717+:0acb24383d65+)
+@@ -1,5 +1,6 @@
+ package au.com.finsyn.workbench.manage.view;
+ 
++import au.com.finsyn.workbench.manage.view.setperiod.SetPeriodDatesAction;
+ import jSSS.jcore.swing.table.export.CopyAction;
+ import au.com.finsyn.workbench.manage.model.ManageWorkbenchLinesModel;
+ import au.com.finsyn.xmlcustomisation.customisablecomponents.XmlCustomisablePopupMenu;
+@@ -21,6 +22,7 @@
+ 		add(new RejectWorkbenchLineAction(table, model));
+ 		add(new PeriodEndDateModifyAction(table, model));
+ 		add(new CreateSuperStreamErrorAction(table, model));
++		add(SetPeriodDatesAction.usingTableAndModel(table, model));
+ 		add(new Separator());
+ 		add(new WorkbenchLineViewDetailsAction(table, model));
+ 		add(new Separator());
+Index: src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodDatesAction.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodDatesAction.java	(revision 27717+:0acb24383d65+)
++++ src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodDatesAction.java	(revision 27717+:0acb24383d65+)
+@@ -0,0 +1,208 @@
++package au.com.finsyn.workbench.manage.view.setperiod;
++
++import au.com.finsyn.hibernate.AcurityEntityCloner;
++import au.com.finsyn.hibernate.AcurityEntityCloner.AcurityEntityClonerException;
++import au.com.finsyn.hibernate.generated.entities.ContributionLines;
++import au.com.finsyn.hibernate.generated.entities.WorkbenchLines;
++import au.com.finsyn.superstream.SuperStreamCommonUtils;
++import au.com.finsyn.swing.dialogs.Dialogs;
++import au.com.finsyn.swing.dialogs.MessageDialog.MessageType;
++import au.com.finsyn.swing.ui.ProgressDialog;
++import au.com.finsyn.util.AcurityLogging;
++import au.com.finsyn.util.annotations.ReturnTypesAreNonnullByDefault;
++import au.com.finsyn.util.datastructures.GuavaCollectors;
++import au.com.finsyn.util.exceptions.ExceptionHandler;
++import au.com.finsyn.util.time.DateRange;
++import au.com.finsyn.util.time.DateRange.DateRangeException;
++import au.com.finsyn.workbench.WorkbenchCommonUtils;
++import au.com.finsyn.workbench.manage.model.ManageWorkbenchLinesModel;
++import au.com.finsyn.workbench.manage.model.ManageWorkbenchLinesTableModel;
++import au.com.finsyn.workbench.manage.view.ManageWorkbenchLinesSplitTable;
++import au.com.finsyn.xmlcustomisation.customisablecomponents.XmlCustomisablePopupMenuAction;
++import com.google.common.collect.ImmutableSet;
++import jSSS.cdelegation.AcurityCommandGeneric;
++import jSSS.cdelegation.AcurityCommandUpdate;
++import org.apache.commons.logging.Log;
++
++import javax.annotation.ParametersAreNonnullByDefault;
++import javax.swing.*;
++import java.awt.event.ActionEvent;
++import java.sql.Date;
++import java.util.Collection;
++import java.util.concurrent.ExecutionException;
++import java.util.function.Consumer;
++
++/**
++ * Action to update the period start and end dates on an FW record and its associated FC lines.
++ *
++ * @author timothym
++ */
++@ParametersAreNonnullByDefault
++@ReturnTypesAreNonnullByDefault
++public class SetPeriodDatesAction extends XmlCustomisablePopupMenuAction {
++
++	private static final Log LOG = AcurityLogging.getInstance().getLogger(SetPeriodDatesAction.class);
++
++	private static final String NAME = "setDates";
++
++	private final ManageWorkbenchLinesSplitTable table;
++	private final ManageWorkbenchLinesModel model;
++	private final ExceptionHandler exceptionHandler;
++
++	public static SetPeriodDatesAction usingTableAndModel(ManageWorkbenchLinesSplitTable table,
++	                                               ManageWorkbenchLinesModel model) {
++		return new SetPeriodDatesAction(table, model);
++	}
++
++	protected SetPeriodDatesAction(ManageWorkbenchLinesSplitTable table, ManageWorkbenchLinesModel model) {
++		super("Set period start/end dates",
++				model.getCustomisation()
++						.getTableCustomisation(ManageWorkbenchLinesTableModel.MANAGE_WORKBENCH_LINES_MAIN_TABLE_NAME));
++
++		this.table = table;
++		this.model = model;
++		exceptionHandler = this.model.getExceptionHandler();
++	}
++
++	@Override
++	public String getName() {
++		return NAME;
++	}
++
++	@Override
++	public void actionPerformed(ActionEvent e) {
++		WorkbenchLines selectedWorkbenchLine = model.getSelectedWorkbenchLine();
++
++		if (selectedWorkbenchLine == null || table.getSelectedRow() < 0) {
++			// There is no selected line
++			return;
++		}
++
++		computeLinesToUpdate(selectedWorkbenchLine, this::displaySetPeriodDatesDialog);
++	}
++
++	private void computeLinesToUpdate(WorkbenchLines workbenchLines,
++									  Consumer<ImmutableSet<WorkbenchLines>> resultCallback) {
++		new RetrieveLinesToUpdateTask(workbenchLines) {
++			@Override
++			protected void onTaskCompleted() {
++				try {
++					resultCallback.accept(get());
++				} catch (InterruptedException e) {
++					LOG.warn("FC line retrieval task was interrupted", e);
++				} catch (ExecutionException e) {
++					exceptionHandler.handleRecoverableException(e.getCause(),
++							"An error was encountered while retrieving the associated contribution lines");
++				}
++			}
++		}.execute(new ProgressDialog(table, "Finding associated contribution lines"));
++	}
++
++	private void displaySetPeriodDatesDialog(ImmutableSet<WorkbenchLines> workbenchLines) {
++
++		if (workbenchLines.isEmpty()) {
++			Dialogs.show(table, MessageType.INFORMATION,
++					"There are no posted contribution lines for this workbench line.");
++		} else {
++			SetPeriodsDialog setPeriodsDialog = SetPeriodsDialog.withNumFWLinesChanged(workbenchLines.size());
++
++			setPeriodDatesFromDialog(workbenchLines, setPeriodsDialog);
++		}
++	}
++
++	private void setPeriodDatesFromDialog(ImmutableSet<WorkbenchLines> workbenchLines, SetPeriodsDialog setPeriodsDialog) {
++		int dialogResult = setPeriodsDialog.showDialog();
++
++		if (dialogResult == JOptionPane.OK_OPTION) {
++			try {
++				updatePeriodDatesInDatabase(workbenchLines, setPeriodsDialog.getDateRangeOrThrow());
++			} catch (DateRangeException e) {
++				Dialogs.show(table, MessageType.ERROR, "Invalid dates provided: " + e.getMessage());
++
++				// Tail recursion is its own reward
++				setPeriodDatesFromDialog(workbenchLines, setPeriodsDialog);
++			}
++		}
++	}
++
++	private void updatePeriodDatesInDatabase(ImmutableSet<WorkbenchLines> workbenchLines, DateRange dateRange) {
++		try {
++			AcurityCommandUpdate fwUpdateCommand = constructFWUpdateCommand(workbenchLines, dateRange);
++			AcurityCommandUpdate fcUpdateCommand = constructFCUpdateCommand(workbenchLines, dateRange);
++
++			fwUpdateCommand.postTask(result -> handleFWUpdateResponse(fcUpdateCommand, result));
++		} catch (AcurityEntityClonerException e) {
++			model.getExceptionHandler().handleRecoverableException(e, "An exception occurred while performing update");
++		}
++	}
++
++	private static AcurityCommandUpdate constructFWUpdateCommand(ImmutableSet<WorkbenchLines> workbenchLines,
++	                                                             DateRange dateRange)
++			throws AcurityEntityClonerException {
++		ImmutableSet<WorkbenchLines> modifiedFWLines = AcurityEntityCloner.clone(workbenchLines);
++		setFWPeriodDates(modifiedFWLines, dateRange);
++
++		AcurityCommandUpdate updateCommand = new AcurityCommandUpdate("Updating FW period dates");
++
++		modifiedFWLines.forEach(updateCommand::addEntityToSave);
++		return updateCommand;
++	}
++
++	private static AcurityCommandUpdate constructFCUpdateCommand(
++			ImmutableSet<WorkbenchLines> workbenchLines, DateRange dateRange) throws AcurityEntityClonerException {
++
++		ImmutableSet<ContributionLines> clonedFCLines = extractAndCloneAllocatedFCLines(workbenchLines);
++
++		clonedFCLines.forEach(fcLine -> fcLine.setFCd_Period_End(dateRange.getEndDateAsSQLDate()));
++
++		AcurityCommandUpdate updateCommand = new AcurityCommandUpdate("Updating FW period dates");
++
++		clonedFCLines.forEach(updateCommand::addEntityToSave);
++		return updateCommand;
++	}
++
++	private static ImmutableSet<ContributionLines> extractAndCloneAllocatedFCLines(
++			ImmutableSet<WorkbenchLines> workbenchLines)
++			throws AcurityEntityClonerException {
++
++		ImmutableSet<ContributionLines> joinedFCLines = SuperStreamCommonUtils.extractJoinedFCLines(workbenchLines);
++
++		ImmutableSet<ContributionLines> allocatedJoinedFCLines = joinedFCLines
++				.stream()
++				.filter(WorkbenchCommonUtils::hasAllocatedStatus)
++				.collect(GuavaCollectors.<ContributionLines>toSet());
++
++		return AcurityEntityCloner.clone(allocatedJoinedFCLines);
++	}
++
++	private void handleFWUpdateResponse(AcurityCommandUpdate fcUpdateCommand, Object result) {
++		AcurityCommandGeneric.checkForErrorsAndShowDialog(result);
++		model.refreshTable();
++		model.setSelectedRowModelIndex(-1);
++
++		if (AcurityCommandGeneric.hasErrors(result)) {
++			model.refreshTable();
++		} else {
++			fcUpdateCommand.postTask(this::handleFCUpdateResponse);
++		}
++	}
++
++	private void handleFCUpdateResponse(Object result) {
++		assert SwingUtilities.isEventDispatchThread();
++		AcurityCommandGeneric.checkForErrorsAndShowDialog(result);
++		model.refreshTable();
++		model.setSelectedRowModelIndex(-1);
++	}
++
++	public static void setFWPeriodDates(Collection<WorkbenchLines> workbenchLines, DateRange dateRange) {
++		workbenchLines.forEach(fwLine -> {
++			fwLine.setFWd_Period_Start(dateRange.getStartDateAsSQLDate());
++			fwLine.setFWd_Period_End(dateRange.getEndDateAsSQLDate());
++			setFCEndDates(fwLine.getContributionLines(), dateRange.getEndDateAsSQLDate());
++		});
++	}
++
++	public static void setFCEndDates(Collection<ContributionLines> contributionLines, Date endDate) {
++		contributionLines.forEach(fcLine -> fcLine.setFCd_Period_End(endDate));
++	}
++}
+Index: src/main/java/jSSS/util/StringUtil.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/jSSS/util/StringUtil.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/main/java/jSSS/util/StringUtil.java	(revision 27717+:0acb24383d65+)
+@@ -336,4 +336,23 @@
+ 	public static String returnEmptyIfNull(@Nullable String string) {
+ 		return string == null ? "" : string;
+ 	}
++
++	public static String renderWithPlural(int number, String singular, String plural) {
++		return number == 1 ? number + " " + singular : number + " " + plural;
++	}
++
++	public static String renderWithGuessedPlural(int number, String nounSingular) {
++
++		String guessedPlural;
++
++		if (StringUtils.endsWithIgnoreCase(nounSingular, "s")) {
++			guessedPlural = nounSingular + "es";
++		} else if (StringUtils.endsWithIgnoreCase(nounSingular, "y")) {
++			guessedPlural = nounSingular.substring(0, nounSingular.length() - 1) + "ies";
++		} else {
++			guessedPlural = nounSingular + "s";
++		}
++
++		return renderWithPlural(number, nounSingular, guessedPlural);
++	}
+ }
+Index: src/main/java/au/com/finsyn/hibernate/AcurityEntityCloner.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/hibernate/AcurityEntityCloner.java	(revision 27717+:0acb24383d65+)
++++ src/main/java/au/com/finsyn/hibernate/AcurityEntityCloner.java	(revision 27717+:0acb24383d65+)
+@@ -0,0 +1,200 @@
++package au.com.finsyn.hibernate;
++
++import au.com.finsyn.util.annotations.ReturnTypesAreNonnullByDefault;
++import au.com.finsyn.util.datastructures.GuavaCollectors;
++import com.google.common.collect.ImmutableList;
++import com.google.common.collect.ImmutableSet;
++import org.apache.commons.beanutils.BeanUtils;
++import org.hibernate.collection.spi.PersistentCollection;
++import org.hibernate.proxy.HibernateProxy;
++
++import javax.annotation.Nullable;
++import javax.annotation.ParametersAreNonnullByDefault;
++import java.lang.reflect.InvocationTargetException;
++import java.util.ArrayList;
++import java.util.Collection;
++import java.util.HashSet;
++import java.util.List;
++import java.util.Set;
++import java.util.function.Supplier;
++
++/**
++ * A utility class providing methods to deep clone instances of {@link AcurityEntity} and those instances' joined
++ * entities. This class differs from (say) {@link BeanUtils#cloneBean(Object)} in that it also performs a deep clone of
++ * any joined instances of {@link AcurityEntity}.
++ * <p>
++ * This class safely handles Hibernate objects by replacing any uninitialised fields in a lazily initialised bean with
++ * {@code null}.
++ *
++ * @author timothym
++ */
++@ParametersAreNonnullByDefault
++@ReturnTypesAreNonnullByDefault
++public final class AcurityEntityCloner {
++
++	private AcurityEntityCloner() {
++	}
++
++	public static <E extends AcurityEntity> ImmutableSet<E> clone(Set<E> entityCollection)
++			throws AcurityEntityClonerException {
++
++		entityCollection = replaceWithEmptyIfHibernateProxy(entityCollection, HashSet::new);
++		int size = entityCollection.size();
++
++		Collection<E> clonedCollection =
++				cloneIntoMutableCollection(entityCollection, () -> new ArrayList<>(size));
++
++		return ImmutableSet.copyOf(clonedCollection);
++	}
++
++	public static <E extends AcurityEntity> ImmutableList<E> clone(List<E> entityCollection)
++			throws AcurityEntityClonerException {
++		entityCollection = replaceWithEmptyIfHibernateProxy(entityCollection, ArrayList::new);
++		int size = entityCollection.size();
++
++		List<E> clonedCollection =
++				cloneIntoMutableCollection(entityCollection, () -> new ArrayList<>(size));
++
++		return ImmutableList.copyOf(clonedCollection);
++	}
++
++	public static <E extends AcurityEntity, C extends Collection<E>> C cloneIntoMutableCollection(
++			C entityCollection, Supplier<C> mutableCollectionSupplier) throws AcurityEntityClonerException {
++
++		entityCollection = replaceWithEmptyIfHibernateProxy(entityCollection, mutableCollectionSupplier);
++
++		C clonedEntities = mutableCollectionSupplier.get();
++
++		for (E originalEntity: entityCollection) {
++			clonedEntities.add(clone(originalEntity));
++		}
++
++		return clonedEntities;
++	}
++
++	@SuppressWarnings("unchecked")
++	public static <T extends AcurityEntity> T clone(@Nullable T acurityEntity) throws AcurityEntityClonerException {
++		acurityEntity = replaceWithNullIfHibernateProxy(acurityEntity);
++
++		if (acurityEntity == null) {
++			return null;
++		}
++
++		try {
++			AcurityEntity clonedEntity = (AcurityEntity) BeanUtils.cloneBean(acurityEntity);
++			// The entity itself has been cloned, but any joined entities haven't been. The following clones any joined
++			// entities
++
++			replaceJoinedEntitiesWithClones(clonedEntity);
++
++			return (T) clonedEntity;
++		} catch (IllegalAccessException | InstantiationException |
++				NoSuchMethodException | InvocationTargetException e) {
++			throw new AcurityEntityClonerException("An error occurred while cloning an Acurity entity", e);
++		}
++	}
++
++	private static void replaceJoinedEntitiesWithClones(AcurityEntity acurityEntity)
++			throws AcurityEntityClonerException {
++		try {
++
++			ImmutableSet<EntityFieldInfo<AcurityEntity>> joinedEntityFieldsInfo =
++					extractFieldInfoForNonnullJoinedEntities(acurityEntity);
++
++			for (EntityFieldInfo<AcurityEntity> joinedFieldInfo : joinedEntityFieldsInfo) {
++				replaceJoinedFieldWithClone(acurityEntity, joinedFieldInfo);
++			}
++		} catch (InvocationTargetException | IllegalAccessException |
++				InstantiationException | NoSuchMethodException e) {
++			throw new AcurityEntityClonerException("An error occurred while cloning an Acurity entity", e);
++		}
++	}
++
++	private static void replaceJoinedFieldWithClone(AcurityEntity returnedEntity,
++	                                                EntityFieldInfo<AcurityEntity> joinedFieldInfo)
++			throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException,
++			AcurityEntityClonerException {
++
++		if (joinedFieldInfo.isAcurityEntityDataType()) {
++			replaceJoinedEntityWithClone(returnedEntity, joinedFieldInfo);
++
++		} else if (joinedFieldInfo.isCollectionDataType()) {
++			replaceJoinedCollectionWithClone(returnedEntity, joinedFieldInfo);
++
++		}
++	}
++
++	@SuppressWarnings("unchecked")
++	private static ImmutableSet<EntityFieldInfo<AcurityEntity>> extractFieldInfoForNonnullJoinedEntities(
++			AcurityEntity clonedEntity) {
++
++		return clonedEntity.getFieldInfo().values()
++				.stream()
++				.filter(entityFieldInfo -> entityFieldInfo.getEntityFieldType()
++						== EntityFieldInfo.EntityFieldType.JOINED_ENTITY)
++				.filter(entityFieldInfo -> entityFieldInfo.isAcurityEntityDataType()
++						|| entityFieldInfo.isCollectionDataType())
++				.map(entityFieldInfo -> (EntityFieldInfo<AcurityEntity>) entityFieldInfo)
++				.filter(entityFieldInfo -> entityFieldInfo.getGetter().apply(clonedEntity) != null)
++				.collect(GuavaCollectors.<EntityFieldInfo<AcurityEntity>>toSet());
++	}
++
++	private static void replaceJoinedEntityWithClone(AcurityEntity entity,
++	                                                 EntityFieldInfo<AcurityEntity> joinedFieldInfo)
++			throws AcurityEntityClonerException {
++		AcurityEntity clone = clone((AcurityEntity) joinedFieldInfo.getGetter().apply(entity));
++
++		joinedFieldInfo.getSetter().accept(entity, clone);
++	}
++
++	private static void replaceJoinedCollectionWithClone(AcurityEntity returnedEntity,
++	                                                     EntityFieldInfo<AcurityEntity> joinedFieldInfo)
++			throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException,
++			AcurityEntityClonerException {
++
++		Collection<AcurityEntity> clonedJoinedCollection = deepCloneJoinedCollection(returnedEntity, joinedFieldInfo);
++
++		joinedFieldInfo.getSetter().accept(returnedEntity, clonedJoinedCollection);
++	}
++
++	private static Collection<AcurityEntity> deepCloneJoinedCollection(AcurityEntity entity,
++	                                                                   EntityFieldInfo<AcurityEntity> joinedCollectionField)
++			throws AcurityEntityClonerException, IllegalAccessException, InstantiationException {
++
++		@SuppressWarnings("unchecked")
++		Collection<AcurityEntity> originalEntities =
++				(Collection<AcurityEntity>) joinedCollectionField.getGetter().apply(entity);
++
++		if (originalEntities instanceof List) {
++			return clone((List<AcurityEntity>) originalEntities);
++		} else if (originalEntities instanceof Set) {
++			return clone((Set<AcurityEntity>) originalEntities);
++		} else {
++			Supplier<Collection<AcurityEntity>> newCollectionSupplier = () -> {
++				try {
++					return originalEntities.getClass().newInstance();
++				} catch (InstantiationException | IllegalAccessException e) {
++					throw new RuntimeException("Unable to instantiate joined collection class "
++							+ originalEntities.getClass().getName(), e);
++				}
++			};
++
++			return cloneIntoMutableCollection(originalEntities, newCollectionSupplier);
++		}
++	}
++
++	private static <E, C extends Collection<E>> C replaceWithEmptyIfHibernateProxy(C collection, Supplier<C> replacementConstructor) {
++		return collection instanceof PersistentCollection ? replacementConstructor.get() : collection;
++	}
++
++	@Nullable
++	private static <T> T replaceWithNullIfHibernateProxy(@Nullable T entity) {
++		return entity instanceof HibernateProxy ? null : entity;
++	}
++
++	public static class AcurityEntityClonerException extends Exception {
++		protected AcurityEntityClonerException(String message, Throwable cause) {
++			super(message, cause);
++		}
++	}
++}
+Index: src/test/java/au/com/finsyn/hibernate/AcurityEntityClonerTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/test/java/au/com/finsyn/hibernate/AcurityEntityClonerTest.java	(revision 27717+:0acb24383d65+)
++++ src/test/java/au/com/finsyn/hibernate/AcurityEntityClonerTest.java	(revision 27717+:0acb24383d65+)
+@@ -0,0 +1,65 @@
++package au.com.finsyn.hibernate;
++
++import au.com.finsyn.hibernate.generated.entities.MemberDetails;
++import au.com.finsyn.hibernate.generated.entities.PersonalDetails;
++import org.junit.Test;
++
++import static org.junit.Assert.*;
++
++public class AcurityEntityClonerTest {
++
++    private static final String GIVEN_NAME = "Jane";
++    private static final String SURNAME = "Doe";
++    private static final String CLIENT_NUMBER = "00000001";
++    private static final String FUND = "FUND";
++    private static final String MEMBER_NUMBER = "000001";
++
++    @Test
++    public void testClone() throws Exception {
++
++        PersonalDetails clientRecord = constructTestClientRecord();
++        MemberDetails memberDetails = constructTestMemberRecord(clientRecord);
++
++        MemberDetails clonedMemberDetails = AcurityEntityCloner.clone(memberDetails);
++
++        assertFalse(memberDetails == clonedMemberDetails);
++        assertTrue(memberDetails.equals(clonedMemberDetails));
++
++        assertEquals(GIVEN_NAME, clonedMemberDetails.getMDz_Given_Names());
++        assertEquals(SURNAME, clonedMemberDetails.getMDz_Surname());
++        assertEquals(CLIENT_NUMBER, clonedMemberDetails.getMDz_Acct_No());
++        assertEquals(FUND, clonedMemberDetails.getMDz_Fund());
++        assertEquals(MEMBER_NUMBER, clonedMemberDetails.getMDz_Member());
++
++        assertFalse(clonedMemberDetails.getClient() == clientRecord);
++        assertTrue(clonedMemberDetails.getClient().equals(clientRecord));
++
++        assertEquals(GIVEN_NAME, clonedMemberDetails.getClient().getD2z_Given_Names());
++        assertEquals(SURNAME, clonedMemberDetails.getClient().getD2z_Surname());
++        assertEquals(CLIENT_NUMBER, clonedMemberDetails.getClient().getD2z_Client());
++    }
++
++    private static MemberDetails constructTestMemberRecord(PersonalDetails clientRecord) {
++        MemberDetails memberDetails = new MemberDetails();
++
++        memberDetails.setMDi_Identity(1);
++        memberDetails.setMDz_Fund(FUND);
++        memberDetails.setMDz_Member(MEMBER_NUMBER);
++        memberDetails.setMDz_Acct_No(CLIENT_NUMBER);
++        memberDetails.setMDz_Given_Names(GIVEN_NAME);
++        memberDetails.setMDz_Surname(SURNAME);
++
++        memberDetails.setClient(clientRecord);
++        return memberDetails;
++    }
++
++    private static PersonalDetails constructTestClientRecord() {
++        PersonalDetails clientRecord = new PersonalDetails();
++
++        clientRecord.setD2i_Identity(1);
++        clientRecord.setD2z_Given_Names(GIVEN_NAME);
++        clientRecord.setD2z_Surname(SURNAME);
++        clientRecord.setD2z_Client(CLIENT_NUMBER);
++        return clientRecord;
++    }
++}
+\ No newline at end of file
+Index: src/main/java/au/com/finsyn/workbench/manage/view/reallocate/ReallocateDialog.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/view/reallocate/ReallocateDialog.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/main/java/au/com/finsyn/workbench/manage/view/reallocate/ReallocateDialog.java	(revision 27717+:0acb24383d65+)
+@@ -1,16 +1,44 @@
+ package au.com.finsyn.workbench.manage.view.reallocate;
+ 
+-import static jSSS.preferences.AcurityProperty.APPLICATION_ICON;
+-
++import au.com.finsyn.formtools.SaveProvider.SaveEvent;
++import au.com.finsyn.formtools.SaveProvider.SaveListener;
++import au.com.finsyn.hibernate.AcurityEntityCloner;
++import au.com.finsyn.hibernate.AcurityEntityCloner.AcurityEntityClonerException;
++import au.com.finsyn.hibernate.HibernateUtils;
++import au.com.finsyn.hibernate.generated.entities.ContributionLines;
++import au.com.finsyn.hibernate.generated.entities.MemberDetails;
+ import au.com.finsyn.hibernate.tools.codesanddescriptions.CodesAndDescriptionsUtils;
++import au.com.finsyn.swing.components.JAmountFormattedTextField;
++import au.com.finsyn.swing.components.JideDatePicker;
+ import au.com.finsyn.swing.dialogs.Dialogs;
++import au.com.finsyn.swing.tables.FixedBottomRowTable;
++import au.com.finsyn.swing.tables.cellrenders.CurrencyCellRenderer;
++import au.com.finsyn.swing.ui.ProgressDialog;
++import au.com.finsyn.util.CommonUtils;
++import au.com.finsyn.workbench.WorkbenchCommonUtils;
++import au.com.finsyn.workbench.WorkbenchFileLockManager;
++import au.com.finsyn.workbench.manage.ContributionLineWithDerivedFields;
++import au.com.finsyn.workbench.manage.model.reallocate.Column;
++import au.com.finsyn.workbench.manage.model.reallocate.ReallocateFromJTable;
++import au.com.finsyn.workbench.manage.model.reallocate.ReallocateModel;
++import au.com.finsyn.workbench.manage.model.reallocate.ReallocateToJTable;
++import au.com.finsyn.workbench.manage.model.reallocate.ReallocationSummaryJTable;
++import au.com.finsyn.workbench.manage.view.setperiod.SetPeriodDatesAction;
++import com.google.common.collect.ImmutableSet;
+ import jSSS.jgui.Jgui;
+-import jSSS.jgui.jSSSApp;
+ import jSSS.jgui.comm.CommException;
+-import au.com.finsyn.swing.ui.ProgressDialog;
++import jSSS.jgui.jSSSApp;
+ import jSSS.util.jSSSLogger;
++import net.miginfocom.swing.MigLayout;
+ 
+-import java.awt.Toolkit;
++import javax.swing.*;
++import javax.swing.GroupLayout.Alignment;
++import javax.swing.LayoutStyle.ComponentPlacement;
++import javax.swing.border.TitledBorder;
++import javax.swing.event.ListSelectionEvent;
++import javax.swing.event.ListSelectionListener;
++import javax.swing.event.TableModelListener;
++import java.awt.*;
+ import java.awt.event.ActionEvent;
+ import java.awt.event.ActionListener;
+ import java.awt.event.KeyEvent;
+@@ -25,58 +53,26 @@
+ import java.util.Map;
+ import java.util.Set;
+ 
+-import javax.swing.AbstractAction;
+-import javax.swing.ActionMap;
+-import javax.swing.GroupLayout;
+-import javax.swing.GroupLayout.Alignment;
+-import javax.swing.InputMap;
+-import javax.swing.JButton;
+-import javax.swing.JComponent;
+-import javax.swing.JDialog;
+-import javax.swing.JLabel;
+-import javax.swing.JPanel;
+-import javax.swing.JScrollPane;
+-import javax.swing.JTable;
+-import javax.swing.JTextField;
+-import javax.swing.KeyStroke;
+-import javax.swing.LayoutStyle.ComponentPlacement;
+-import javax.swing.SwingConstants;
+-import javax.swing.SwingUtilities;
+-import javax.swing.border.TitledBorder;
+-import javax.swing.event.ListSelectionEvent;
+-import javax.swing.event.ListSelectionListener;
+-import javax.swing.event.TableModelListener;
++import static jSSS.preferences.AcurityProperty.APPLICATION_ICON;
+ 
+-import au.com.finsyn.formtools.SaveProvider.SaveEvent;
+-import au.com.finsyn.formtools.SaveProvider.SaveListener;
+-import au.com.finsyn.hibernate.generated.entities.ContributionLines;
+-import au.com.finsyn.hibernate.generated.entities.MemberDetails;
+-import au.com.finsyn.swing.components.JAmountFormattedTextField;
+-import au.com.finsyn.swing.tables.FixedBottomRowTable;
+-import au.com.finsyn.swing.tables.cellrenders.CurrencyCellRenderer;
+-import au.com.finsyn.util.CommonUtils;
+-import au.com.finsyn.workbench.WorkbenchCommonUtils;
+-import au.com.finsyn.workbench.WorkbenchFileLockManager;
+-import au.com.finsyn.workbench.manage.ContributionLineWithDerivedFields;
+-import au.com.finsyn.workbench.manage.model.reallocate.Column;
+-import au.com.finsyn.workbench.manage.model.reallocate.ReallocateFromJTable;
+-import au.com.finsyn.workbench.manage.model.reallocate.ReallocateModel;
+-import au.com.finsyn.workbench.manage.model.reallocate.ReallocateToJTable;
+-import au.com.finsyn.workbench.manage.model.reallocate.ReallocationSummaryJTable;
+-
+ public class ReallocateDialog extends JDialog
+ {
+ 	private final ReallocateModel model;
+-	private JButton btnReallocate;
++
+ 	private Boolean saved = false;
+ 	private Boolean singleFile = null;
++
+ 	private ReallocateFromJTable reallocateFromTable = null;
++
++	private JButton btnReallocate;
+ 	private JAmountFormattedTextField txtFldReallocationFromTotal;
+ 	private JAmountFormattedTextField txtFldReallocationToTotal;
+ 	private JAmountFormattedTextField txtFldAmountAwaitingReallocation;
+ 	private FixedBottomRowTable reallocationSummaryTable;
+ 	private JLabel lblReallocationSummary;
+ 	private JButton btnSelectMember;
++	private JideDatePicker updateEndDatePicker;
++
+ 	private TableModelListener fromTableSingleFileListener;
+ 	private TableModelListener fromTableMultiFileListener;
+ 	private TableModelListener toTableSingleFileListener;
+@@ -174,16 +170,14 @@
+ 		paneInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "escape");
+ 		actionMap.put("escape", new AbstractAction() {
+ 			@Override
+-			public void actionPerformed(ActionEvent e)
+-			{
++			public void actionPerformed(ActionEvent e) {
+ 				doBtnCancelActionPerformed(e);
+ 			}
+ 		});
+ 	}
+ 	
+-	private void initComponents()
+-	{
+-		JPanel contentPanel = new JPanel();
++	private void initComponents() {
++		JPanel contentPanel = new JPanel(new MigLayout("ins 0", "[]", "[grow][grow][][]"));
+ 
+ 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+ 		setIconImage(Toolkit.getDefaultToolkit().getImage(
+@@ -205,27 +199,11 @@
+ 		JPanel reallocateToPanel = new JPanel();
+ 		reallocateToPanel.setBorder(new TitledBorder(null, "Reallocate To", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+ 
+-		GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
+-		gl_contentPanel.setHorizontalGroup(
+-			gl_contentPanel.createParallelGroup(Alignment.LEADING)
+-				.addComponent(reallocateFromPanel, GroupLayout.DEFAULT_SIZE, 1127, Short.MAX_VALUE)
+-				.addGroup(gl_contentPanel.createSequentialGroup()
+-					.addComponent(buttonsPanel, GroupLayout.DEFAULT_SIZE, 1117, Short.MAX_VALUE)
+-					.addContainerGap())
+-				.addComponent(reallocateToPanel, GroupLayout.DEFAULT_SIZE, 1127, Short.MAX_VALUE)
+-		);
+-		gl_contentPanel.setVerticalGroup(
+-			gl_contentPanel.createParallelGroup(Alignment.TRAILING)
+-				.addGroup(gl_contentPanel.createSequentialGroup()
+-					.addContainerGap()
+-					.addComponent(reallocateFromPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+-					.addPreferredGap(ComponentPlacement.RELATED)
+-					.addComponent(reallocateToPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+-					.addPreferredGap(ComponentPlacement.RELATED)
+-					.addComponent(buttonsPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+-					)
+-		);
++		contentPanel.add(reallocateFromPanel, "cell 0 0, grow");
++		contentPanel.add(reallocateToPanel, "cell 0 1, grow");
++		contentPanel.add(constructEndDatePanel(), "cell 0 2, left");
++		contentPanel.add(buttonsPanel, "cell 0 3, grow");
+-		
++
+ 		JLabel lblReallocationFromTotal = new JLabel("Reallocation From Total:");
+ 		JLabel lblReallocationToTotal = new JLabel("Reallocation To Total:");
+ 		JLabel lblAmountAwaitingReallocation = new JLabel("Amount awaiting Reallocation:");
+@@ -436,9 +414,23 @@
+ 			}
+ 		});
+ 		buttonsPanel.add(btnCancel);
+-		contentPanel.setLayout(gl_contentPanel);
+ 	}
+-	
++
++	public JPanel constructEndDatePanel() {
++		JPanel returnedPanel = new JPanel(new FlowLayout());
++
++		JLabel label = new JLabel("Set Period End Date:");
++
++		updateEndDatePicker = new JideDatePicker();
++		updateEndDatePicker.setAssociatedLabel(label);
++		updateEndDatePicker.setToolTipText(ContributionLines.FCD_PERIOD_END.getName());
++
++		returnedPanel.add(label);
++		returnedPanel.add(updateEndDatePicker);
++
++		return returnedPanel;
++	}
++	
+ 	private String getUserPreferenceExtension()
+ 	{
+ 		return (isSingleFile() ? "SingleFile" : "MultiFile");
+@@ -604,9 +596,20 @@
+ 					"Invalid Reallocation Amount(s)");
+ 		} else {
+ 			// Get those contribution lines that have been altered. First get those changed in the From table.
+-			Set<ContributionLines> changedContributionLines = new HashSet<ContributionLines>(getModel().getFromTableModel().getDataToSave()); 
++			Set<ContributionLines> changedContributionLines = new HashSet<>(getModel().getFromTableModel().getDataToSave());
++
+ 			// Add all those changed in the To table.
+-			changedContributionLines.addAll(getModel().getToTableModel().getDataToSave()); 
++			try {
++				Set<ContributionLines> linesFromToSaveTable = getModel().getToTableModel().getDataToSave();
++				ImmutableSet<ContributionLines> linesFromToSaveTableWithUpdatedPeriodDates = cloneAndSetPeriodDates(linesFromToSaveTable);
++
++				changedContributionLines.addAll(linesFromToSaveTableWithUpdatedPeriodDates);
++			} catch (AcurityEntityClonerException acurityEntityClonerException) {
++				model.getMainModel().getExceptionHandler().handleRecoverableException(acurityEntityClonerException,
++						"An error occurred while performing the reallocation");
++				return;
++			}
++
+ 			final WorkbenchFileLockManager fileLockManager = new WorkbenchFileLockManager();
+ 			// Lock all workbench files we are going to be working with
+ 			if (!WorkbenchCommonUtils.lockWorkbenchFiles_ContributionLines(changedContributionLines, fileLockManager)) {
+@@ -654,8 +657,20 @@
+ 				throw e1;
+ 			}
+ 		}
++	}
++
++	private ImmutableSet<ContributionLines> cloneAndSetPeriodDates(Set<ContributionLines> linesFromToSaveTable)
++			throws AcurityEntityClonerException {
++		ImmutableSet<ContributionLines> clonedLines = AcurityEntityCloner.clone(linesFromToSaveTable);
++
++		if (updateEndDatePicker.getSelectedOldDate() != null) {
++			SetPeriodDatesAction.setFCEndDates(clonedLines,
++					HibernateUtils.convertUtilDateToSqlDate(updateEndDatePicker.getSelectedOldDate()));
++		}
++
++		return clonedLines;
+ 	}
+-	
++
+ 	private class AmountChangeListener implements PropertyChangeListener {
+ 
+ 		@Override
+Index: src/main/java/au/com/finsyn/workbench/manage/ManageWorkbenchLinesView.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/ManageWorkbenchLinesView.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/main/java/au/com/finsyn/workbench/manage/ManageWorkbenchLinesView.java	(revision 27717+:0acb24383d65+)
+@@ -71,6 +71,7 @@
+ 
+ import org.apache.commons.beanutils.BeanUtils;
+ import org.apache.commons.lang3.StringUtils;
++import org.apache.commons.logging.Log;
+ import org.hibernate.Session;
+ import org.jdesktop.beansbinding.AutoBinding;
+ import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
+@@ -127,7 +128,7 @@
+ import au.com.finsyn.xmlcustomisation.customisablecomponents.XmlCustomisableJLabel;
+ 
+ public class ManageWorkbenchLinesView extends XmlCustomisationJPanel<ManageWorkbenchLinesCustomisation> implements ExceptionHandler {
+-    private static final org.apache.commons.logging.Log log = AcurityLogging.getInstance().getLogger(ManageWorkbenchLinesView.class);
++    private static final Log log = AcurityLogging.getInstance().getLogger(ManageWorkbenchLinesView.class);
+ 
+     private final ManageWorkbenchLinesModel model;
+     private final SaveMarshall detailsPanelSaveMarshall;
+@@ -963,10 +964,12 @@
+                     model.getReallocateModel().setFromTableModel(isSingleFile);
+                     model.getReallocateModel().setToTableModel(isSingleFile);
+                     // Fire up the reallocation dialog
++
+                     ReallocateDialog dialog = new ReallocateDialog(isSingleFile, model.getReallocateModel(), selectedContributionLines, getCustomisationName());
+                     // Don't do anything if the user selects the close button (the X button in the top-right corner).
+                     dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+                     dialog.setLocationRelativeTo(this);
++                    dialog.pack();
+                     if (dialog.showDialog()) {
+                         // If changes were made to the contribution lines via the dialog then refresh the table.
+                         model.refreshTable();
+Index: src/main/java/au/com/finsyn/workbench/manage/model/reallocate/ReallocateModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/model/reallocate/ReallocateModel.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/main/java/au/com/finsyn/workbench/manage/model/reallocate/ReallocateModel.java	(revision 27717+:0acb24383d65+)
+@@ -9,6 +9,7 @@
+ 
+ import au.com.finsyn.swing.dialogs.Dialogs;
+ import au.com.finsyn.swing.dialogs.MessageDialog;
++import au.com.finsyn.util.AcurityLogging;
+ import jSSS.cdelegation.AcurityCommandGeneric;
+ import jSSS.cdelegation.AcurityCommandUpdate;
+ import jSSS.cdelegation.DataLine;
+@@ -17,7 +18,6 @@
+ import jSSS.jgui.jSSSApp;
+ import au.com.finsyn.swing.ui.ProgressDialog;
+ import jSSS.util.jSSSDate;
+-import jSSS.util.jSSSLogger;
+ 
+ import java.awt.Component;
+ import java.awt.Cursor;
+@@ -35,11 +35,11 @@
+ import java.util.Map.Entry;
+ import java.util.Set;
+ 
+-import javax.swing.JOptionPane;
+ import javax.swing.SwingUtilities;
+ 
+ import org.apache.commons.beanutils.BeanUtils;
+ import org.apache.commons.lang3.StringUtils;
++import org.apache.commons.logging.Log;
+ import org.hibernate.Criteria;
+ import org.hibernate.HibernateException;
+ import org.hibernate.Session;
+@@ -74,6 +74,9 @@
+ import au.com.finsyn.xmlcustomisation.tables.XmlTableCustomisation;
+ 
+ public class ReallocateModel extends AbstractModelObject {
++
++	private static final Log LOG = AcurityLogging.getInstance().getLogger(ReallocateModel.class);
++
+ 	public static final String REALLOCATION_AMOUNTS_BALANCED = "ReallocationAmountsBalanced";
+ 	public static final String REALLOCATION_REASON_SET = "ReallocationReasonChanged";
+ 	private Boolean reallocationAmountsBalanced = false;
+@@ -103,9 +106,9 @@
+ 	private long newContributionLineID = 0;
+ 	private long newWorkbenchLineID = 0;
+ 	// Maintain a list of those sequence numbers that have been modified during this processing
+-	private Map<WorkbenchLines, Integer> listOfSequenceNumbers = new HashMap<WorkbenchLines, Integer>();
++	private Map<WorkbenchLines, Integer> listOfSequenceNumbers = new HashMap<>();
+ 	// Maintain a list of workbench lines that have been added during the processing of a receipt
+-	private Map<Long, Map<WorkbenchLines, Integer>> newWorkbenchLinesPerReceipt = new HashMap<Long, Map<WorkbenchLines, Integer>>();
++	private Map<Long, Map<WorkbenchLines, Integer>> newWorkbenchLinesPerReceipt = new HashMap<>();
+ 	
+ 	private final ManageWorkbenchLinesModel mainModel;
+ 	
+@@ -126,10 +129,10 @@
+ 		public UpdateAndType(AcurityCommandUpdate acurityCommand, ControlLineType controlLineType) {
+ 			this.controlLineType = controlLineType;
+ 			this.acurityCommand = acurityCommand;
+-			this.previousReversals = new ArrayList<ReversalAndType>();
+-			this.originalContributionLines = new ArrayList<ContributionLines>();
+-			this.toContributionLines = new ArrayList<ContributionLines>();
+-			this.reallocationAmounts = new ArrayList<BigDecimal>();
++			this.previousReversals = new ArrayList<>();
++			this.originalContributionLines = new ArrayList<>();
++			this.toContributionLines = new ArrayList<>();
++			this.reallocationAmounts = new ArrayList<>();
+ 		}
+ 		public AcurityCommandUpdate getAcurityCommand() {
+ 			return acurityCommand;
+@@ -258,7 +261,7 @@
+ 		if (memberDetails != null && !memberDetails.isEmpty()) {
+ 			memberDetail = memberDetails.get(0);
+ 		} else {
+-			jSSSLogger.severe("Empty member details list.");
++			LOG.error("Empty member details list.");
+ 			return;
+ 		}
+ 		
+@@ -390,7 +393,7 @@
+ 				
+ 				if (memberFound) {
+ 					if (existingWorkbenchLine == null) {
+-						jSSSLogger.severe("Missing workbench line.");
++						LOG.error("Missing workbench line.");
+ 						Dialogs.show(
+ 								getParentDialog(),
+ 								Dialogs.ERROR,
+@@ -479,7 +482,7 @@
+ 						getNewWorkbenchLinesPerReceipt().get(newContributionLine.getFCl_Receipt_Ref()).put(newWorkbenchLine, 0);
+ 					} else {
+ 						// Add this receipt reference to the map
+-						Map<WorkbenchLines, Integer> newWorkbenchLines = new HashMap<WorkbenchLines, Integer>();
++						Map<WorkbenchLines, Integer> newWorkbenchLines = new HashMap<>();
+ 						newWorkbenchLines.put(newWorkbenchLine, 0);
+ 						getNewWorkbenchLinesPerReceipt().put(newContributionLine.getFCl_Receipt_Ref(), newWorkbenchLines);
+ 					}
+@@ -504,17 +507,17 @@
+ 		Set<ContributionLines> toContributionLines = toTableModel.getDataToSave();
+ 		Integer sequenceNumber;
+ 		// All the contribution lines to be reallocated from and to, listed per receipt
+-		Map<Long, List<ContributionLineWithDerivedFields>> fromReallocationsPerReceipt = new HashMap<Long, List<ContributionLineWithDerivedFields>>();
+-		Map<Long, Boolean> allocatedPerReceipt = new HashMap<Long, Boolean>();
+-		Map<Long, String> fundPerReceipt = new HashMap();
+-		Map<Long, List<ContributionLineWithDerivedFields>> fromReallocationsPerFile = new HashMap<Long, List<ContributionLineWithDerivedFields>>();
+-		Map<Long, List<ContributionLineWithDerivedFields>> toReallocationsPerFile = new HashMap<Long, List<ContributionLineWithDerivedFields>>();
++		Map<Long, List<ContributionLineWithDerivedFields>> fromReallocationsPerReceipt = new HashMap<>();
++		Map<Long, Boolean> allocatedPerReceipt = new HashMap<>();
++		Map<Long, String> fundPerReceipt = new HashMap<>();
++		Map<Long, List<ContributionLineWithDerivedFields>> fromReallocationsPerFile = new HashMap<>();
++		Map<Long, List<ContributionLineWithDerivedFields>> toReallocationsPerFile = new HashMap<>();
+ 		List<ContributionLines> originalFromContributionLines = getFromTableModel().getOriginalContributionLines();
+ 		ContributionLines originalContributionLine = null;
+ 		int index;
+ 		BigDecimal reallocationFromAmount = null;
+ 		BigDecimal reallocationToAmount = null;
+-		List<UpdateAndType> acurityUpdates = new ArrayList<UpdateAndType>();
++		List<UpdateAndType> acurityUpdates = new ArrayList<>();
+ 		UpdateAndType contributionLineUpdate = null;
+ 		AcurityCommandUpdate acurityContributionLineCommand = null;
+ 		UpdateAndType workbenchLineUpdate = null;
+@@ -545,7 +548,7 @@
+ 				}
+ 			} else {
+ 				// Add this receipt to the map
+-				allocatedPerReceipt.put(receiptRef, CONTRIBUTION_ALLOCATED_STATUS.contains(getContributionLineStatus(contributionLine)) ? true : false);
++				allocatedPerReceipt.put(receiptRef, CONTRIBUTION_ALLOCATED_STATUS.contains(getContributionLineStatus(contributionLine)));
+ 			}
+ 				
+ 			// Sort the contributions according to their receipts
+@@ -554,7 +557,7 @@
+ 				fromReallocationsPerReceipt.get(receiptRef).add((ContributionLineWithDerivedFields)contributionLine);
+ 			} else {
+ 				// Add this receipt to the map
+-				List<ContributionLineWithDerivedFields> contributionLines = new ArrayList<ContributionLineWithDerivedFields>();
++				List<ContributionLineWithDerivedFields> contributionLines = new ArrayList<>();
+ 				contributionLines.add((ContributionLineWithDerivedFields)contributionLine);
+ 				fromReallocationsPerReceipt.put(receiptRef, contributionLines);
+ 			}
+@@ -584,7 +587,7 @@
+ 				toReallocationsPerFile.get(fileRef).add((ContributionLineWithDerivedFields)contributionLine);
+ 			} else {
+ 				// Add this file reference to the map
+-				List<ContributionLineWithDerivedFields> contributionLines = new ArrayList<ContributionLineWithDerivedFields>();
++				List<ContributionLineWithDerivedFields> contributionLines = new ArrayList<>();
+ 				contributionLines.add((ContributionLineWithDerivedFields)contributionLine);
+ 				toReallocationsPerFile.put(fileRef, contributionLines);
+ 			}
+@@ -625,7 +628,7 @@
+ 					fromReallocationsPerFile.get(fileRef).add((ContributionLineWithDerivedFields)contributionLine);
+ 				} else {
+ 					// Add this file reference to the map
+-					List<ContributionLineWithDerivedFields> contributionLines = new ArrayList<ContributionLineWithDerivedFields>();
++					List<ContributionLineWithDerivedFields> contributionLines = new ArrayList<>();
+ 					contributionLines.add((ContributionLineWithDerivedFields)contributionLine);
+ 					fromReallocationsPerFile.put(fileRef, contributionLines);
+ 				}
+@@ -637,7 +640,7 @@
+ 				// Build a list of to contribution lines for this file reference
+ 				List<ContributionLineWithDerivedFields> toContributionLinesPerFile = toReallocationsPerFile.get(fileRef);
+ 				if (toContributionLinesPerFile == null) {
+-					jSSSLogger.severe("No recipients were found for the reallocations made from file reference " + fileRef + ".");
++					LOG.error("No recipients were found for the reallocations made from file reference " + fileRef + ".");
+ 					Dialogs.show(
+ 							getParentDialog(), Dialogs.ERROR,
+ 							"No recipients were found for the reallocations made from file reference " + fileRef + ".",
+@@ -835,14 +838,14 @@
+ 									reallocationFromAmount = BigDecimal.ZERO;
+ 								}
+ 							} catch (Exception e) {
+-								jSSSLogger.severe(e);
+-								jSSSApp.showErrorDialog(getParentDialog(), "Error creating new to contribution lines.", e);
++								LOG.error(e);
++								Dialogs.show(getParentDialog(), MessageDialog.MessageType.ERROR, "Error creating new to contribution lines.", e);
+ 								return false;
+ 							}
+ 						} // End while - from contribution line still has money to be reallocated
+ 					} catch (Exception e) {
+-						jSSSLogger.severe(e);
+-						jSSSApp.showErrorDialog(getParentDialog(), "Error creating new to contribution lines.", e);
++						LOG.error(e);
++						Dialogs.show(getParentDialog(), MessageDialog.MessageType.ERROR, "Error creating new to contribution lines.", e);
+ 						return false;
+ 					}
+ 				} // end of for - each from contribution line in the file
+@@ -850,7 +853,7 @@
+ 				// All reallocations have been processed for this file. There should be no to contributions left in the list, and
+ 				// the from amount should have been completely used up.
+ 				if (!toContributionLinesPerFile.isEmpty() || (reallocationFromAmount.compareTo(BigDecimal.ZERO) != 0)) {
+-					jSSSLogger.severe("The reallocation amounts did not balance for file reference " + fileRef + ".");
++					LOG.error("The reallocation amounts did not balance for file reference " + fileRef + ".");
+ 					Dialogs.show(
+ 							getParentDialog(),
+ 							Dialogs.ERROR,
+@@ -918,8 +921,8 @@
+ 				reversalCommand.set(AcurityCommandGeneric.CANCEL_TRANSACTION, "Y");
+ 				reversalCommand.setMember(AcurityCommandGeneric.ALL_MEMBERS);
+ 
+-				if (receiptRef.longValue() == 0L) {
+-					jSSSLogger.severe("Allocated contribution lines were present without a receipt.");
++				if (receiptRef == 0L) {
++					LOG.error("Allocated contribution lines were present without a receipt.");
+ 					Dialogs.show(
+ 							getParentDialog(),
+ 							Dialogs.ERROR,
+@@ -927,7 +930,7 @@
+ 							"Reallocation Error");
+ 					return false;
+ 				} else if (receipt == null) {
+-					jSSSLogger.severe("No receipt was found for receipt reference " + receiptRef + ".");
++					LOG.error("No receipt was found for receipt reference " + receiptRef + ".");
+ 					Dialogs.show(
+ 							getParentDialog(),
+ 							Dialogs.ERROR,
+@@ -955,7 +958,7 @@
+ 				// If not, then the effective date is the day after the last fund review date.
+ 				Date bankedDate = receipt.getBSd_Exit();
+ 				if (bankedDate == null) {
+-					jSSSLogger.severe("No banked date found for receipt reference " + receiptRef + ".");
++					LOG.error("No banked date found for receipt reference " + receiptRef + ".");
+ 					Dialogs.show(
+ 							getParentDialog(),
+ 							Dialogs.ERROR,
+@@ -970,7 +973,7 @@
+ 					// Get the Division Information record to find the last fund review date at the division level
+ 					String currentDivision = jSSSApp.getDivision();
+ 					if (StringUtils.isBlank(currentDivision)) {
+-						jSSSLogger.severe("No division was found.");
++						LOG.error("No division was found.");
+ 						Dialogs.show(
+ 								getParentDialog(),
+ 								Dialogs.ERROR,
+@@ -994,8 +997,8 @@
+ 							if (divisionInformation.size() == 1) {
+ 								latestReviewDate = divisionInformation.get(0).getGVd_Review_Close_Off();
+ 							} else {
+-								jSSSLogger.severe("There was a problem retrieving the division information details for the division with " +
++								LOG.error("There was a problem retrieving the division information details for the division with " +
+-										   		  "GVz_Division = " + currentDivision + ".");
++										"GVz_Division = " + currentDivision + ".");
+ 								Dialogs.show(
+ 										getParentDialog(),
+ 										Dialogs.ERROR,
+@@ -1005,8 +1008,8 @@
+ 								return false;
+ 							}
+ 						} else {
+-							jSSSLogger.severe("There was a problem retrieving the division information details for the division with " +
++							LOG.error("There was a problem retrieving the division information details for the division with " +
+-							   		  "GVz_Division = " + currentDivision + ".");
++									"GVz_Division = " + currentDivision + ".");
+ 							Dialogs.show(
+ 									getParentDialog(),
+ 									Dialogs.ERROR,
+@@ -1017,7 +1020,7 @@
+ 						}
+ 						
+ 						if (latestReviewDate == null) {
+-							jSSSLogger.severe("No review close-off date found for division with GVz_Division = " + currentDivision + ".");
++							LOG.error("No review close-off date found for division with GVz_Division = " + currentDivision + ".");
+ 							Dialogs.show(
+ 									getParentDialog(),
+ 									Dialogs.ERROR,
+@@ -1043,8 +1046,8 @@
+ 								if (fundInformation.size() == 1) {
+ 									latestReviewDate = fundInformation.get(0).getFRd_Latest_Review();
+ 								} else {
+-									jSSSLogger.severe("There was a problem retrieving the fund information details for the fund with " +
++									LOG.error("There was a problem retrieving the fund information details for the fund with " +
+-											   		  "FRz_Fund = " + fundPerReceipt.get(receiptRef) + ".");
++											"FRz_Fund = " + fundPerReceipt.get(receiptRef) + ".");
+ 									Dialogs.show(
+ 											getParentDialog(),
+ 											Dialogs.ERROR,
+@@ -1054,8 +1057,8 @@
+ 									return false;
+ 								}
+ 							} else {
+-								jSSSLogger.severe("There was a problem retrieving the fund information details for the fund with " +
++								LOG.error("There was a problem retrieving the fund information details for the fund with " +
+-								   		  "FRz_Fund = " + fundPerReceipt.get(receiptRef) + ".");
++										"FRz_Fund = " + fundPerReceipt.get(receiptRef) + ".");
+ 								Dialogs.show(
+ 										getParentDialog(),
+ 										Dialogs.ERROR,
+@@ -1066,7 +1069,7 @@
+ 							}
+ 							
+ 							if (latestReviewDate == null) {
+-								jSSSLogger.severe("No latest review date found for fund with FRz_Fund = " + fundPerReceipt.get(receiptRef) + ".");
++								LOG.error("No latest review date found for fund with FRz_Fund = " + fundPerReceipt.get(receiptRef) + ".");
+ 								Dialogs.show(
+ 										getParentDialog(),
+ 										Dialogs.ERROR,
+@@ -1094,8 +1097,8 @@
+ 						if (fundInformation.size() == 1) {
+ 							latestReviewDate = fundInformation.get(0).getFRd_Latest_Review();
+ 						} else {
+-							jSSSLogger.severe("There was a problem retrieving the fund information details for the fund with " +
++							LOG.error("There was a problem retrieving the fund information details for the fund with " +
+-									   		  "FRz_Fund = " + receipt.getBSz_Fund() + ".");
++									"FRz_Fund = " + receipt.getBSz_Fund() + ".");
+ 							Dialogs.show(
+ 									getParentDialog(),
+ 									Dialogs.ERROR,
+@@ -1105,8 +1108,8 @@
+ 							return false;
+ 						}
+ 					} else {
+-						jSSSLogger.severe("There was a problem retrieving the fund information details for the fund with " +
++						LOG.error("There was a problem retrieving the fund information details for the fund with " +
+-						   		  "FRz_Fund = " + receipt.getBSz_Fund() + ".");
++								"FRz_Fund = " + receipt.getBSz_Fund() + ".");
+ 						Dialogs.show(
+ 								getParentDialog(),
+ 								Dialogs.ERROR,
+@@ -1117,7 +1120,7 @@
+ 					}
+ 					
+ 					if (latestReviewDate == null) {
+-						jSSSLogger.severe("No latest review date found for fund with FRz_Fund = " + receipt.getBSz_Fund() + ".");
++						LOG.error("No latest review date found for fund with FRz_Fund = " + receipt.getBSz_Fund() + ".");
+ 						Dialogs.show(
+ 								getParentDialog(),
+ 								Dialogs.ERROR,
+@@ -1145,7 +1148,7 @@
+ 				}
+ 				
+ 				if (interestDate == null) {
+-					jSSSLogger.severe("No interest or banked dates found for receipt reference " + receiptRef + ".");
++					LOG.error("No interest or banked dates found for receipt reference " + receiptRef + ".");
+ 					Dialogs.show(
+ 							getParentDialog(),
+ 							Dialogs.ERROR,
+@@ -1184,9 +1187,9 @@
+ 		UpdateAndType firstUpdate = acurityUpdates.remove(0);
+ 		firstUpdate.getAcurityCommand().postTask(new ReallocationTaskListener(firstUpdate,
+ 																			  acurityUpdates,
+-																			  new ArrayList<ReversalAndType>(),
+-																			  new ArrayList<Object[]>(),
+-																			  new ArrayList<Long>(),
++				new ArrayList<>(),
++				new ArrayList<>(),
++				new ArrayList<>(),
+ 																			  false,
+ 																			  progressDialog));
+ 
+@@ -1219,10 +1222,8 @@
+ 			}
+ 			
+ 			session.getTransaction().rollback();
+-		} catch (HibernateException e) {
++		} catch (HibernateException | SQLException e) {
+ 			HibernateUtils.handleError(e);
+-		} catch (SQLException e) {
+-			HibernateUtils.handleError(e);
+ 		} finally {
+ 			if (session != null)
+ 				session.close();
+@@ -1316,7 +1317,7 @@
+ 						acurityUpdates.add(0, toContributionLineUpdate);
+ 					} else {
+ 						// There is a problem. If the 8E ran successfully we should have a transaction history record for it.
+-						jSSSLogger.severe("There was a problem finding the transaction history record for job number " + currentCommand.getJobNumber() + ".");
++						LOG.error("There was a problem finding the transaction history record for job number " + currentCommand.getJobNumber() + ".");
+ 						Dialogs.show(
+ 								getParentDialog(),
+ 								Dialogs.ERROR,
+@@ -1425,7 +1426,7 @@
+ 			
+ 			// This is the last task
+ 			if (lastTask) {
+-				List<ContributionLines> savedContributionLines = new LinkedList<ContributionLines>(getFromTableModel().getDataToSave());
++				List<ContributionLines> savedContributionLines = new LinkedList<>(getFromTableModel().getDataToSave());
+ 				boolean staticDataLinesExist = false;
+ 				if (!failedTasks) {
+ 					// Nothing went wrong, so let the user know.
+@@ -1492,7 +1493,7 @@
+ 								firstReversal.getAcurityCommand().postTask(new ReallocationReversalTaskListener(firstReversal, reversalsSoFar, progressDialogReversal));
+ 								SwingUtilities.invokeLater(progressDialogReversal::delayedVisible);
+ 							} else {
+-								jSSSLogger.severe("There was a problem finding the transaction history record for job number " + firstReversal.getJobNumber() + ".");
++								LOG.error("There was a problem finding the transaction history record for job number " + firstReversal.getJobNumber() + ".");
+ 								Dialogs.show(
+ 										getParentDialog(),
+ 										Dialogs.ERROR,
+@@ -1543,7 +1544,7 @@
+ 						acurityReversal.getAcurityCommand().set("URF", Long.toString(transactionHistory.getTHl_Trans_Ref()));
+ 						acurityReversal.getAcurityCommand().postTask(new ReallocationReversalTaskListener(acurityReversal, acurityReversals, progressDialogReversal));
+ 					} else {
+-						jSSSLogger.severe("There was a problem finding the transaction history record for job number " + acurityReversal.getJobNumber() + ".");
++						LOG.error("There was a problem finding the transaction history record for job number " + acurityReversal.getJobNumber() + ".");
+ 						Dialogs.show(
+ 								getParentDialog(),
+ 								Dialogs.ERROR,
+@@ -1583,7 +1584,7 @@
+ 	private void processWorkbenchFiles(ProgressDialog progressDialogProcessing) {
+ 		Set<ContributionLines> savedContributionLines = getFromTableModel().getDataToSave();
+ 
+-		final Set<FileRegister> files = new HashSet<FileRegister>();
++		final Set<FileRegister> files = new HashSet<>();
+ 		for(ContributionLines cl : savedContributionLines) {
+ 			files.add(cl.getWorkbenchLines().getFileRegister());
+ 		}
+@@ -1767,11 +1768,15 @@
+ 		if (rcptList != null && rcptList.size() == 1) {
+ 				receipt = rcptList.get(0);
+ 		} else {
+-			jSSSLogger.severe("There was a problem retrieving the receipt details for receiptRef: " + receiptRef + ".");
++			LOG.error("There was a problem retrieving the receipt details for receiptRef: " + receiptRef + ".");
+ 			Dialogs.show(getParentDialog(), Dialogs.ERROR,
+ 					"There was a problem retrieving the receipt details for receiptRef: " + receiptRef + ".",
+ 					"Reallocation Error");
+ 		}
+ 		return receipt;
++	}
++
++	public ManageWorkbenchLinesModel getMainModel() {
++		return mainModel;
+ 	}
+ }
+Index: src/main/java/au/com/finsyn/workbench/manage/view/setperiod/RetrieveLinesToUpdateTask.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/view/setperiod/RetrieveLinesToUpdateTask.java	(revision 27717+:0acb24383d65+)
++++ src/main/java/au/com/finsyn/workbench/manage/view/setperiod/RetrieveLinesToUpdateTask.java	(revision 27717+:0acb24383d65+)
+@@ -0,0 +1,128 @@
++package au.com.finsyn.workbench.manage.view.setperiod;
++
++import au.com.finsyn.hibernate.generated.entities.ContributionLines;
++import au.com.finsyn.hibernate.generated.entities.WorkbenchLines;
++import au.com.finsyn.hibernate.tools.FundAndMember;
++import au.com.finsyn.hibernate.tools.JoinSpec;
++import au.com.finsyn.hibernate.tools.querybuilder.ParameterisedSQLFragment;
++import au.com.finsyn.hibernate.tools.querybuilder.SQLQueryBuilder;
++import au.com.finsyn.swing.util.workers.CancellableDatabaseTask;
++import au.com.finsyn.util.annotations.ReturnTypesAreNonnullByDefault;
++import au.com.finsyn.util.datastructures.GuavaCollectors;
++import au.com.finsyn.util.function.Predicates;
++import au.com.finsyn.workbench.WorkbenchCommonUtils;
++import com.google.common.collect.ImmutableList;
++import com.google.common.collect.ImmutableSet;
++import org.hibernate.Session;
++
++import javax.annotation.ParametersAreNonnullByDefault;
++import java.util.Collection;
++import java.util.List;
++import java.util.Optional;
++
++/**
++ * Queries the database for the FW lines that need to have their start and end dates updated as part of a
++ * {@link SetPeriodDatesAction}.
++ *
++ * @author timothym
++ */
++@ParametersAreNonnullByDefault
++@ReturnTypesAreNonnullByDefault
++class RetrieveLinesToUpdateTask extends CancellableDatabaseTask<ImmutableSet<WorkbenchLines>, Void> {
++
++    private static final JoinSpec fcToFWJoin = JoinSpec.fromAnnotation(ContributionLines.class, WorkbenchLines.class).get();
++    private static final JoinSpec fwToFCJoin = JoinSpec.fromAnnotation(WorkbenchLines.class, ContributionLines.class).get();
++
++    private final WorkbenchLines selectedFWLine;
++
++    public RetrieveLinesToUpdateTask(WorkbenchLines selectedFWLine) {
++        this.selectedFWLine = selectedFWLine;
++    }
++
++    @Override
++    protected ImmutableSet<WorkbenchLines> performTask(Session session) throws Exception {
++        FundAndMember fundAndMember = FundAndMember.fromWorkbenchLine(selectedFWLine);
++
++        Optional<ParameterisedSQLFragment> matchesDivsAndTransRefsFragment =
++                constructMatchesDivsAndTransRefsFilter(selectedFWLine);
++
++        if (!matchesDivsAndTransRefsFragment.isPresent()) {
++            // There are no divs or trans refs, so we'll only ever get an empty list.
++            return ImmutableSet.of();
++        }
++
++        ParameterisedSQLFragment matchingFCLinesSubSelect =
++                constructFCLinesSubSelect(fundAndMember, matchesDivsAndTransRefsFragment.get());
++
++        SQLQueryBuilder query = constructFWLinesQuery(matchingFCLinesSubSelect);
++
++        List<WorkbenchLines> results = query.constructAcurityEntitySqlExecutor(WorkbenchLines.class)
++                .setSession(session)
++                .execute()
++                .getResults();
++
++        return ImmutableSet.copyOf(results);
++    }
++
++	private static ParameterisedSQLFragment constructFCLinesSubSelect(
++			FundAndMember fundAndMember,
++			ParameterisedSQLFragment matchesDivsAndTransRefsFragment) {
++		return new ParameterisedSQLFragment()
++				.append("SELECT DISTINCT FWi_Identity")
++				.append("FROM").append(JoinSpec.constructFromClause(ContributionLines.class, fcToFWJoin))
++				.append("WHERE")
++				.append("FCz_Fund =").appendParameter(fundAndMember.getFund()).append("AND")
++				.append("FCz_Member =").appendParameter(fundAndMember.getMember()).append("AND")
++				.append(matchesDivsAndTransRefsFragment).append("AND")
++				.append(constructAllocatedStatusesFragment());
++	}
++
++	private static ParameterisedSQLFragment constructAllocatedStatusesFragment() {
++
++		ImmutableList<String> allocatedStatuses = WorkbenchCommonUtils.CONTRIBUTION_ALLOCATED_STATUS
++				.stream()
++				.map(WorkbenchCommonUtils.ContributionLineStatuses::getCode)
++				.collect(GuavaCollectors.<String>toList());
++
++		return new ParameterisedSQLFragment()
++				.append("FCz_Status").append(ParameterisedSQLFragment.in(allocatedStatuses).get());
++	}
++
++	private static SQLQueryBuilder constructFWLinesQuery(ParameterisedSQLFragment selectFCLines) {
++		return new SQLQueryBuilder()
++				.append("SELECT *")
++				.append("FROM").append(JoinSpec.constructFromClause(WorkbenchLines.class, fwToFCJoin))
++				.append("WHERE")
++				.append("FWi_Identity IN (").append(selectFCLines).append(")")
++				.setMaxResults(null);
++	}
++
++    private static Optional<ParameterisedSQLFragment> constructMatchesDivsAndTransRefsFilter(
++            WorkbenchLines selectedFWLine) {
++        ImmutableSet<DivisionAndTransactionRef> divisionsAndTransRefs =
++                extractDivisionsAndTransRefs(selectedFWLine.getContributionLines());
++
++        ImmutableList<ParameterisedSQLFragment> fcMatchesDivsAndTransRefsFragments = divisionsAndTransRefs
++                .stream()
++                .map(DivisionAndTransactionRef::renderFilterForMatchingFCLine)
++                .collect(GuavaCollectors.<ParameterisedSQLFragment>toList());
++
++        return ParameterisedSQLFragment.bracketedJoin(fcMatchesDivsAndTransRefsFragments, "OR");
++    }
++
++	private static ImmutableSet<DivisionAndTransactionRef> extractDivisionsAndTransRefs(
++			Collection<ContributionLines> fcLines) {
++		return fcLines
++				.stream()
++				.filter(Predicates.isNotNull())
++				.filter(RetrieveLinesToUpdateTask::isPostedFCLineWithTransRef)
++				.map(fcLine -> new DivisionAndTransactionRef(fcLine.getFCz_Division(), fcLine.getFCl_Trans_Ref()))
++				.collect(GuavaCollectors.<DivisionAndTransactionRef>toSet());
++	}
++
++    private static boolean isPostedFCLineWithTransRef(ContributionLines fcLine) {
++        return fcLine.getFCz_Status() != null
++                && fcLine.getFCz_Status().trim().equalsIgnoreCase("Y")
++                && fcLine.getFCl_Trans_Ref() != 0;
++    }
++}
+Index: src/main/java/au/com/finsyn/superstream/SuperStreamCommonUtils.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/superstream/SuperStreamCommonUtils.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/main/java/au/com/finsyn/superstream/SuperStreamCommonUtils.java	(revision 27717+:0acb24383d65+)
+@@ -4,7 +4,10 @@
+ import au.com.finsyn.hibernate.generated.entities.FileRegister;
+ import au.com.finsyn.hibernate.generated.entities.MessageHistory;
+ import au.com.finsyn.hibernate.generated.entities.TransferRequestLines;
++import au.com.finsyn.hibernate.generated.entities.WorkbenchLines;
+ import au.com.finsyn.util.AcurityLogging;
++import au.com.finsyn.util.datastructures.GuavaCollectors;
++import com.google.common.collect.ImmutableSet;
+ import jSSS.cdelegation.AlreadyLockedException;
+ import jSSS.jgui.comm.CommException;
+ import jSSS.jgui.jSSSApp;
+@@ -388,5 +391,12 @@
+ 				== SuperStreamCommonUtils.FileRegisterFileType.SUPER_STREAM_CONTRIBUTION
+ 				|| SuperStreamCommonUtils.getFileRegisterType(fileRegister)
+ 				== SuperStreamCommonUtils.FileRegisterFileType.SUPER_STREAM_ROLLOVER;
++	}
++
++    public static ImmutableSet<ContributionLines> extractJoinedFCLines(Collection<WorkbenchLines> fwLines) {
++	    return fwLines
++			    .stream()
++			    .flatMap(fcLine -> fcLine.getContributionLines().stream())
++			    .collect(GuavaCollectors.<ContributionLines>toSet());
+-	}
++    }
+ }
+\ No newline at end of file
+Index: src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodsDialog.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodsDialog.java	(revision 27717+:0acb24383d65+)
++++ src/main/java/au/com/finsyn/workbench/manage/view/setperiod/SetPeriodsDialog.java	(revision 27717+:0acb24383d65+)
+@@ -0,0 +1,51 @@
++package au.com.finsyn.workbench.manage.view.setperiod;
++
++import au.com.finsyn.swing.components.DateRangePicker;
++import au.com.finsyn.swing.components.DialogJPanel;
++import au.com.finsyn.swing.components.LabelLikeJTextArea;
++import au.com.finsyn.util.annotations.ReturnTypesAreNonnullByDefault;
++import au.com.finsyn.util.time.DateRange;
++import jSSS.util.StringUtil;
++import net.miginfocom.swing.MigLayout;
++
++import javax.annotation.ParametersAreNonnullByDefault;
++import javax.swing.*;
++import java.util.Optional;
++
++@ParametersAreNonnullByDefault
++@ReturnTypesAreNonnullByDefault
++public class SetPeriodsDialog extends DialogJPanel {
++
++	private final int numFWLinesChanged;
++
++	private final DateRangePicker dateRangePicker;
++
++	public static SetPeriodsDialog withNumFWLinesChanged(int numFWLinesChanged) {
++		return new SetPeriodsDialog(numFWLinesChanged);
++	}
++
++	protected SetPeriodsDialog(int numFWLinesChanged) {
++		super("Set Period");
++
++		this.numFWLinesChanged = numFWLinesChanged;
++
++		dateRangePicker = DateRangePicker.vertical();
++	}
++
++	@Override
++	public JComponent createContentPanel() {
++		JPanel returnedPanel = new JPanel(new MigLayout("", "[]", "[][]"));
++
++		returnedPanel.add(dateRangePicker, "cell 0 0");
++
++		returnedPanel.add(new LabelLikeJTextArea("This will update "
++						+ StringUtil.renderWithPlural(numFWLinesChanged, "workbench line", "workbench lines") + "."),
++				"cell 0 1");
++
++		return returnedPanel;
++	}
++
++	public DateRange getDateRangeOrThrow() {
++		return dateRangePicker.getDateRangeOrThrow();
++	}
++}
+Index: src/test/java/jSSS/util/StringUtilTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/test/java/jSSS/util/StringUtilTest.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/test/java/jSSS/util/StringUtilTest.java	(revision 27717+:0acb24383d65+)
+@@ -30,4 +30,28 @@
+                 ImmutableList.of("To", "be", "or", "not", "to", "be", "\"that    is   the question\""),
+                 StringUtil.quotedWordSplit("To be     or    not  to    be \"that    is   the question\""));
+     }
++
++    @Test
++    public void testRenderWithPlural() throws Exception {
++	    assertEquals("1 apple", StringUtil.renderWithPlural(1, "apple", "apples"));
++	    assertEquals("2 apples", StringUtil.renderWithPlural(2, "apple", "apples"));
++
++	    assertEquals("1 class", StringUtil.renderWithPlural(1, "class", "classes"));
++	    assertEquals("2 classes", StringUtil.renderWithPlural(2, "class", "classes"));
++
++	    assertEquals("1 monkey", StringUtil.renderWithPlural(1, "monkey", "monkeys"));
++	    assertEquals("2 monkeys", StringUtil.renderWithPlural(2, "monkey", "monkeys"));
++    }
++
++    @Test
++    public void testRenderWithGuessedPlural() throws Exception {
++	    assertEquals("1 apple", StringUtil.renderWithGuessedPlural(1, "apple"));
++	    assertEquals("2 apples", StringUtil.renderWithGuessedPlural(2, "apple"));
++
++	    assertEquals("1 class", StringUtil.renderWithGuessedPlural(1, "class"));
++	    assertEquals("2 classes", StringUtil.renderWithGuessedPlural(2, "class"));
++
++	    assertEquals("1 monkey", StringUtil.renderWithGuessedPlural(1, "monkey"));
++	    assertEquals("2 monkeies", StringUtil.renderWithGuessedPlural(2, "monkey"));
++    }
+ }
+\ No newline at end of file
+Index: src/main/java/au/com/finsyn/workbench/manage/view/setperiod/DivisionAndTransactionRef.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/view/setperiod/DivisionAndTransactionRef.java	(revision 27717+:0acb24383d65+)
++++ src/main/java/au/com/finsyn/workbench/manage/view/setperiod/DivisionAndTransactionRef.java	(revision 27717+:0acb24383d65+)
+@@ -0,0 +1,29 @@
++package au.com.finsyn.workbench.manage.view.setperiod;
++
++import au.com.finsyn.hibernate.tools.querybuilder.ParameterisedSQLFragment;
++import au.com.finsyn.util.Pair;
++import au.com.finsyn.util.annotations.ReturnTypesAreNonnullByDefault;
++
++import javax.annotation.ParametersAreNonnullByDefault;
++
++@ParametersAreNonnullByDefault
++@ReturnTypesAreNonnullByDefault
++class DivisionAndTransactionRef extends Pair<String, Long> {
++    public DivisionAndTransactionRef(String division, Long transaction) {
++        super(division, transaction);
++    }
++
++    public String getDivision() {
++        return this.getFirst();
++    }
++
++    public Long getTransaction() {
++        return this.getSecond();
++    }
++
++    public ParameterisedSQLFragment renderFilterForMatchingFCLine() {
++        return new ParameterisedSQLFragment()
++                .append("FCz_Division =").appendParameter(this.getDivision()).append("AND")
++                .append("FCl_Trans_Ref =").appendParameter(this.getTransaction());
++    }
++}
+Index: src/main/java/au/com/finsyn/hibernate/AcurityEntityUtils.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/hibernate/AcurityEntityUtils.java	(revision 27717:0acb24383d650e1a43c5e781748c653fe0303eb6)
++++ src/main/java/au/com/finsyn/hibernate/AcurityEntityUtils.java	(revision 27717+:0acb24383d65+)
+@@ -28,8 +28,8 @@
+ import java.util.regex.Pattern;
+ import java.util.stream.Collectors;
+ 
+-public class AcurityEntityUtils {
++public final class AcurityEntityUtils {
+-    private static final Log LOG = AcurityLogging.getInstance().getLogger(AcurityEntityUtils.class);
++	private static final Log LOG = AcurityLogging.getInstance().getLogger(AcurityEntityUtils.class);
+ 
+ 	public static final String USER_DEFINED_PREFIX = "ZZ";
+ 
+@@ -132,24 +132,24 @@
+ 		return RegexUtils.captureFirst(REMOVE_FIRST_PART_FROM_MULTI_PART_IDENTIFIER_REGEX, multiPartIdentifier);
+ 	}
+ 
+-    /**
+-     * Strips any multipart identifiers from the given string, returning the fieldName itself. If the given
+-     * {@code String} is {@code null} or does not appear to be a multipart identifier, it is returned without
+-     * modification.
+-     */
+-    public static String stripMultiPartIdentifier(String multiPartIdentifier) {
+-        if (multiPartIdentifier == null) {
+-            return null;
+-        }
++	/**
++	 * Strips any multipart identifiers from the given string, returning the fieldName itself. If the given
++	 * {@code String} is {@code null} or does not appear to be a multipart identifier, it is returned without
++	 * modification.
++	 */
++	public static String stripMultiPartIdentifier(String multiPartIdentifier) {
++		if (multiPartIdentifier == null) {
++			return null;
++		}
+ 
+-        final String REMOVE_MULTIPART_IDENTIFIER_REGEX = ".*\\.(\\w{2}[a-z]_\\w+)";
++		final String REMOVE_MULTIPART_IDENTIFIER_REGEX = ".*\\.(\\w{2}[a-z]_\\w+)";
+ 
+-        if (multiPartIdentifier.matches(REMOVE_MULTIPART_IDENTIFIER_REGEX)) {
+-            return RegexUtils.captureFirst(REMOVE_MULTIPART_IDENTIFIER_REGEX, multiPartIdentifier);
+-        } else {
+-            return multiPartIdentifier;
+-        }
+-    }
++		if (multiPartIdentifier.matches(REMOVE_MULTIPART_IDENTIFIER_REGEX)) {
++			return RegexUtils.captureFirst(REMOVE_MULTIPART_IDENTIFIER_REGEX, multiPartIdentifier);
++		} else {
++			return multiPartIdentifier;
++		}
++	}
+ 	
+ 	/**
+ 	 * Takes a multi-part identifier and returns the {@link AcurityEntity} that matches the first part of the multi-part identifier.
+@@ -232,20 +232,20 @@
+ 	 * This method works by simply taking the first two characters and searching 
+ 	 * {@link AnnotatedClassList#tableCodeToClassMap} for the matching entity, so there is 
+ 	 * no guarantee that the given field actually exists on the entity.
+-     * <p>
+-     * Note that this method is case-insensitive.
++	 * <p>
++	 * Note that this method is case-insensitive.
+ 	 * 
+ 	 * @return the matching {@link AcurityEntity} class, or <code>null</code> if no matching class can be found.
+ 	 */
+ 	public static Optional<Class<? extends AcurityEntity>> getAcurityEntityFromFieldName(String fieldName) {
+ 		if (StringUtils.isBlank(fieldName)
+-                || fieldName.trim().length() < 2
+-                || fieldName.trim().startsWith(USER_DEFINED_PREFIX)) {
++				|| fieldName.trim().length() < 2
++				|| fieldName.trim().startsWith(USER_DEFINED_PREFIX)) {
+ 			return Optional.empty(); // No matching AcurityEntity
+ 		} else {
+-            return Optional.ofNullable(AnnotatedClassList.tableCodeToClassMap.get(
+-                    fieldName.toUpperCase().substring(0, 2))
+-            );
++			return Optional.ofNullable(AnnotatedClassList.tableCodeToClassMap.get(
++					fieldName.toUpperCase().substring(0, 2))
++			);
+ 		}
+ 	}
+ 	
+@@ -348,7 +348,7 @@
+ 			throw new NullPointerException();
+ 		}
+ 		
+-        return AcurityEntity.getDummyInstance(entityClass).get().retrieveAllFieldNames();
++		return AcurityEntity.getDummyInstance(entityClass).get().retrieveAllFieldNames();
+ 	}
+ 
+ 	/**
+@@ -394,28 +394,28 @@
+ 		return false;
+ 	}
+ 
+-    /**
+-     * Tests whether all of the given field names represent valid fields of the given entity.
+-     * @throws IllegalArgumentException if any of the given field names are not valid fields of the given entity.
+-     */
+-    public static void testValidDatabaseFieldOfEntity(Class<? extends AcurityEntity> entityClass,
+-                                                      Collection<String> fieldNames) {
+-        Collection<String> invalidFields = fieldNames.stream()
+-                .filter(fieldName -> !AcurityEntityUtils.isValidDatabaseFieldOfEntity(entityClass, fieldName))
+-                .collect(Collectors.toSet());
++	/**
++	 * Tests whether all of the given field names represent valid fields of the given entity.
++	 * @throws IllegalArgumentException if any of the given field names are not valid fields of the given entity.
++	 */
++	public static void testValidDatabaseFieldOfEntity(Class<? extends AcurityEntity> entityClass,
++													  Collection<String> fieldNames) {
++		Collection<String> invalidFields = fieldNames.stream()
++				.filter(fieldName -> !AcurityEntityUtils.isValidDatabaseFieldOfEntity(entityClass, fieldName))
++				.collect(Collectors.toSet());
+ 
+-        if (!invalidFields.isEmpty()) {
+-            throw new IllegalArgumentException(StringUtils.join(invalidFields, ", ")
+-                    + " are not valid fields of "
+-                    + AcurityNamingStrategy.INSTANCE.classToTableName(entityClass));
+-        }
+-    }
++		if (!invalidFields.isEmpty()) {
++			throw new IllegalArgumentException(StringUtils.join(invalidFields, ", ")
++					+ " are not valid fields of "
++					+ AcurityNamingStrategy.INSTANCE.classToTableName(entityClass));
++		}
++	}
+ 	
+ 	/**
+ 	 * Checks the given field name to determine whether it is a valid multi-part database field of the given entity.
+ 	 */
+ 	public static boolean isValidMultiPartDatabaseFieldOfEntity(Class<? extends AcurityEntity> entityClass,
+-                                                                String fieldName) {
++																String fieldName) {
+ 		if (entityClass == null || fieldName == null) {
+ 			throw new NullPointerException();
+ 		}
+@@ -437,31 +437,31 @@
+ 		}
+ 	}
+ 
+-    /**
+-     * Converts a character to a boolean representation, assuming it is a "Y/N" field common in Acurity Entities. If the
+-     * given character is not either {@code 'Y'} or {@code 'N'}, this method returns an empty {@link Optional}.
+-     */
+-    public static Optional<Boolean> yNCharToBoolean(Character character) {
+-        if (character == 'Y') {
+-            return Optional.of(Boolean.TRUE);
+-        } else if (character == 'N') {
+-            return Optional.of(Boolean.FALSE);
+-        } else {
+-            return Optional.empty();
+-        }
+-    }
++	/**
++	 * Converts a character to a boolean representation, assuming it is a "Y/N" field common in Acurity Entities. If the
++	 * given character is not either {@code 'Y'} or {@code 'N'}, this method returns an empty {@link Optional}.
++	 */
++	public static Optional<Boolean> yNCharToBoolean(Character character) {
++		if (character == 'Y') {
++			return Optional.of(Boolean.TRUE);
++		} else if (character == 'N') {
++			return Optional.of(Boolean.FALSE);
++		} else {
++			return Optional.empty();
++		}
++	}
+ 
+-    /**
+-     * Converts the given {@link Boolean} to {@code 'Y'} or {@code 'N'} for {@code true} or {@code false} values
+-     * respectively. Returns {@code null} if {@code null} is passed in.
+-     */
+-    public static Character toYNCharacter(Boolean booleanValue) {
+-        if (booleanValue == null) {
+-            return null;
+-        } else {
+-            return booleanValue ? 'Y' : 'N';
+-        }
+-    }
++	/**
++	 * Converts the given {@link Boolean} to {@code 'Y'} or {@code 'N'} for {@code true} or {@code false} values
++	 * respectively. Returns {@code null} if {@code null} is passed in.
++	 */
++	public static Character toYNCharacter(Boolean booleanValue) {
++		if (booleanValue == null) {
++			return null;
++		} else {
++			return booleanValue ? 'Y' : 'N';
++		}
++	}
+ 
+ 	/**
+ 	 * Like {@link #toYNCharacter(Boolean)}, except that the result is converted to a String.
+@@ -470,67 +470,67 @@
+ 		return String.valueOf(toYNCharacter(booleanValue));
+ 	}
+ 
+-    /**
+-     * Returns a formatted, single-string representation of the "Last Modified" information taken from the
+-     * XXz_Mod_User, XXd_Mod_Date, and XXt_Mod_Time fields of the given {@link AcurityEntity}. An empty {@link Optional}
+-     * is returned if the given entity has no such fields or if any of them are null.
+-     *
+-     * @throws NullPointerException if entity is {@code null}
+-     */
+-    public static Optional<String> lastModifiedString(AcurityEntity entity) {
+-        Objects.requireNonNull(entity);
++	/**
++	 * Returns a formatted, single-string representation of the "Last Modified" information taken from the
++	 * XXz_Mod_User, XXd_Mod_Date, and XXt_Mod_Time fields of the given {@link AcurityEntity}. An empty {@link Optional}
++	 * is returned if the given entity has no such fields or if any of them are null.
++	 *
++	 * @throws NullPointerException if entity is {@code null}
++	 */
++	public static Optional<String> lastModifiedString(AcurityEntity entity) {
++		Objects.requireNonNull(entity);
+ 
+-        try {
+-            String user = (String) ReflectionDataHandler.get(entity.getTableCode() + "z_Mod_User", entity);
+-            java.sql.Date date = (java.sql.Date) ReflectionDataHandler.get(entity.getTableCode() + "d_Mod_Date", entity);
+-            java.sql.Time time = (java.sql.Time) ReflectionDataHandler.get(entity.getTableCode() + "t_Mod_Time", entity);
++		try {
++			String user = (String) ReflectionDataHandler.get(entity.getTableCode() + "z_Mod_User", entity);
++			java.sql.Date date = (java.sql.Date) ReflectionDataHandler.get(entity.getTableCode() + "d_Mod_Date", entity);
++			java.sql.Time time = (java.sql.Time) ReflectionDataHandler.get(entity.getTableCode() + "t_Mod_Time", entity);
+ 
+-            return lastModifiedString(user, date, time);
+-        } catch (ReflectionException e) {
+-            return Optional.empty();
+-        } catch (ClassCastException e) {
+-            LOG.warn(e.getClass().getName() + " thrown when trying to parse last modified string from Acurity entity",
+-                    e);
+-            return Optional.empty();
+-        }
+-    }
++			return lastModifiedString(user, date, time);
++		} catch (ReflectionException e) {
++			return Optional.empty();
++		} catch (ClassCastException e) {
++			LOG.warn(e.getClass().getName() + " thrown when trying to parse last modified string from Acurity entity",
++					e);
++			return Optional.empty();
++		}
++	}
+ 
+-    /**
+-     * Returns a formatted, single-string representation of the "Last Modified" information generally taken from the
+-     * XXz_Mod_User, XXd_Mod_Date, and XXt_Mod_Time fields of an {@link AcurityEntity}. An empty {@link Optional} is
+-     * returned if any of the given fields hava value of {@code null}.
+-     */
+-    public static Optional<String> lastModifiedString(String user, java.sql.Date date, java.sql.Time time) {
+-        if (user != null && date != null && time != null) {
+-            SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
+-            SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm a");
++	/**
++	 * Returns a formatted, single-string representation of the "Last Modified" information generally taken from the
++	 * XXz_Mod_User, XXd_Mod_Date, and XXt_Mod_Time fields of an {@link AcurityEntity}. An empty {@link Optional} is
++	 * returned if any of the given fields hava value of {@code null}.
++	 */
++	public static Optional<String> lastModifiedString(String user, java.sql.Date date, java.sql.Time time) {
++		if (user != null && date != null && time != null) {
++			SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
++			SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm a");
+ 
+-            String str = 	user.trim() + " " +
+-                            dateFormatter.format(date) + " " +
+-                            timeFormatter.format(time);
++			String str = 	user.trim() + " " +
++							dateFormatter.format(date) + " " +
++							timeFormatter.format(time);
+ 
+-            return Optional.of(str);
+-        } else {
+-            return Optional.empty();
+-        }
+-    }
+-    
+-    /**
+-     * Takes a header code and converts it to a table code. Not every table code is identical to
+-     * the header code. This is a hardcoded hack to fix issue SR-6762 but if header codes are changed
+-     * in C side then this method may need to be altered.
+-     */
+-    public static String convertHeaderToTableCode(String aHeaderCode) {
+-    	switch (aHeaderCode)
+-    	{
+-    		case "IT": return "IR";
+-    		case "IR": return "IN";
+-    		case "DN": return "DX";
+-    		case "TF": return "PY";
+-    		case "R3": return "RO";
+-    	}
+-    	return aHeaderCode;
+-    }
++			return Optional.of(str);
++		} else {
++			return Optional.empty();
++		}
++	}
++
++	/**
++	 * Takes a header code and converts it to a table code. Not every table code is identical to
++	 * the header code. This is a hardcoded hack to fix issue SR-6762 but if header codes are changed
++	 * in C side then this method may need to be altered.
++	 */
++	public static String convertHeaderToTableCode(String aHeaderCode) {
++		switch (aHeaderCode)
++		{
++			case "IT": return "IR";
++			case "IR": return "IN";
++			case "DN": return "DX";
++			case "TF": return "PY";
++			case "R3": return "RO";
++		}
++		return aHeaderCode;
++	}
+ 
+ 	/**
+ 	 * Returns the table code for the given entity.
+@@ -566,30 +566,30 @@
+ 		return RegexUtils.capture(GENERAL_FIELD_NAME_PATTERN, string);
+ 	}
+ 
+-    /**
+-     * Returns the {@link EntityFieldInfo} for the relation from one class to another, or an empty {@link Optional} if
+-     * none exists.
+-     */
+-    public static <T extends AcurityEntity> Optional<EntityFieldInfo<? super T>> getRelationFieldInfo(
+-            Class<? extends T> from,
+-            Class<? extends AcurityEntity> to) {
+-        return Optional.ofNullable(EntityFieldInfo.getFieldInfoMap(from).get().get(to.getSimpleName().toUpperCase()));
+-    }
++	/**
++	 * Returns the {@link EntityFieldInfo} for the relation from one class to another, or an empty {@link Optional} if
++	 * none exists.
++	 */
++	public static <T extends AcurityEntity> Optional<EntityFieldInfo<? super T>> getRelationFieldInfo(
++			Class<? extends T> from,
++			Class<? extends AcurityEntity> to) {
++		return Optional.ofNullable(EntityFieldInfo.getFieldInfoMap(from).get().get(to.getSimpleName().toUpperCase()));
++	}
+ 
+-    /**
+-     * Returns true if and only if there exists an {@link EntityFieldInfo} for the relation from the class {@code from}
+-     * to the class {@code to}, and the relation is stored in a collection. This is equivalent to saying that the
+-     * relation from {@code from} to {@code to} is defined in the entity as being a "to many" relationship.
+-     * <p>
+-     * Note that this method will return {@code false} whenever the above is not true, including when there is no
+-     * relation at all.
+-     */
+-    public static <T extends AcurityEntity> boolean isToManyRelation(Class<? extends T> from,
+-                                                                     Class<? extends AcurityEntity> to) {
+-        return getRelationFieldInfo(from, to)
+-                .map(fieldInfo -> Collection.class.isAssignableFrom(fieldInfo.getDataType()))
+-                .orElse(false);
+-    }
++	/**
++	 * Returns true if and only if there exists an {@link EntityFieldInfo} for the relation from the class {@code from}
++	 * to the class {@code to}, and the relation is stored in a collection. This is equivalent to saying that the
++	 * relation from {@code from} to {@code to} is defined in the entity as being a "to many" relationship.
++	 * <p>
++	 * Note that this method will return {@code false} whenever the above is not true, including when there is no
++	 * relation at all.
++	 */
++	public static <T extends AcurityEntity> boolean isToManyRelation(Class<? extends T> from,
++																	 Class<? extends AcurityEntity> to) {
++		return getRelationFieldInfo(from, to)
++				.map(fieldInfo -> Collection.class.isAssignableFrom(fieldInfo.getDataType()))
++				.orElse(false);
++	}
+ 
+ 	public static <T extends AcurityEntity> boolean hasToManyRelationJoins(Class<? extends T> from,
+ 																		   @Nullable Collection<JoinSpec> joins) {
+@@ -604,40 +604,40 @@
+ 		return hasToManyRelation(from, joinedTables);
+ 	}
+ 
+-    /**
+-     * Returns true if the relation from the given class to any of the given collection of classes is a "to many"
+-     * relation as defined for method {@link #isToManyRelation(Class, Class)}
+-     */
+-    public static <T extends AcurityEntity> boolean hasToManyRelation(
+-            Class<? extends T> from,
+-            @Nullable Collection<Class<? extends AcurityEntity>> to) {
+-        return to != null &&
+-                to.stream()
+-                        .map(toEntity -> isToManyRelation(from, toEntity))
+-                        .reduce(Boolean::logicalOr)
+-                        .orElse(false);
+-    }
++	/**
++	 * Returns true if the relation from the given class to any of the given collection of classes is a "to many"
++	 * relation as defined for method {@link #isToManyRelation(Class, Class)}
++	 */
++	public static <T extends AcurityEntity> boolean hasToManyRelation(
++			Class<? extends T> from,
++			@Nullable Collection<Class<? extends AcurityEntity>> to) {
++		return to != null &&
++				to.stream()
++						.map(toEntity -> isToManyRelation(from, toEntity))
++						.reduce(Boolean::logicalOr)
++						.orElse(false);
++	}
+ 
+-    /**
+-     * Uses the {@link EntityFieldInfo} field info to clone the values from one {@link AcurityEntity} to another.
+-     */
+-    @SuppressWarnings("unchecked")
+-    public static <T extends AcurityEntity> void cloneFields(T from, T to) {
+-        to.getFieldInfo().forEach(
+-                (fieldName, fieldInfo) -> {
+-                    Object value = ((EntityFieldInfo<T>) from.getFieldInfo().get(fieldName)).getGetter().apply(from);
+-                    ((EntityFieldInfo<T>) fieldInfo).getSetter().accept(to, value);
+-                }
+-        );
+-    }
++	/**
++	 * Uses the {@link EntityFieldInfo} field info to clone the values from one {@link AcurityEntity} to another.
++	 */
++	@SuppressWarnings("unchecked")
++	public static <T extends AcurityEntity> void cloneFields(T from, T to) {
++		to.getFieldInfo().forEach(
++				(fieldName, fieldInfo) -> {
++					Object value = ((EntityFieldInfo<T>) from.getFieldInfo().get(fieldName)).getGetter().apply(from);
++					((EntityFieldInfo<T>) fieldInfo).getSetter().accept(to, value);
++				}
++		);
++	}
+ 
+-    /**
+-     * Attempts to compute the table name for the given entity class. This method uses
+-     * {@link AcurityEntity#getDummyInstance(Class)} and then {@link AcurityEntity#getInstanceTableName()} to determine
+-     * the table name, and so will throw a {@link NoSuchElementException} if {@code getDummyInstance(Class)} returns an
+-     * empty {@link Optional}.
+-     */
+-    public static String getTableName(Class<? extends AcurityEntity> table) {
+-        return AcurityEntity.getDummyInstance(table).get().getInstanceTableName();
+-    }
++	/**
++	 * Attempts to compute the table name for the given entity class. This method uses
++	 * {@link AcurityEntity#getDummyInstance(Class)} and then {@link AcurityEntity#getInstanceTableName()} to determine
++	 * the table name, and so will throw a {@link NoSuchElementException} if {@code getDummyInstance(Class)} returns an
++	 * empty {@link Optional}.
++	 */
++	public static String getTableName(Class<? extends AcurityEntity> table) {
++		return AcurityEntity.getDummyInstance(table).get().getInstanceTableName();
++	}
+ }
