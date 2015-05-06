@@ -4,6 +4,7 @@
     <extensionMap>
       <mapping pattern="members" type="PLAIN_TEXT" />
       <mapping pattern="getStatus" type="PLAIN_TEXT" />
+      <mapping ext="svg" type="XHTML" />
     </extensionMap>
   </component>
 </application>
