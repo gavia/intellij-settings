@@ -77,6 +77,9 @@
             <id>Abstraction issuesJava</id>
           </State>
           <State>
+            <id>CSS</id>
+          </State>
+          <State>
             <id>Cloning issuesJava</id>
           </State>
           <State>
@@ -95,7 +98,13 @@
             <id>Encapsulation issuesJava</id>
           </State>
           <State>
+            <id>FreeMarker inspections</id>
+          </State>
+          <State>
             <id>Groovy</id>
+          </State>
+          <State>
+            <id>ImportsJava</id>
           </State>
           <State>
             <id>Inheritance issuesJava</id>
@@ -110,13 +119,28 @@
             <id>Internationalization issuesJava</id>
           </State>
           <State>
+            <id>Invalid elementsCSS</id>
+          </State>
+          <State>
+            <id>JBoss Seam issues</id>
+          </State>
+          <State>
+            <id>JSP Inspections</id>
+          </State>
+          <State>
             <id>JUnit issuesJava</id>
           </State>
           <State>
             <id>Java</id>
           </State>
           <State>
+            <id>JavaFX</id>
+          </State>
+          <State>
             <id>JavaScript</id>
+          </State>
+          <State>
+            <id>Less</id>
           </State>
           <State>
             <id>Logging issuesJava</id>
@@ -126,6 +150,9 @@
           </State>
           <State>
             <id>Numeric issuesJava</id>
+          </State>
+          <State>
+            <id>OSGi</id>
           </State>
           <State>
             <id>Performance issuesJava</id>
@@ -150,6 +177,9 @@
           </State>
           <State>
             <id>Python</id>
+          </State>
+          <State>
+            <id>Sass/SCSS</id>
           </State>
           <State>
             <id>Scala: Collections</id>
