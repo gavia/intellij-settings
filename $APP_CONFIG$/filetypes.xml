@@ -2,8 +2,9 @@
   <component name="FileTypeManager" version="13">
     <ignoreFiles list="*.hprof;*.orig;*.pyc;*.pyo;*.rbc;*~;.DS_Store;.bundle;.git;.hg;.svn;CVS;RCS;SCCS;__pycache__;_svn;rcs;" />
     <extensionMap>
-      <mapping pattern="getStatus" type="PLAIN_TEXT" />
+      <mapping ext="svg" type="Native" />
       <mapping pattern="members" type="PLAIN_TEXT" />
+      <mapping pattern="getStatus" type="PLAIN_TEXT" />
     </extensionMap>
   </component>
 </application>
