@@ -25,6 +25,7 @@
           <map>
             <entry key="C:/Playground/dependencyMucking/AcurityWebServices" value="4292934770308" />
             <entry key="C:/Playground/dependencyMucking/AcurityWebVaadin" value="7154896038318" />
+            <entry key="C:/build/devel/srcjava/acurity" value="7153420384533" />
             <entry key="C:/build/devel/srcjava/acurityDataModel" value="1409189478002" />
           </map>
         </option>
@@ -269,10 +270,10 @@
           <method />
         </configuration>
         <configuration default="true" type="Applet" factoryName="Applet">
-          <module />
           <option name="WIDTH" value="400" />
           <option name="HEIGHT" value="300" />
           <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+          <module />
           <method />
         </configuration>
         <configuration default="true" type="Application" factoryName="Application">
