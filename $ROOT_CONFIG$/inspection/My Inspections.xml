@@ -127,6 +127,7 @@
   <inspection_tool class="SizeReplaceableByIsEmpty" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="SqlDialectInspection" enabled="false" level="WARNING" enabled_by_default="false" />
   <inspection_tool class="StaticFieldReferenceOnSubclass" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="StaticNonFinalField" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="StringConcatenationInsideStringBufferAppend" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="SuspiciousNameCombination" enabled="true" level="WEAK WARNING" enabled_by_default="true">
     <group names="x,width,left,right" />
