@@ -77,25 +77,52 @@
             <id>Abstraction issuesJava</id>
           </State>
           <State>
+            <id>Assignment issuesJava</id>
+          </State>
+          <State>
+            <id>Class metricsJava</id>
+          </State>
+          <State>
+            <id>Class structureJava</id>
+          </State>
+          <State>
             <id>Cloning issuesJava</id>
           </State>
           <State>
             <id>Code style issuesJava</id>
           </State>
           <State>
-            <id>Code style issuesJavaScript</id>
+            <id>CodeSpring CoreSpring</id>
           </State>
           <State>
-            <id>Control flow issuesJava</id>
+            <id>Concurrency annotation issuesJava</id>
           </State>
           <State>
-            <id>Control flow issuesJavaScript</id>
+            <id>Declaration redundancyJava</id>
+          </State>
+          <State>
+            <id>DeclarationGroovy</id>
+          </State>
+          <State>
+            <id>Django</id>
           </State>
           <State>
             <id>Encapsulation issuesJava</id>
           </State>
           <State>
+            <id>FlexUnit inspections</id>
+          </State>
+          <State>
+            <id>GeneralJavaScript</id>
+          </State>
+          <State>
             <id>Groovy</id>
+          </State>
+          <State>
+            <id>Guice Inspections</id>
+          </State>
+          <State>
+            <id>ImportsJava</id>
           </State>
           <State>
             <id>Inheritance issuesJava</id>
@@ -104,10 +131,7 @@
             <id>Initialization issuesJava</id>
           </State>
           <State>
-            <id>Internationalization issues</id>
-          </State>
-          <State>
-            <id>Internationalization issuesJava</id>
+            <id>JBoss Seam issues</id>
           </State>
           <State>
             <id>JUnit issuesJava</id>
@@ -116,13 +140,22 @@
             <id>Java</id>
           </State>
           <State>
+            <id>Java EE issues</id>
+          </State>
+          <State>
             <id>JavaScript</id>
           </State>
           <State>
             <id>Logging issuesJava</id>
           </State>
           <State>
-            <id>Method metricsJava</id>
+            <id>Memory issuesJava</id>
+          </State>
+          <State>
+            <id>Naming ConventionsGroovy</id>
+          </State>
+          <State>
+            <id>Naming conventionsJava</id>
           </State>
           <State>
             <id>Numeric issuesJava</id>
@@ -131,22 +164,7 @@
             <id>Performance issuesJava</id>
           </State>
           <State>
-            <id>Plugin DevKit</id>
-          </State>
-          <State>
-            <id>Portability issuesJava</id>
-          </State>
-          <State>
-            <id>Potentially confusing code constructsGroovy</id>
-          </State>
-          <State>
-            <id>Probable bugsGroovy</id>
-          </State>
-          <State>
             <id>Probable bugsJava</id>
-          </State>
-          <State>
-            <id>Probable bugsJavaScript</id>
           </State>
           <State>
             <id>Python</id>
@@ -155,15 +173,33 @@
             <id>Scala: General</id>
           </State>
           <State>
-            <id>TestNG</id>
+            <id>Security issuesJava</id>
+          </State>
+          <State>
+            <id>Serialization issuesJava</id>
+          </State>
+          <State>
+            <id>Spring</id>
+          </State>
+          <State>
+            <id>Spring CoreSpring</id>
+          </State>
+          <State>
+            <id>Threading issuesGroovy</id>
           </State>
           <State>
             <id>Threading issuesJava</id>
           </State>
+          <State>
+            <id>UI Form Problems</id>
+          </State>
+          <State>
+            <id>Visibility issuesJava</id>
+          </State>
         </expanded-state>
         <selected-state>
           <State>
-            <id>UnnecessaryThis</id>
+            <id>StaticNonFinalField</id>
           </State>
         </selected-state>
       </profile-state>
@@ -307,6 +343,7 @@
       </profile-state>
     </entry>
   </component>
+  <component name="CppTools.Settings" gccPath="gcc" clangPath="clang" msvcdir="c:\Program Files\Microsoft Visual Studio .NET 2012\vc10" defines="WIN32;NDEBUG;_WINDOWS;_MBCS;_AFXDLL;_WIN32" launchGdbOnFailureCommand="$gdb$ --directory=&quot;c:/MingW/1.0/home/maxim/CF-C&quot;" gdbPath="gdb" />
   <component name="CvsApplicationLevelConfiguration">
     <option name="EXT_CONFIGURATION">
       <value>
@@ -489,6 +526,7 @@
     <option name="RENAME_SEARCH_FOR_TEXT_FOR_METHOD" value="false" />
     <option name="RENAME_SEARCH_FOR_TEXT_FOR_VARIABLE" value="false" />
     <option name="MOVE_PREVIEW_USAGES" value="false" />
+    <option name="MOVE_SEARCH_FOR_TEXT" value="false" />
     <option name="MOVE_INNER_PREVIEW_USAGES" value="false" />
     <option name="INTRODUCE_FIELD_VISIBILITY" value="private" />
     <option name="INTRODUCE_CONSTANT_VISIBILITY" value="private" />

@@ -4,12 +4,14 @@
       <list>
         <Profile>
           <option name="defaultProfile" value="true" />
+          <option name="enabledInputFiltering" value="false" />
           <option name="grepExpressionGroups">
             <list>
               <GrepExpressionGroup>
                 <option name="grepExpressionItems">
                   <list>
                     <GrepExpressionItem>
+                      <option name="enabled" value="false" />
                       <option name="grepExpression" value="[\d\.]+ [\d\.]+ ERROR.*" />
                       <option name="id" value="9426b919-29d1-4913-85eb-16fc3eb493f0" />
                       <option name="style">
@@ -30,6 +32,7 @@
                       </option>
                     </GrepExpressionItem>
                     <GrepExpressionItem>
+                      <option name="enabled" value="false" />
                       <option name="grepExpression" value="[\d\.]+ [\d\.]+ SEVERE.*" />
                       <option name="id" value="f7d7e773-ff4e-4742-8e31-29e15937ca0a" />
                       <option name="style">
@@ -50,6 +53,7 @@
                       </option>
                     </GrepExpressionItem>
                     <GrepExpressionItem>
+                      <option name="enabled" value="false" />
                       <option name="grepExpression" value="[\d\.]+ [\d\.]+ WARN.*" />
                       <option name="id" value="ea6d87d2-1763-4d8e-bd4f-f81ff4bd3bc8" />
                       <option name="style">
@@ -70,6 +74,7 @@
                       </option>
                     </GrepExpressionItem>
                     <GrepExpressionItem>
+                      <option name="enabled" value="false" />
                       <option name="grepExpression" value="[\d\.]+ [\d\.]+ INFO.*" />
                       <option name="id" value="4d4651d7-0f1d-41de-a7f5-9900e282d075" />
                       <option name="style">
@@ -85,6 +90,7 @@
                       </option>
                     </GrepExpressionItem>
                     <GrepExpressionItem>
+                      <option name="enabled" value="false" />
                       <option name="grepExpression" value="[\d\.]+ [\d\.]+ DEBUG.*" />
                       <option name="id" value="94e5a0b7-cd80-4207-9b88-2a68641bdcc8" />
                       <option name="style">
