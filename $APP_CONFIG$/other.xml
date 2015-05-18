@@ -104,10 +104,10 @@
             <id>DeclarationGroovy</id>
           </State>
           <State>
-            <id>Django</id>
+            <id>Encapsulation issuesJava</id>
           </State>
           <State>
-            <id>Encapsulation issuesJava</id>
+            <id>Error handlingGroovy</id>
           </State>
           <State>
             <id>FlexUnit inspections</id>
@@ -167,9 +167,6 @@
             <id>Probable bugsJava</id>
           </State>
           <State>
-            <id>Python</id>
-          </State>
-          <State>
             <id>Scala: General</id>
           </State>
           <State>
@@ -199,7 +196,7 @@
         </expanded-state>
         <selected-state>
           <State>
-            <id>StaticNonFinalField</id>
+            <id>GroovyUnusedCatchParameter</id>
           </State>
         </selected-state>
       </profile-state>
