@@ -196,7 +196,7 @@
         </expanded-state>
         <selected-state>
           <State>
-            <id>GroovyUnusedCatchParameter</id>
+            <id>ThrowableInstanceNeverThrown</id>
           </State>
         </selected-state>
       </profile-state>

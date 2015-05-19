@@ -135,6 +135,7 @@
     <group names="y,height,top,bottom" />
   </inspection_tool>
   <inspection_tool class="SystemOutErr" enabled="true" level="WARNING" enabled_by_default="true" />
+  <inspection_tool class="ThrowableInstanceNeverThrown" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="ThrowableResultOfMethodCallIgnored" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="ThrowsRuntimeException" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="UNUSED_SYMBOL" enabled="true" level="WEAK WARNING" enabled_by_default="true">
