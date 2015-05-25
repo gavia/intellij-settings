@@ -5,5 +5,9 @@
     <option name="PATTERN_ANNOTATION" value="org.intellij.lang.annotations.Pattern" />
     <option name="SUBST_ANNOTATION" value="org.intellij.lang.annotations.Subst" />
     <option name="RESOLVE_REFERENCES" value="true" />
+    <injection language="SQL" injector-id="java">
+      <display-name>ParameterisedSQLQuery.append (au.com.finsyn.acuritywebserver.core.datasource.utils)</display-name>
+      <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("append").withParameters("java.lang.String").definedInClass("au.com.finsyn.acuritywebserver.core.datasource.utils.ParameterisedSQLQuery"))]]></place>
+    </injection>
   </component>
 </application>
