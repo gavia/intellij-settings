@@ -20,7 +20,12 @@
           <option name="url" value="http://timothym@wpmverctl01:5000/acurity/" />
           <option name="userName" value="" />
         </UrlAndUserName>
+        <UrlAndUserName>
+          <option name="url" value="http://timothym@wpmverctl01:5000/AcurityWebVaadin" />
+          <option name="userName" value="" />
+        </UrlAndUserName>
       </list>
     </option>
+    <option name="cloneParentDir" value="C:\build\devel\srcjava" />
   </component>
 </application>
