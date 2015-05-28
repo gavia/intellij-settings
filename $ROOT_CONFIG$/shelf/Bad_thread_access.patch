@@ -1,0 +1,105 @@
+Index: src/main/java/jSSS/jgui/CustomisationsEditor/validation/CustomisationFilesUpgrader.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/jSSS/jgui/CustomisationsEditor/validation/CustomisationFilesUpgrader.java	(revision 27877:0cd0679970a3be01c5890741db7eb4f55be47f4c)
++++ src/main/java/jSSS/jgui/CustomisationsEditor/validation/CustomisationFilesUpgrader.java	(revision 27877+:0cd0679970a3+)
+@@ -6,11 +6,9 @@
+  */
+ package jSSS.jgui.CustomisationsEditor.validation;
+ 
+-import static jSSS.preferences.AcurityProperty.ADD_CUSTOMISATION_UPGRADE_COMMENTS;
+ import jSSS.jcore.jSSSApplication;
+ import jSSS.jcore.swing.worker.SwingWorker;
+ import jSSS.jgui.Const;
+-import jSSS.jgui.jSSSApp;
+ import jSSS.jgui.CustomisationsEditor.CEdtrConstants;
+ import jSSS.jgui.CustomisationsEditor.CustomisationsEditor;
+ import jSSS.jgui.CustomisationsEditor.EditorUtils;
+@@ -21,10 +19,14 @@
+ import jSSS.jgui.CustomisationsEditor.definitions.ESHistoryDefinition;
+ import jSSS.jgui.CustomisationsEditor.functions.ListOfGUIForms;
+ import jSSS.jgui.comm.Client;
++import jSSS.jgui.jSSSApp;
+ import jSSS.util.ICStringConst;
+ import jSSS.util.Msg;
+ import jSSS.util.jSSSLogger;
+ 
++import javax.swing.JDialog;
++import javax.swing.JOptionPane;
++import javax.swing.SwingUtilities;
+ import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+@@ -33,9 +35,7 @@
+ import java.util.List;
+ import java.util.Map;
+ 
+-import javax.swing.JDialog;
+-import javax.swing.JOptionPane;
+-import javax.swing.SwingUtilities;
++import static jSSS.preferences.AcurityProperty.ADD_CUSTOMISATION_UPGRADE_COMMENTS;
+ 
+ /**
+  * @author tetyanag
+@@ -245,7 +245,10 @@
+ 				}
+ 				return null;
+ 			}
+-		};		
++		};
++		// Make sure we initialise the CustomisationsEditor singleton on the EDT, given that it will be used within
++		// the worker
++		CustomisationsEditor.getInstance();
+ 
+ 		worker.start();
+ 		showUpgradeResults();
+Index: src/main/java/jSSS/startup/NewUI.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/jSSS/startup/NewUI.java	(revision 27877:0cd0679970a3be01c5890741db7eb4f55be47f4c)
++++ src/main/java/jSSS/startup/NewUI.java	(revision 27877+:0cd0679970a3+)
+@@ -6,17 +6,27 @@
+ import jSSS.util.ResourceLoader;
+ import org.apache.commons.logging.Log;
+ 
+-import javax.swing.*;
+-import java.awt.*;
+-import java.io.*;
++import javax.swing.ImageIcon;
++import javax.swing.SwingUtilities;
++import java.awt.Color;
++import java.awt.Dimension;
++import java.awt.Font;
++import java.io.BufferedInputStream;
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.FileNotFoundException;
++import java.io.IOException;
++import java.io.InputStream;
+ import java.util.Properties;
+ 
+ /*
+  * Breaking changes:
+  * 1. Umit replaced the splash_screen and login_screen images inside the jar file.
+  */
+-public class NewUI {
++public enum NewUI {
+ 
++    INSTANCE;
++
+     private static final Log LOG = AcurityLogging.getInstance().getLogger(NewUI.class);
+     public static final String FILE_LOCATION = "Customisations/NewUI.properties";
+ 
+@@ -64,8 +74,6 @@
+     public int listFormFontSize = 0;
+ 
+     private boolean isNewUI = true;
+-
+-    private static NewUI INSTANCE;
+ 
+     /**
+      * NOT THREAD SAFE
