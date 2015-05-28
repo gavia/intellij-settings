@@ -86,6 +86,9 @@
             <id>Java</id>
           </State>
           <State>
+            <id>Java language level migration aidsJava</id>
+          </State>
+          <State>
             <id>Performance issuesJava</id>
           </State>
           <State>
@@ -106,7 +109,7 @@
         </expanded-state>
         <selected-state>
           <State>
-            <id>Ant inspections</id>
+            <id>CodeBlock2Expr</id>
           </State>
         </selected-state>
       </profile-state>
