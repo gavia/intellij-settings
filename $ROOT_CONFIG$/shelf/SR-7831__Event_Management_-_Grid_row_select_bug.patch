@@ -1,0 +1,263 @@
+Index: src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/model/EventActionContextTableModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/model/EventActionContextTableModel.java	(revision 27869:b12a77cd77a89d000bfc2a5c52ea7d79d6d5f67f)
++++ src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/model/EventActionContextTableModel.java	(revision 27869+:b12a77cd77a8+)
+@@ -180,4 +180,8 @@
+     public ReadOnlyProperty<EventActionContext> eventActionContextProperty() {
+         return eventActionContext;
+     }
++
++    public EventDefinitions getEventDefinition() {
++        return eventDefinition;
++    }
+ }
+Index: src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/view/EventActionContextTable.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/view/EventActionContextTable.java	(revision 27869:b12a77cd77a89d000bfc2a5c52ea7d79d6d5f67f)
++++ src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/view/EventActionContextTable.java	(revision 27869+:b12a77cd77a8+)
+@@ -9,15 +9,17 @@
+ import au.com.finsyn.swing.tables.ComponentWithPopupMenuInterface;
+ import au.com.finsyn.swing.tables.FitChildJScrollPane;
+ import au.com.finsyn.swing.tables.PopupMouse;
++import au.com.finsyn.swing.tables.TableSupport;
+ import au.com.finsyn.swing.tables.TableUtils;
+ import au.com.finsyn.swing.tables.cellrenders.BatchCodeCellRenderer;
+ import au.com.finsyn.swing.tables.cellrenders.CheckBoxCellRenderer.YesNoCheckBoxCellRenderer;
+ import au.com.finsyn.swing.tables.cellrenders.CodeAndDescriptionCellRenderer;
+ import au.com.finsyn.swing.tables.cellrenders.ReportGroupTypeCellRenderer;
++import au.com.finsyn.swing.tables.cellrenders.RightAlignedTableCellRenderer;
+ import au.com.finsyn.swing.util.WebColour;
+ import au.com.finsyn.swing.util.listenerhelpers.TableColumnAddedListener.SetRendererAsTableColumnAddedListener;
+-import au.com.finsyn.util.entities.codesanddescriptions.CodesAndDescriptionEnum;
+ import au.com.finsyn.util.ComparatorUtils;
++import au.com.finsyn.util.entities.codesanddescriptions.CodesAndDescriptionEnum;
+ import com.jidesoft.grid.AutoFilterTableHeader;
+ import com.jidesoft.grid.CellStyle;
+ import com.jidesoft.grid.ISortableTableModel;
+@@ -25,7 +27,6 @@
+ import com.jidesoft.grid.SortableTableModel;
+ import com.jidesoft.grid.StyleModel;
+ import com.jidesoft.grid.TableModelWrapperUtils;
+-import au.com.finsyn.swing.tables.cellrenders.RightAlignedTableCellRenderer;
+ import jSSS.util.GuiUtil;
+ import javafx.collections.ListChangeListener;
+ 
+@@ -49,7 +50,7 @@
+  * @author timothym
+  */
+ public class EventActionContextTable extends SortableTable implements ColumnWidthPreferenceInterface, StyleModel,
+-        ComponentWithPopupMenuInterface {
++        ComponentWithPopupMenuInterface, TableSupport {
+ 
+     private ColumnWidthPreferenceHelper widthPreferenceHelper = new ColumnWidthPreferenceHelper(this);
+     private final EventManagementStateBundle stateBundle;
+Index: src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/view/EventsTable.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/view/EventsTable.java	(revision 27869:b12a77cd77a89d000bfc2a5c52ea7d79d6d5f67f)
++++ src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/view/EventsTable.java	(revision 27869+:b12a77cd77a8+)
+@@ -13,27 +13,33 @@
+ import au.com.finsyn.swing.tables.TableUtils;
+ import au.com.finsyn.swing.tables.cellrenders.CodeAndDescriptionCellRenderer;
+ import au.com.finsyn.swing.tables.cellrenders.KeyValueCellRenderer;
++import au.com.finsyn.swing.tables.cellrenders.RightAlignedTableCellRenderer;
+ import au.com.finsyn.swing.tables.cellrenders.ToStringCellRenderer;
+ import au.com.finsyn.swing.util.listenerhelpers.TableColumnAddedListener.SetRendererAsTableColumnAddedListener;
+-import au.com.finsyn.util.entities.codesanddescriptions.CodesAndDescriptionEnum;
++import au.com.finsyn.util.SystemStreamUtils;
+ import au.com.finsyn.util.datastructures.CollectionUtils;
+ import au.com.finsyn.util.datastructures.FlyweightMap;
++import au.com.finsyn.util.entities.codesanddescriptions.CodesAndDescriptionEnum;
+ import com.jidesoft.grid.HierarchicalTable;
+ import com.jidesoft.grid.HierarchicalTableComponentFactory;
+ import com.jidesoft.grid.JideTable;
+ import com.jidesoft.grid.RowStripeTableStyleProvider;
+ import com.jidesoft.grid.TableModelWrapperUtils;
+-import au.com.finsyn.swing.tables.cellrenders.RightAlignedTableCellRenderer;
+ 
+ import javax.swing.JPopupMenu;
+ import javax.swing.ListSelectionModel;
+ import javax.swing.SwingUtilities;
++import javax.swing.event.ListSelectionEvent;
++import javax.swing.event.ListSelectionListener;
+ import javax.swing.table.TableCellRenderer;
+ import javax.swing.table.TableColumn;
+ import java.awt.Color;
+ import java.awt.Component;
+ import java.awt.Dimension;
+ import java.awt.Font;
++import java.time.LocalTime;
++import java.util.HashMap;
++import java.util.Map;
+ import java.util.Objects;
+ import java.util.Optional;
+ import java.util.stream.Collectors;
+@@ -48,13 +54,16 @@
+ 
+     private static final Color ROW_BACKGROUND = Color.WHITE;
+ 
+-    private ColumnWidthPreferenceHelper widthPreferenceHelper = new ColumnWidthPreferenceHelper(this);
+     private FlyweightMap<EventDefinitions, EventActionContextTableModel> contextTableModels =
+             new FlyweightMap<>(event -> new EventActionContextTableModel(
+                     this.stateBundle,
+                     event,
+                     this.getActualModel().currentContextProperty()));
+ 
++    private ColumnWidthPreferenceHelper widthPreferenceHelper = new ColumnWidthPreferenceHelper(this);
++
++    private Map<EventActionContextTable, ListSelectionListener> actionTables = new HashMap<>();
++
+     private EventManagementStateBundle stateBundle;
+ 
+     private EventsTablePopupMenu popupMenu;
+@@ -97,18 +106,58 @@
+ 
+     @Override
+     public Component createChildComponent(HierarchicalTable table, Object value, int row) {
+-        EventActionTablePanel returnedPanel = new EventActionTablePanel(
+-                this.contextTableModels.get(this.getActualModel().getElementAt(row)),
+-                this.getCellStyleAt(row, 0).getBackground(), this.stateBundle);
+ 
++        EventActionContextTableModel matchingTableModel =
++                this.contextTableModels.get(this.getActualModel().getElementAt(row));
++
++        Color backgroundColor = this.getCellStyleAt(row, 0).getBackground();
++
++        EventActionTablePanel returnedPanel = new EventActionTablePanel(matchingTableModel, backgroundColor,
++                this.stateBundle);
++
++        registerActionTable(returnedPanel.getTable());
++
+         SwingUtilities.invokeLater(this::resizeAndRepaint);
+ 
+         return returnedPanel;
+     }
+ 
++    private void registerActionTable(EventActionContextTable actionTable) {
++        ListSelectionListener listSelectionListener = event -> handleContextTableSelectionChange(event, actionTable);
++        actionTable.getSelectionModel().addListSelectionListener(listSelectionListener);
++
++        actionTables.put(actionTable, listSelectionListener);
++    }
++
++    private void handleContextTableSelectionChange(ListSelectionEvent event, EventActionContextTable actionTable) {
++
++        SystemStreamUtils.printDebugInfo(
++                "event", event,
++                "event code", actionTable.getActualModel().getEventDefinition().getEVz_EventCode(),
++                "time", LocalTime.now());
++
++        if (event.getFirstIndex() >= 0) {
++            System.err.println("Clears tables at " + LocalTime.now());
++            actionTables.keySet().forEach(table -> {
++                if (table != actionTable) {
++                    table.clearSelection();
++                }
++            });
++        }
++    }
++
++    private void unRegisterActionTable(EventActionContextTable actionTable) {
++        ListSelectionListener listSelectionListener = actionTables.get(actionTable);
++        actionTable.getSelectionModel().removeListSelectionListener(listSelectionListener);
++
++        actionTables.remove(actionTable);
++    }
++
+     @Override
+-    public void destroyChildComponent(HierarchicalTable hierarchicalTable, Component component, int i) {
+-        // Do nothing
++    public void destroyChildComponent(HierarchicalTable hierarchicalTable, Component component, int row) {
++        EventActionContextTable tableToUnRegister = ((EventActionTablePanel) component).getTable();
++
++        unRegisterActionTable(tableToUnRegister);
+     }
+ 
+     private void initRenderers() {
+Index: src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/view/EventActionTablePanel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/view/EventActionTablePanel.java	(revision 27869:b12a77cd77a89d000bfc2a5c52ea7d79d6d5f67f)
++++ src/main/java/au/com/finsyn/forms/eventsandexceptions/eventmanagement/view/EventActionTablePanel.java	(revision 27869+:b12a77cd77a8+)
+@@ -23,6 +23,7 @@
+     private JPanel overlayPanel;
+     private JLabel noResultsLbl;
+     private FitChildJScrollPane tableScrollPane;
++    private EventActionContextTable table;
+ 
+     public EventActionTablePanel(EventActionContextTableModel tableModel, Color backgroundColor,
+                                  EventManagementStateBundle stateBundle) {
+@@ -31,40 +32,45 @@
+         this.backgroundColor = backgroundColor;
+         this.stateBundle = stateBundle;
+ 
+-        this.init();
+-        this.initListeners();
++        init();
++        initListeners();
+     }
+ 
+     private void init() {
+-        this.overlayPanel = new JPanel();
+-        this.overlayPanel.setLayout(new OverlayLayout(overlayPanel));
++        overlayPanel = new JPanel();
++        overlayPanel.setLayout(new OverlayLayout(overlayPanel));
+ 
+-        this.tableScrollPane = new FitChildJScrollPane(new EventActionContextTable(this.tableModel, this.stateBundle)
++        table = new EventActionContextTable(tableModel, stateBundle);
++        tableScrollPane = new FitChildJScrollPane(table
+                 .setPreferredHeightWhenEmpty(50));
+ 
+-        this.noResultsLbl = new JLabel("No Actions");
+-        this.noResultsLbl.setFont(this.noResultsLbl.getFont().deriveFont(Font.BOLD));
+-        this.noResultsLbl.setAlignmentX(0.5f);
+-        this.noResultsLbl.setAlignmentY(0.7f);
++        noResultsLbl = new JLabel("No Actions");
++        noResultsLbl.setFont(noResultsLbl.getFont().deriveFont(Font.BOLD));
++        noResultsLbl.setAlignmentX(0.5f);
++        noResultsLbl.setAlignmentY(0.7f);
+ 
+-        this.setBackground(backgroundColor);
+-        this.setComponent(overlayPanel);
++        setBackground(backgroundColor);
++        setComponent(overlayPanel);
+ 
+-        this.refreshOverlayPanel();
++        refreshOverlayPanel();
+     }
+ 
+     private void initListeners() {
+-        this.tableModel.addTableModelListener(event -> this.refreshOverlayPanel());
++        tableModel.addTableModelListener(event -> refreshOverlayPanel());
+     }
+ 
+     private void refreshOverlayPanel() {
+-        this.overlayPanel.removeAll();
++        overlayPanel.removeAll();
+ 
+-        if (this.tableModel.getRowCount() == 0) {
+-            this.overlayPanel.add(this.noResultsLbl);
++        if (tableModel.getRowCount() == 0) {
++            overlayPanel.add(noResultsLbl);
+         }
+-        this.overlayPanel.add(this.tableScrollPane);
++        overlayPanel.add(tableScrollPane);
+ 
+-        this.overlayPanel.repaint();
++        overlayPanel.repaint();
++    }
++
++    public EventActionContextTable getTable() {
++        return table;
+     }
+ }

@@ -86,7 +86,16 @@
             <id>Java</id>
           </State>
           <State>
+            <id>Java language level migration aidsJava</id>
+          </State>
+          <State>
+            <id>Performance issuesJava</id>
+          </State>
+          <State>
             <id>Plugin DevKit</id>
+          </State>
+          <State>
+            <id>Properties Files</id>
           </State>
           <State>
             <id>Scala</id>
@@ -98,6 +107,11 @@
             <id>XSLT</id>
           </State>
         </expanded-state>
+        <selected-state>
+          <State>
+            <id>CodeBlock2Expr</id>
+          </State>
+        </selected-state>
       </profile-state>
     </entry>
     <entry key="My Java Inspections">
