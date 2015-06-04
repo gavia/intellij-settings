@@ -1,0 +1,16 @@
+Index: ../masterProject/settings.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../masterProject/settings.gradle	(revision 27932:ee2d35e404388c1cd81a439ae7d3be1936ad6580)
++++ ../masterProject/settings.gradle	(revision 27932+:ee2d35e40438+)
+@@ -3,6 +3,7 @@
+         'acurityCommon', 
+         'acurityDataModel', 
+         'AcurityManager', 
++        'AcurityServer',
+         'AcurityWebServices', 
+         'AcurityWebVaadin', 
+         'architect-std', 
+\ No newline at end of file
