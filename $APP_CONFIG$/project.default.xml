@@ -23,6 +23,7 @@
       <component name="GradleLocalSettings">
         <option name="modificationStamps">
           <map>
+            <entry key="$USER_HOME$/Projects/gradle" value="86039485999384" />
             <entry key="C:/Playground/dependencyMucking/AcurityWebServices" value="4292934770308" />
             <entry key="C:/Playground/dependencyMucking/AcurityWebVaadin" value="7154896038318" />
             <entry key="C:/build/devel/srcjava/AcurityWebServices" value="8589346290091" />
@@ -360,7 +361,7 @@
         <states>
           <state key="ProjectJDKs.UI">
             <settings>
-              <last-edited>1.7</last-edited>
+              <last-edited>1.6</last-edited>
               <splitter-proportions>
                 <option name="proportions">
                   <list>
