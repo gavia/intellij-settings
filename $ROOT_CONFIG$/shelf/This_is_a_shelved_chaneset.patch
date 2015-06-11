@@ -1,0 +1,41 @@
+Index: src/main/java/au/com/finsyn/workbench/manage/ManageWorkbenchLinesView.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/ManageWorkbenchLinesView.java	(revision 27901:83291e73c0a44904082b19b3a6982ce6aeb5ae9e)
++++ src/main/java/au/com/finsyn/workbench/manage/ManageWorkbenchLinesView.java	(revision 27901+:83291e73c0a4+)
+@@ -781,7 +781,7 @@
+ 
+                 if (contributionLine.getFCc_Deleted() == 'Y' ||
+                         WorkbenchCommonUtils.isRefundedContributionLine(contributionLine) ||
+-                        WorkbenchCommonUtils.CONTRIBUTION_REFUND_RELATED_STATUS.contains(getContributionLineStatus(contributionLine))) {
++                        WorkbenchCommonUtils.isContributionRefundRelated(contributionLine)) {
+                     // REFUND related contribution lines are not shown to the user, so we don't need to warn when they are removed.
+                     selectedContributionLines.remove(i);
+                     --i;
+@@ -936,7 +936,7 @@
+ 
+                 if (contributionLine.getFCc_Deleted() == 'Y' ||
+                         WorkbenchCommonUtils.isRefundedContributionLine(contributionLine) ||
+-                        WorkbenchCommonUtils.CONTRIBUTION_REFUND_RELATED_STATUS.contains(getContributionLineStatus(contributionLine))) {
++                        WorkbenchCommonUtils.isContributionRefundRelated(contributionLine)) {
+                     // REFUND related contribution lines are not shown to the user, so we don't need to warn when they are removed.
+                     selectedContributionLines.remove(i);
+                     --i;
+Index: gradle/wrapper/gradle-wrapper.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- gradle/wrapper/gradle-wrapper.properties	(revision 27901:83291e73c0a44904082b19b3a6982ce6aeb5ae9e)
++++ gradle/wrapper/gradle-wrapper.properties	(revision 27901+:83291e73c0a4+)
+@@ -1,6 +1,6 @@
+-#Tue Jun 02 14:41:28 AEST 2015
++#Wed Jun 03 08:55:38 AEST 2015
+ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-2.4-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-2.4-all.zip

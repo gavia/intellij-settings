@@ -1,9 +1,12 @@
 <application>
   <component name="CodeInsightSettings">
     <option name="COMPLETION_CASE_SENSITIVE" value="2" />
+    <EXCLUDED_PACKAGE NAME="au.com.finsyn.acuritywebservices.datamodel.generated.entities" />
     <EXCLUDED_PACKAGE NAME="com.google.common.base.Function" />
     <EXCLUDED_PACKAGE NAME="com.google.common.base.Optional" />
     <EXCLUDED_PACKAGE NAME="com.sun.xml.internal.bind.v2.runtime.property.Property" />
+    <EXCLUDED_PACKAGE NAME="jSSS.entity.generated" />
+    <EXCLUDED_PACKAGE NAME="junit.framework.TestCase" />
     <EXCLUDED_PACKAGE NAME="org.parboiled.common.ImmutableList" />
   </component>
   <component name="DaemonCodeAnalyzerSettings" profile="My Inspections" />

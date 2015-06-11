@@ -1,0 +1,1272 @@
+Index: settings.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- settings.gradle	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ settings.gradle	(revision 27889+:aee7ca4ff736+)
+@@ -1,1 +1,1 @@
+-include ':..:acurityDataModel', ':..:finsynCommons', ':..:acurityCommon', ':..:AcurityManager'
+\ No newline at end of file
++include  ':..:jfo-fs', ':..:acurityDataModel', ':..:finsynCommons', ':..:acurityCommon', ':..:AcurityManager'
+\ No newline at end of file
+Index: ../jfo-fs/src/de/northbit/report/sources/XMLDataSourceHandler.java
+===================================================================
+--- ../jfo-fs/src/de/northbit/report/sources/XMLDataSourceHandler.java	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/src/main/java/de/northbit/report/sources/XMLDataSourceHandler.java	(revision 27889+:aee7ca4ff736+)
+@@ -1,7 +1,9 @@
+ package de.northbit.report.sources;
+ 
+-import java.util.Stack;
+-
++import de.northbit.jfo.env.JFOConfig;
++import de.northbit.report.ReportData;
++import de.northbit.report.ReportException;
++import de.northbit.util.log.LogUtil;
+ import org.apache.commons.logging.Log;
+ import org.xml.sax.Attributes;
+ import org.xml.sax.Locator;
+@@ -9,10 +11,7 @@
+ import org.xml.sax.SAXParseException;
+ import org.xml.sax.helpers.DefaultHandler;
+ 
+-import de.northbit.jfo.env.JFOConfig;
+-import de.northbit.report.ReportData;
+-import de.northbit.report.ReportException;
+-import de.northbit.util.log.LogUtil;
++import java.util.Stack;
+ 
+ /**
+  * SAX Handler
+Index: ../jfo-fs/.classpath
+===================================================================
+--- ../jfo-fs/.classpath	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/.classpath	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
+@@ -1,8 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<classpath>
+-	<classpathentry kind="src" path="src"/>
+-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+-	<classpathentry kind="lib" path="lib/apache/commons-logging-1.1.1.jar"/>
+-	<classpathentry kind="lib" path="lib/jfo.jar"/>
+-	<classpathentry kind="output" path="bin"/>
+-</classpath>
+Index: ../jfo-fs/gradlew
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../jfo-fs/gradlew	(revision 27889+:aee7ca4ff736+)
++++ ../jfo-fs/gradlew	(revision 27889+:aee7ca4ff736+)
+@@ -0,0 +1,164 @@
++#!/usr/bin/env bash
++
++##############################################################################
++##
++##  Gradle start up script for UN*X
++##
++##############################################################################
++
++# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
++DEFAULT_JVM_OPTS=""
++
++APP_NAME="Gradle"
++APP_BASE_NAME=`basename "$0"`
++
++# Use the maximum available, or set MAX_FD != -1 to use that value.
++MAX_FD="maximum"
++
++warn ( ) {
++    echo "$*"
++}
++
++die ( ) {
++    echo
++    echo "$*"
++    echo
++    exit 1
++}
++
++# OS specific support (must be 'true' or 'false').
++cygwin=false
++msys=false
++darwin=false
++case "`uname`" in
++  CYGWIN* )
++    cygwin=true
++    ;;
++  Darwin* )
++    darwin=true
++    ;;
++  MINGW* )
++    msys=true
++    ;;
++esac
++
++# For Cygwin, ensure paths are in UNIX format before anything is touched.
++if $cygwin ; then
++    [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
++fi
++
++# Attempt to set APP_HOME
++# Resolve links: $0 may be a link
++PRG="$0"
++# Need this for relative symlinks.
++while [ -h "$PRG" ] ; do
++    ls=`ls -ld "$PRG"`
++    link=`expr "$ls" : '.*-> \(.*\)$'`
++    if expr "$link" : '/.*' > /dev/null; then
++        PRG="$link"
++    else
++        PRG=`dirname "$PRG"`"/$link"
++    fi
++done
++SAVED="`pwd`"
++cd "`dirname \"$PRG\"`/" >&-
++APP_HOME="`pwd -P`"
++cd "$SAVED" >&-
++
++CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
++
++# Determine the Java command to use to start the JVM.
++if [ -n "$JAVA_HOME" ] ; then
++    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
++        # IBM's JDK on AIX uses strange locations for the executables
++        JAVACMD="$JAVA_HOME/jre/sh/java"
++    else
++        JAVACMD="$JAVA_HOME/bin/java"
++    fi
++    if [ ! -x "$JAVACMD" ] ; then
++        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
++
++Please set the JAVA_HOME variable in your environment to match the
++location of your Java installation."
++    fi
++else
++    JAVACMD="java"
++    which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
++
++Please set the JAVA_HOME variable in your environment to match the
++location of your Java installation."
++fi
++
++# Increase the maximum file descriptors if we can.
++if [ "$cygwin" = "false" -a "$darwin" = "false" ] ; then
++    MAX_FD_LIMIT=`ulimit -H -n`
++    if [ $? -eq 0 ] ; then
++        if [ "$MAX_FD" = "maximum" -o "$MAX_FD" = "max" ] ; then
++            MAX_FD="$MAX_FD_LIMIT"
++        fi
++        ulimit -n $MAX_FD
++        if [ $? -ne 0 ] ; then
++            warn "Could not set maximum file descriptor limit: $MAX_FD"
++        fi
++    else
++        warn "Could not query maximum file descriptor limit: $MAX_FD_LIMIT"
++    fi
++fi
++
++# For Darwin, add options to specify how the application appears in the dock
++if $darwin; then
++    GRADLE_OPTS="$GRADLE_OPTS \"-Xdock:name=$APP_NAME\" \"-Xdock:icon=$APP_HOME/media/gradle.icns\""
++fi
++
++# For Cygwin, switch paths to Windows format before running java
++if $cygwin ; then
++    APP_HOME=`cygpath --path --mixed "$APP_HOME"`
++    CLASSPATH=`cygpath --path --mixed "$CLASSPATH"`
++
++    # We build the pattern for arguments to be converted via cygpath
++    ROOTDIRSRAW=`find -L / -maxdepth 1 -mindepth 1 -type d 2>/dev/null`
++    SEP=""
++    for dir in $ROOTDIRSRAW ; do
++        ROOTDIRS="$ROOTDIRS$SEP$dir"
++        SEP="|"
++    done
++    OURCYGPATTERN="(^($ROOTDIRS))"
++    # Add a user-defined pattern to the cygpath arguments
++    if [ "$GRADLE_CYGPATTERN" != "" ] ; then
++        OURCYGPATTERN="$OURCYGPATTERN|($GRADLE_CYGPATTERN)"
++    fi
++    # Now convert the arguments - kludge to limit ourselves to /bin/sh
++    i=0
++    for arg in "$@" ; do
++        CHECK=`echo "$arg"|egrep -c "$OURCYGPATTERN" -`
++        CHECK2=`echo "$arg"|egrep -c "^-"`                                 ### Determine if an option
++
++        if [ $CHECK -ne 0 ] && [ $CHECK2 -eq 0 ] ; then                    ### Added a condition
++            eval `echo args$i`=`cygpath --path --ignore --mixed "$arg"`
++        else
++            eval `echo args$i`="\"$arg\""
++        fi
++        i=$((i+1))
++    done
++    case $i in
++        (0) set -- ;;
++        (1) set -- "$args0" ;;
++        (2) set -- "$args0" "$args1" ;;
++        (3) set -- "$args0" "$args1" "$args2" ;;
++        (4) set -- "$args0" "$args1" "$args2" "$args3" ;;
++        (5) set -- "$args0" "$args1" "$args2" "$args3" "$args4" ;;
++        (6) set -- "$args0" "$args1" "$args2" "$args3" "$args4" "$args5" ;;
++        (7) set -- "$args0" "$args1" "$args2" "$args3" "$args4" "$args5" "$args6" ;;
++        (8) set -- "$args0" "$args1" "$args2" "$args3" "$args4" "$args5" "$args6" "$args7" ;;
++        (9) set -- "$args0" "$args1" "$args2" "$args3" "$args4" "$args5" "$args6" "$args7" "$args8" ;;
++    esac
++fi
++
++# Split up the JVM_OPTS And GRADLE_OPTS values into an array, following the shell quoting and substitution rules
++function splitJvmOpts() {
++    JVM_OPTS=("$@")
++}
++eval splitJvmOpts $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS
++JVM_OPTS[${#JVM_OPTS[*]}]="-Dorg.gradle.appname=$APP_BASE_NAME"
++
++exec "$JAVACMD" "${JVM_OPTS[@]}" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
+Index: ../jfo-fs/.settings/org.eclipse.jdt.core.prefs
+===================================================================
+--- ../jfo-fs/.settings/org.eclipse.jdt.core.prefs	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/.settings/org.eclipse.jdt.core.prefs	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
+@@ -1,12 +0,0 @@
+-#Mon Feb 21 13:29:35 EST 2011
+-eclipse.preferences.version=1
+-org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
+-org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.4
+-org.eclipse.jdt.core.compiler.codegen.unusedLocal=preserve
+-org.eclipse.jdt.core.compiler.compliance=1.4
+-org.eclipse.jdt.core.compiler.debug.lineNumber=generate
+-org.eclipse.jdt.core.compiler.debug.localVariable=generate
+-org.eclipse.jdt.core.compiler.debug.sourceFile=generate
+-org.eclipse.jdt.core.compiler.problem.assertIdentifier=error
+-org.eclipse.jdt.core.compiler.problem.enumIdentifier=warning
+-org.eclipse.jdt.core.compiler.source=1.4
+Index: ../jfo-fs/build.xml
+===================================================================
+--- ../jfo-fs/build.xml	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/build.xml	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
+@@ -1,47 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project name="jfo-fs Make jar" default="jfo-fs-jar" basedir=".">
+-
+-	<loadfile property="acurity-version" srcFile="../../Release/Src/.swversion">
+-		<filterchain>
+-			<striplinebreaks/>
+-		</filterchain>
+-    </loadfile>
+-
+-    <path id="compile.classpath">
+-        <pathelement location="bin" />
+-        <filelist id="run.classpath" dir="lib">
+-            <file name="jfo.jar" />
+-            <file name="apache/commons-logging-1.1.1.jar" />
+-        </filelist>
+-    </path>
+-
+- 	<target name="clean" description="clean up" >
+-		<delete dir="bin"/>
+- 		<delete dir="dist"/>
+-	</target>
+-
+-	<target name="init">
+-		<tstamp/>
+-		<mkdir dir="bin"/>
+-		<mkdir dir="dist"/>
+-	</target>
+-
+-	<target name="compile-jfo-fs" depends="clean, init" description="compile jfo-fs" >
+-		<javac destdir="bin" source="1.4" target="1.4" fork="true" memoryMaximumSize="128m" nowarn="on" includeantruntime="false">
+-			<src path="src"/>
+-            <classpath refid="compile.classpath" />
+-		</javac>
+-	</target>
+-
+-	<target name="jfo-fs-jar" depends="compile-jfo-fs" description="Build jfo-fs.jar">
+-		<jar jarfile="dist/jfo-fs.jar" includes="**/*.class" basedir="bin">
+-			<manifest>
+-				<attribute name="Version" value="${acurity-version}"/>
+-			</manifest>
+-		</jar>
+-		
+-		<copy file="dist/jfo-fs.jar" todir="../install" overwrite="yes"/>
+-	</target>
+-
+-</project>
+-
+Index: ../jfo-fs/.project
+===================================================================
+--- ../jfo-fs/.project	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/.project	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
+@@ -1,27 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<projectDescription>
+-	<name>jfo-fs</name>
+-	<comment></comment>
+-	<projects>
+-	</projects>
+-	<buildSpec>
+-		<buildCommand>
+-			<name>org.eclipse.jdt.core.javabuilder</name>
+-			<arguments>
+-			</arguments>
+-		</buildCommand>
+-		<buildCommand>
+-			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
+-			<triggers>full,incremental,</triggers>
+-			<arguments>
+-				<dictionary>
+-					<key>LaunchConfigHandle</key>
+-					<value>&lt;project&gt;/.externalToolBuilders/Makejar.launch</value>
+-				</dictionary>
+-			</arguments>
+-		</buildCommand>
+-	</buildSpec>
+-	<natures>
+-		<nature>org.eclipse.jdt.core.javanature</nature>
+-	</natures>
+-</projectDescription>
+Index: build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- build.gradle	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ build.gradle	(revision 27889+:aee7ca4ff736+)
+@@ -85,6 +85,7 @@
+ dependencies {
+     jaxb 'com.sun.xml.bind:jaxb-xjc:2.2.4-1'
+ 
++    compile files(project(':..:jfo-fs').tasks.jar.archivePath)
+     compile project(':..:finsynCommons')
+     compile project(':..:acurityDataModel')
+     compile project(':..:acurityCommon')
+@@ -117,8 +118,6 @@
+     compile 'com.tunnelvisionlabs:antlr4-runtime:4.4'
+     compile 'com.finsyn.acurity:AcurityArchitectGrammar:1.47'
+ 
+-    compile files('../jfo-fs/dist/jfo-fs.jar')
+-
+     compile 'it.tidalwave.betterbeansbinding:betterbeansbinding-swingbinding:1.3.0'
+     compile 'com.jidesoft:jide-common:3.4.7'
+     compile 'com.jidesoft:jide-grids:3.4.7'
+@@ -175,8 +174,6 @@
+     testCompile group: 'junit', name: 'junit', version: '4.8.2'
+     testCompile 'org.easytesting:fest-swing:1.2'
+     testCompile 'org.easytesting:fest-util:1.1.6'
+-
+-
+ }
+ 
+ test {
+\ No newline at end of file
+Index: ../jfo-fs/src/de/northbit/jfo/env/JFOConfig.java
+===================================================================
+--- ../jfo-fs/src/de/northbit/jfo/env/JFOConfig.java	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/src/main/java/de/northbit/jfo/env/JFOConfig.java	(revision 27889+:aee7ca4ff736+)
+@@ -1,5 +1,19 @@
+ package de.northbit.jfo.env;
+ 
++import de.northbit.config.Configuration;
++import de.northbit.config.XMLConfigToolkit;
++import de.northbit.jfo.renderer.RendererFactory;
++import de.northbit.jfo.tools.FontMapper;
++import de.northbit.jfo.tools.ImageMetaData;
++import de.northbit.jfo.tools.ImageTranscoder;
++import de.northbit.jfo.tools.InternalImageTranscoder;
++import de.northbit.jfo.tools.NativeCmdImageTranscode;
++import de.northbit.net.ExtendableURLStreamHandlerFactory;
++import de.northbit.util.Measure;
++import de.northbit.xml.AbstractNodeWithAttributes;
++import org.apache.commons.logging.Log;
++import org.apache.commons.logging.LogFactory;
++
+ import java.awt.Dimension;
+ import java.io.BufferedOutputStream;
+ import java.io.File;
+@@ -13,21 +27,6 @@
+ import java.util.Iterator;
+ import java.util.LinkedList;
+ import java.util.List;
+-
+-import org.apache.commons.logging.Log;
+-import org.apache.commons.logging.LogFactory;
+-
+-import de.northbit.config.Configuration;
+-import de.northbit.config.XMLConfigToolkit;
+-import de.northbit.jfo.renderer.RendererFactory;
+-import de.northbit.jfo.tools.FontMapper;
+-import de.northbit.jfo.tools.ImageMetaData;
+-import de.northbit.jfo.tools.ImageTranscoder;
+-import de.northbit.jfo.tools.InternalImageTranscoder;
+-import de.northbit.jfo.tools.NativeCmdImageTranscode;
+-import de.northbit.net.ExtendableURLStreamHandlerFactory;
+-import de.northbit.util.Measure;
+-import de.northbit.xml.AbstractNodeWithAttributes;
+ 
+ /**
+  * Configuration for JFO. It contains global setting for these components:
+Index: ../jfo-fs/lib/apache/commons-logging-1.1.1.jar
+===================================================================
+--- ../jfo-fs/lib/apache/commons-logging-1.1.1.jar	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/lib/apache/commons-logging-1.1.1.jar	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
+@@ -1,551 +0,0 @@
+-PK
+-     ˆv7            	   META-INF/PK
+-    ‡v7€r%9ò   ñ     META-INF/MANIFEST.MF�PËjÃ0¼ôú‰8„|KÒ’4¥àz+BZ+¢ÒÊÈršþ}m§î#¥ìm;³»•hK¨ßC¬mÀœebBÉ<ªƒ=Bü„Ÿœšš
+-%Ë2�æ‹÷œÍ+©À¶òHÉ¢±.õ¸vf’�Í×úµÛ>Ó—ì†’•¯xÀ$SÀw69ÈÙ2x°fÁ‹æ‡l¨C¼$¡Lo2»
+-ê^rÅÂW:g!!{ç/ªËýíPRT liÕßí¾ªþSî»cüõgÞTÖ/Bðõí¦£¦cj'£�4PmÓ»Sì¶ðGéa|¤Pç¾Â
+-})ù PK
+-     ƒv7               org/PK
+-     ƒv7               org/apache/PK
+-     ƒv7               org/apache/commons/PK
+-     ƒv7               org/apache/commons/logging/PK
+-     ƒv7                org/apache/commons/logging/impl/PK
+-    ‡v7´´â†m  ^,     META-INF/LICENSEÝZ[sÛÆ~÷¯Ør¦Si¦�4iç‰±ä†­CiD¹n&“‡%° ·°È. Šýõ=—½�¤dwúVM¦5IìÙ³çò�ïœÅñ¹¿E/Ë�ïu©:§^<óä?”uÚtâëùëBüMv£´ñõë×ß<¹h7ý›W¯öûý\Ò6sc·¯ÞÊ½z�ï¯ï~Z‹ÅêJ¼½Y]-ï—7«µxws'>¬¯qw}{wsõá-~]ÐSWËõýÝò‡ø
+-	øj.®T­;=€rnþÂk3ó'š	·“M#Z%;1ÀIe['dW‰Òt¯µ±btªVõÖTc‰_^>[i7X½ñ{!�¨pKU‰ÍA¬UÉB¾ùÖŒÛ�øN˜>hxÎ”c«ºáX/cO+M°z»„ÙwÊ
+-P	êá ä8ìŒÕÿ¦ý¼œs+†�lºµv[zÈÛ!S@me#®Iô‰c‡$í•�%I	Z€àY/ÆÀ^A­o
+-¬i
+-!­
+-RºÀÓà·cWÁ²Ò´­é¼$ÿ ØëaÇrxÃ¹xg,éÑ�¶71ÉªÑáÁG3/eFGqâB_òR³W¶ ÷Yð*¡;þw!#J	NÇç¼þ‰,`E+;¹Uè<Ü×�åÎ+VˆýNÑñÁû´¯$Ù¹eö£	¤\hÐ„ÜãvºGIµ®Áš½²%Š¾øöõï/i;æaÃAãà°:ú Üd•AäFu`„Rƒ+'Ò3=“Ë6ãL\ÀZü—�]æ^‡ÿÐ&ºQ–y|xê´Õ½[í<Å'¹å$ÔÖ°[	)éÕGZoU­¬…åôkMÿ„[´¦Òp4IY¬»²É�„¢3ƒht«qwð£3õ°Çðr´!8¥ë‡Ü#A^?P„ü¯õv´ô;¸¥Q|Ülþ¡pªºìü¸cl(?jkZø±ÜÉ´	QÑ9|R†€¢oÿ±R°yH\1= —qtLH›^cBRÎs‘ g€¯'ÎÑNúÀèíPçn«*-Åpèóc4öÓ	(ìáKÒ˜p#-¥€îÂ1b°éü±ZY�<HÝÈMò?Ã¥Ñ°”>”dÄ…€n`x8Â[
+-ÖdV9X[ÈBA[/â eÛÃÎ° Âœâ“‹¾W°ó#$Scö—É
+-WÊê°âƒh7;Ž Üã¼
+-üé½$¶AP|#:¯£T¬pŒ~ˆÆ*ÜŠÜ…¹°ßér—�8k€ ™iÕƒ&Wbƒi|ž66|ÞÍy6yaXå”ƒH!ëKØÌ4”°Lou»œúü�NÕ“ô/Ä±ù¼õ0š½ïH¼¯VµRÇüT½´)h:F«¬j�Ý'2Ü¢ã¤“­ºN× D¶–%‰"«‘Ñ¨'J¡u”©“×ß"”ûÖãÇ9S6Û/Ð'\¨¥Q6ñ	Åpå™H�dØ6´
+-~Jù"KŠQßÀÖM€m7n ;<xÞAÑEš“z>h#ÂñZ¼LåîÙj‘DeÚã}£À˜5˜âiòòeÕ^Ìâ™f^×ûË°H5�€Ö è…�l(Žö×uD>ÆÎ[_`äFWÉPh§Á¥d!û»âÙR±+ßþK:"ê7@)AZV²"r7¨Öå5wTXBJª‘þ	v?V>f+‘kåF/2™DAfm´pÜrtTåiÇ–ðÒÓÈ�„x©4©Ç`„éYC<ÂQ\¯ËÑŒ’·•öBŸMì(P.åô¶#ì‡PD‘aÏF"‚Õlö–"ÏÕùì4…�øu<vÈÀÏRžÜ€ˆ�íÑ¦bÊlÄPFEHJçû¤$tê·â§ÁmKöær�„7K?¢¯çâ¯H«pÛ·ñø�Y‰õÈÅÕÇêÙf&K³•TI‘H „€ÎÄâˆ 9„SÃëÕ –	áÐ×T{�\£3ÝKò¼ƒãÇ—Àzì's�ÍpxY[Ÿ4»S"�ŸTsßÿá†¡Û‚�c=Æñ	Ò%8ïÇ
+-¬+B ö�„@�ß€Î\j}ã‰EÞ·å4?b1‘å“Ï”sÂvÐ3ÝJÝÿï\À2Õ˜`Ðr�"�‚Ž¢KÑóY3ï]a;ù ˆå…¨�6u�<Š€j ~ùQŒØ1<Qö¬�`&œMÀ>
+-»Ê¾o°Ý48�¬ŒØåU+©ÁÞülv8°"	É­q³ƒìuNZMÙY[@ŸÐÑ(j_žøîÚ`Ó)_þ€‘DVOËŽ„q‡ë«-¨Ï$oªœßb�®µn.–5ú?öB�
+-c::eÐ[VAn%þL ç÷‹T°"·¶Æ¹—d0<FiFäOü</E#÷nÔµQ[.`± |âG¨øÀQM`Å�oµ“œ29çŽüÑS1LÅ¦‘(ShF}¦„F#å˜/y�UquÀEï…X‘.¶
+-¾Á­Ò°O¬
+-¾™‹;•O†æ´u+	ÙŽQpPn3Á£gX¹i#l6ÈQ!£�ÿ7±"OÛf.áO Y‘Z!2H
+-­V)örmè‰¸¾ìzêì…¼ä“Ži[ÔÕã~ÜªáˆZ9õ�Ý!þ�TR}8î$¾§2öÜd{òà&Qiì£°ç¡ŽÅ‚öAw'Ü=ºl{„¸Ò([÷-C±œéÎe¶³U$XxsÖÂSw .Û8n˜¢ÀKÕ±ðÑ] ,V
+-yS‘‘	
+-Ñ!¥›?� Îès©ø—˜£g�AÊU†-T<&š“3Î©pñINKõÔhÕ%‚Vô¿oüÐÕ³ÕÍýòíõ’ïq {cÚù=�rgûäÙ•AÀ™L9±,ù+ZO	>”õ˜)èÔY³"(Iœófb<¨2ðAèÅ—Ø5sÞÂgíJÁ2%¶Sù”Þ/IÙ
+-Ä6}Ô”AÇdëd¡IT¹guø>óI�åy=@	]'œÁ’¹MðT¾±Å©•eàzÙ”Ë÷g¬Te
+-è ÙY ÐV/ñ�‡è›çsÐ0#±PšÐûwaˆ_§fÎüMä�[é8äƒ"5¯ÈP¦êøÜ"Ä:Lfó±lÈªÂ[ìwòˆÌ¤Õ½…¾$
+-¶¾Gäg¢~
+-ÇU¥ºjlm�DL îÿ‚;�1�†`†³ÉDÓ*è™˜Øñ8þØ0OÝ[œ5Qê*ˆ¶Ò°ž	ÀÑà+s
+-ñçÈUÆ‘œFÖ:a¹g|í�¹2b1Ù]‘©ÏhS¤´©©Y<<ÑŠäÓ¹˜J$·Î¦yI�“ÛªIŽ¬gÉD¥1Ž&c™Ø©u‡|KÍŽ¿	à^5±@7:¨¢Žœ¦a£RcûK³’8ß8³Èl˜•�±ž]%¦�;r˜êmòéóÓšyšEjfÃ"˜ºVáö‘×¯Ì€‹âí
+-Õ—�á¦ÓvKí–RÍ�Pœª_ad.ñ1»à)X1¶D[èé(ð>C¨#S�ªÌ ž€7Äª­´|¯tÜ{ø»€?â3]BÎ�)wv#„†÷jL_Â5†lqn
+-N½”}À™¾ÿ:ùæ‡CÐ�C¤¤6ÕªßFío�° ;ð	–tr)~Óâõ4jVÞQÂ½+bÓ�“Ú“ùlÈ¦à7_
+-Î” ¶ÔŸçâJ;j�ðÒ¶�‚]1	¢ª›7°Ôyc‹•`€¼HÍKš‚Éa>÷]RõuÅ¡Áq‹š?�ãË‰s/q®�?[¬År=?,ÖËu0îÇåý�7îÅÇÅÝÝbu¿¼^‹›»üZþæ�X¬~_®®€îh¾~Äé¨K'Ñ„+U6&MDsRpê M.™Š"{
+-±`Ìûåýûë¬¾z¹\½»[®þzýÓõê¾?]ß½ý´\ü°|¿¼ÿ™BèÝò~u½æ×^ÆíâöáýâNÜ~¸»½Y_sµåÛÂo@ÿ6Õtë@73ÜNÃ<gMo5Òs:p
+-Ñ…�Pü%ÄÍæ¥<mt87Àµv„ìÎ”:¶Éêþž•¦±ùEëi3Ë±÷—9|&ÅEïµÜè†.Ï—XyÐŸn =X|ÕÐ°t„N;µ„›, !tjÛh`_¥º,âmw1åÆÉÏgãý‚‰Îô½!BGÊmqï-Â–¾�àèvü|~0zNÊe‚ËMû‰ ¹V¶r;�áãêðJ@z9Àõ
+-ïÖ³ÛgH( ¶|•€†gºx!ç…„Æ™è�ãjËwæXÅc­Æ[ããF—¬9FŒùÝygf¸šO.ž½Zá±Ã»5¦Úë&Ÿ~‚¢lú^â”9ÁˆŠ×R7£åj$›zì¹¡"xæM¼ÀàÍíÁ+�ƒqˆýxçeÄaº¬4]’Öþõ
+-È o„ðrƒÏðÝ\,J¬	h…€¼¸ó"ê,)>î�ºOÓõø²ðÙë¶ÀBË�1<¥Içä²�f®ÀÛjExPGÊ®T|ˆžÇ ýwªíðÕ’4c³6Awa6�ŸBoy…°ƒÌ—¯Zà<˜/¾¿ÒAcƒñ£Ùc'Ä­d4Ù3œÎGo´tMv9·¿¡!®ÿ�4Á(éKL'Ý¢$DO“¢,üL{&]3>cÂs¾“mêh›JÕÐ®ð
+-`ÆÕ™Ñ¹´-!Q ×ÑŠ)�GkÓm™Ÿ&CWŽÍ*Q‹Ó¹ñæàÉF:Ð-�lÉü>‹ÆŒ6F]8€¯WWXWÏ½G¿/noá‘å?ß iZ ˆzð¯/ä¯îáo¤Ê>Þ%Áßý.(ükÓiB Õ²ÆB>„©F‘:ùZ«¦r
+-$;ƒþo)Dæì—_gøh2á«Ý!¡ªïú²Nz..®L÷‡ø¾@–£Aøï.uëÔ¦: 	@ñ£¾;ÈÊvv7‹¹â€ç�ñ"”šzV p6/¨øi?'
+-(NÏrÜ@”!cå¶‹hfŠq¸ZÝ¨ôÊ
+-Ý�M.œ�r4¸Fža­˜Þ|ú—_PM<ïã½åÂ½kÏ¤!‡´åo¬9Òeâ/øûUüBzƒžG·¬¿Òã>Hª¬gš†O‘¿*.ð�øÎåå÷("ô#\¾üø<ÐxÝù6” 1FT¤8"uýfCÓ29Ù…@–C÷Ï½rú¸ûj}ýT¦%_ÂÐŸâþ�3“�ÔNßpÂKƒü�§øÿH¿ñ&³­•š¨‚œh
+-Ä­ÛŽp@	 ,tÇoöùiIâëîô\óÿPK
+-    ‡v7ŠA8…       META-INF/NOTICE­�OKÃ@Åïû)Þ­
+-Í_Bn„¢«÷5;I·MgÂî¦¥~z7¶i�:‡fø½Ç›,CòçRY†—×ÕsýˆÖö„Fœ#?Ë‚ ¬	žš`…±0�«xytÇÒ6Äžæ“Ë9?AešÏa9
+-­G£=¡‡Zv;a�¥t]tžÿ^]ÚÖ2�íÖežIl÷¿ó¾IÚždd£§§”ZMA'flBÞô£!Ÿ�ž<ü™¿ñ·0´§^2ø<b¦#oYq�fûõã6S@‚wf½‹`½×½pÒº¸Äm««ÃF»j‘éÝ…²—n±©N}bŠ´L‹òÚÚP�Ç	ËÓB)õ
+-PK
+-    ƒv7¦µîª�  ƒ
+-  2   org/apache/commons/logging/impl/AvalonLogger.class¥WMTUþ^Â„_¤
+-Uù	”¨€U Ð–­¦€ÁV«N&“dê$Ã™L¤n=ºÖ­§®uãBÛjE�u§ç¸qëÖ­[÷ê½“af2%èáœ;soîý¾û½wß¼Ã¯aœ�EKmxËlV"XmÅ‹Q4á¥v\ÂËQ
+-¾Âoé(.c�ßÖÙl°y•Í6›l¶Ø¼Æf›Í›×Ù\es�ÍlÞŒàzoEð¶@,«æäŠn¥�|^5ÆÓ†™OÉ»²RPSò{²n”R9S.ª{†ùnJ·³RÕä9�Ý)k™×Jšµ 09z€±m�¦%#«
+-t¦µ’ºV)fTsKÎèéIŠ¬oË¦Æ¾l²
+-Z™XjI£X4Je[+åSZqWO]°™ÝFOŒ¦oP3)]¦„MË¤¼*{‰:c.ß¯myÕ]–3£cÇZ˜®²j-^Ùæ¬š©ä’µ­¬gn¨Š5WÙ*˜Æ‹µû‹ÕrYÎ{Ztª„EÒê{$;Ù¬š¦ÁýädKÖi	´RÎèÐÊËÜàJ‰ë³áÑ±kvx…óÝ0V¹Ð
+-Ä´ò%B¨MØ2eE­MØ‘Í’ë7[ü3ïQT u^Ñ�á!Jj0ºiTLE]ÕxÃ»k7r’I8…óNbPÂã8ù@æZE×7­d©æÊMEÝµ4ƒ�OTw)Q�Ë	ËHdÔDyWU´œ¦fZ.Á£•Ph’,³¢X†™ ·RV³CÌ8Á;dd$Œ!)á9œ�@‘�…*a96ÃžÇY	SìN±›g·Àn�ÝYvgØ�awžÝv0,0qœ™¦óî.­ÄC¨L`¬á¦}¤ñ_*hzö °XïïTxëiÀ©¦¢®ç†ëÍk½s™¬ÓGàê=×CCÍ¹1Ñ6�„å‰ð�=û)~
+-	²Cä­SFˆž�É{Iñ
+-BÉq2_S(„Ód{è³
+-,‘�G–Ñ�<A‘¾jžÄS€ýÆðÂvÀ
+-º8kÄ¿�ð/ˆý€¦«=Í÷ÐòS’ãûˆ„pˆ4Ž²i‡ô2�¯‘¢uÞ¨!qÉGèoÔ&§AvÈS¶4'ï"ô•Ýbwl©šàÀ´aÜ]–)·øÂúŠÚ¼2õ•9P]Ywºýª ×Iz˜žÉoÑº�6�OÑÍïãß!:±�ö0¼°E’]²aÕRWÞ &m9üö4ž¡l¦zÖ¡ºâla¼†ªë€jRÈÇt“óýš…Œ»Lq‡IÐ
+-H‰y¥tø¥|H@5,e*HJÌ#¥Ó/åc’òÉR¦ƒ¤ty¥tû¥Ü" Ï–2$¥Ë#¥Ç/ås’òÅRf‚¤ôz¥<â—r›€î4,e&HJ¯GÊ	¿”IÊý#¤ÐmãàO;‡-êð—žãúsÍi‹:X‚/¦ú1?Âou^Bèò#ü^a6¡×�ðG]„¹c¬ÃŸuæƒúüÕE8÷¾[ÿ Nh�ŽÕ¹ÿþÝô�ƒh?b¬‚¤ôy¥ôû¤ˆ>’Òß°”… )})�ú¥Ð
+--N?TJ+qÞÁ´™é¦Îu$j¶t–ìþâ¿PK
+-    ƒv7±±‡;J     ;   org/apache/commons/logging/impl/Jdk13LumberjackLogger.class�Wix×=cËKclƒØB–!oYÀ¡%c%Â¦ØÅµ»1–Çö`-FCÒ$$dé’6I7²6´MIÚ¤
+-Ë'�64i“îIÛßí¿öûÚýÙåÜYf„MÿÜysß{çžwßy÷Í¼÷Ÿ³çPŠ&üÙ�›0áÃ�8(f²‡äyXÌÝbîñÓ|Þ�{qŸŠûýðãˆx�ÖƒbŽŠyH<¬â?–bBÌ£*¾àG-&T|Ñ�z|Iœ_Ïc~|_Uñx9žðcžó5áñu?¾�oúñ-+ÇSò|ZÌ3bžóœŠç}ø6^�—ãÂã;òú]‰þ=i½(æûbNù—T¼¬â*~¨âÞXrdÄH)XÙ¯Oè-ËŒµˆÏLŒ´Dì¾[xzÜPPãŒ‰éìë±RÂ¾%éd&5Úcz:Ýe«v<»k49ä¸–E¥{{bÈqv&3‰!Ê€ÿP&?1&Œ˜‚€	ébï3aZ[Ô/¥±a/I¶'‡jIÄL]™ø ‘êÕc6ídT�íÕS¦¼çœkÔL+¸%’L�´èãztÔh‰&ãñd"�mÆÇc-w�ÝxsÄÆÛ¯GÇò9)å(íÁ¢”/eYàéM%
+-›º7eD“)fd�û.ì±»´,æ$ª4žfðc’épEU°tÄ°Ú/Ê:§%šÏš¦@KÛÔúR¦%*¨wÀÌdŽ²ã'ZÅ8_­Ùauùa»çÜ2ÊJéQÃ™*q’cFÂ<,3V,Ìéï�í}Å¸g\]ÚÒSu&UCâ±Œø8EÂuX»�”)‹(\pÇdÔ·ÌdBr3dfFæé£{p¿µì$«q#�ÖGæé87@AÈeZÑ
+-ó³�×H¥’\bÙ°néÜÉ�ªÕÁ
+-—=Wfb8© ÊLïî		àìÓ€íîè¼›ŽN‰‘wTšé0
+-ôÊèÓS‰ü{™½A|�^å[¢±Ü©ò÷Ø‡¶ÓU¬t}³¬DÃmèÖ°	­nÁf¦5“K$&4|›5´‰¹[4Œ`TÅ«~„sÿ/£k�|MC—àžÄ6
+-§Ä¼ŽÓ:1Åâá²²˜VPë&×ÙËS¢œÑðœÕ0ƒ7T¼©áÎ³èU&•è—ioiø)ÎkøÞVqAÃÏq^Å;ÞÅ/¸WºµNš¿ÔðÞ×ð+§õë‹xçuªâ7~‹­~‡ßËúvjøƒ¼Žà
+-Jë�bþ$æcàÆlú¿
+-«ð|5+X{¨ˆT³¹tò¬é1ó°S$V“0ec¦¥éŒ[]¼Šž›¯¤VÊ)«IVÏüÛeYÞYxÁøèµÅAU¯=·ë\)ä¬©6c±p¢Çb.{�Ó²|ö_Rd—ó•0Wb‰],V]+¦]JX.nÏÛ—ðE�œL8}ŒUïÞÃSl%gKn­ §^ïreº§Ü—0&-û wö‘uâÚN¹úç¹X8%÷0ž�fbÈ˜ì.r…³è{‚ayøÒ™ÁtnR}0v]S…Ü	á9D÷QË‹(Ž±:Ã]$5¡Ç2†@¬w»7Ü0½={;ötÌ	ú¢e\¶Þ‡»:»	 ¡{z¼oûž®p×N\Í/³›P‚›±^•ò
+-À#–Ï)­ö³-÷d�åsµT>—Ca•ÚF»�oGØ_ÂgShJH™B‰˜ÒP�g
+-e¶õ†J§ †ÄÊ¢œCNÚ°·Ó®‡�¶Ëîc¸*¯eà•zvã:|�èA;GÕ;�°€ÝÂü0‘Â–£ó&‘ÊøÜ)‘²ð=…­3ð÷74N£¢Í:
+-õi’™†�—²,*í†7‹ª¦wàxš²X"“ž,ªçˆ†ø‘
+- Ÿ"‘Oc
+->Ã<~Žþ}Ì£N*ƒÌÏ©Ûd7’F=nÀ“	åiïÄ�Ì£b·îâJìV»ø?P"÷’³å
+-Î«`ß…,íŸæg—³¬oµ|©Û5ƒú~®iyW	¯hÌ"�ÅÊ6ÏVõ<5«§±¦­,Àå­í³m›7àåª®Êb]W—¼Àe;îÿý[aÏ3xk®¡Ï»¯U
+-x«ƒY\ÛZðÖ©uåY\×æøª›³øH«?ð•Öùé“-øêüž}Y¬çÎŸ€'¢Ô“özÏr{®Ïåó³Ô�@9’¨Ä8êp k‘ÂµHsÃ-Ê`‚*;È|Nb/1Ëwsä=lÝKÅÞ‡Çp?ŽQ}Çñ ^ÅƒÄ~˜èGyÉ>‚·ñ¨½‡¡ÿe´‹ñëð"Å´‡ñ×âYJª—ùnäŸÐ'¸Æ;Â8}ÜµNFÿ$}r2ZÑÏ=W­‰û>@´c¸†»¿™b=Ž 50@]œc¬W$k¼�Ûg…ÚØ—eñe—+C§l8ƒ
+-Ê4BsÒòÛ�O�ì“:¯Ì¦’ò$”@Fs�Ý„,-„lt�|Ž�ÏÛ�ëœÁ—@JkˆÙ)aÛpåÛPŒïKy¾†+ß†b|OrjÑ|‡¯Œïy‚¿µ ßá+ãû>äl±|ù…šÛï¬¤,<%ï¢*Ägé4Jñ¤çµ|˜*ö
+-ðCÔð+MBiÎÔ¼ÌL×44KÃ_ð×Ò`º¦¡©XþAÈ.:
+-û1–ß”KC…”[Ê˜Õú•<´×îúWÁ’+òKŽƒhp�ø·+Dü
+- ”2WˆD1ˆ&ˆJWˆd1ˆfˆ:Wˆñb-.k\!¸*¨¹ˆ‚” 4eÃ
+-:àª æ"
+-R6rÓ¢”råÛRŒïmß¶ ß”+ß–b|ï"dd‘|Ëy¡å®t~Ñ(ö(•j7œ´Ó?'Õ´–*ó?PK
+-    ƒv7ÔÌ³×‰    1   org/apache/commons/logging/impl/Jdk14Logger.class­V[peþ6·MÂ¶¥7J ”"ŠmÚ®*¡r+i)„TÛR(÷m²I—n²5—PÑ_ô]g|Óg|ÁQh�áAgdÆ}óÑG}ô‘ñû7!-°Û´ŽÓéÙÏ9ÿw¾sþsþÍ¯O~x7úña›q6€$…
+-R¼ÄÛ“1„g…˜ðã\“8/Äažâb —p9ˆ+¸*ö]¯×…A«i!RB¤´&###+cF†.!˜.çr·Ú¼fH%n¨ój´\Ò�¨af³z>µL‡%ø„B+HØbçdÙèåÉ«9MBKÅÇPi/è"ô¼^:"¡½ûEsÏ$7šinnJèy-YÎMk…	uÚ°àÌ”jLª]¼W•žÒŒ^”ÐŸ0Ù¨:§¦f´hÊÌåÌ|±ÆKÏÍÑÓéÙ½jÝ´IìvLõEn+43sAÄ·ûÈÊ5ÙöÌ&55;QPSZÜÐrZ¾Ä �V•ã7SÚ\I7ó,�-¦„€ÁL…3ë¼TÕ›ªTÛ—ÓJ3fš
+-£rŽî\‘9º´›T¥µérö¹š�NßÐR%+9§‹jö¹3«:HˆØls,G@[NÐ«
+-&+ãÍ¨%•”Y­”¨vP¸»gÕÒó“5Ó‹'÷x^`vîîž‹–:. kj*†DŒš¢A/Ža¥C¥p+Î«…|íÝ[f^ V‚ eT;•!™WpÜ,RÚ�.ÚnãŠvÚ-²P°§lC§‚íèRð&ŽÈ¸¡`Ì»Õ¦X
+-r`¹œŸÍ›y¦‚9¼£  D%!Ê2æ, ,ã¦‚[¸­ =
+-ÞEX„xOÁûbuGˆ„ØŠ°„ÞusyþlÙt« $Ää´Y{t3:®q
+-ýve7;(Ë§Å²âv<qº
+-l“åV—ÐÕÝSo
+-¶®b– pÐP‹Å¤5*mO[ïÙ«I„=k
+-QÅÍCfsÆþã-á¨Ý”ý¿Aç±Ã!óIÆŸ9ÿ
+-›r^5ÊÚhFÂ.»Ãö^�OÆÇ·Ûî^_uÒG’C£lÆ'üüñ±äHr˜ÕÁï¡!láç1,zÀGbÈøôˆ9ãs$z¾D¹“oiú»øG– E¤p	áŽô
+-Y„‡š{´»ð2å~N�±N!€$1€VÎÕVÅ+¶……]x°V"&/U1…•ˆR'1‚´ezÌòô.Âû9¦~„oj	rÌò.Âóµb2ÿý!ß/èùy¿BGÈçÝ„‹ÆdñØó÷?F3ABrÈß·åk4=}ë_DÃ2÷Ùç}M¸ÀJM‘Ý%rºL¶W°Wq×p×1ŒiœAŠÿt+·Y"F½Ì�¿;ÐÇŸ ^ba7¢ÄÝ‰ØÃ|eâÁ^®üÖ¾§ÕÈ`+"Y«ý´º¬Õ¢¸¹ûºuNÚâµêéÄù.¼"ß¡±÷!š¤%l\N)h7ßrùjð:Þ ”€<T…%¤{%dŸ
+-äˆëQ@vUœ_€«™»¸>lË·Ù‰ïÇÿ¤ßÃ¶|›�ø~JÈÏÖÌw`}|¿ ø—uø¬�ï]B~³f¾ü4VÁG¬w #r®ÇhŒðé~ˆ1¶Ô|[ÓhÁÞg+>@–¬PJek5”Ä‘µ+C«S~"ÀÏuÊpÔ¶­Neø��¿¯¹Çp¼
+-~°Z†
+-â
+-aó¹[ƒöY¦?V¤¼¡–ò	'ˆfˆ?m!×ñ—-ÄI'ˆVˆ¿m!âNm6ÿØB9A´Û@<±…¶í 6‡’P¤`�¶í 6‡’Ú	¹iÍtÊ–o»ß.‚ï¨Ã÷”-ßv'¾}„ì_#_?Çýt|»edvû÷ØtÏ*ÿòñì¡<c…JüPK
+-    ƒv7NfPú  P  1   org/apache/commons/logging/impl/Log4JLogger.class•VYXÇþ‡k–ÕÐ‚„®à‘´¶a‘v-[ŠcI±�€µ±V‹X2²cgX†eäÙ2;+�b%ñ}ß÷íÄ‡|=XÈFú|)oÊ—Ç$ÏÉ»ýœ<æKUÏ°0»�—ê™êª¿þªî®î¿þ÷›P‹]ø"ŠÆeè2&¢Èc2Jj#Š�8ÑˆnÜÇÂŒ’(È°"°£ˆòô~Ã3‹"ÿº�èB‰ÅI§XL³˜‰â4~Ë&÷³8ÃâwìöûþÀÀ0�ö`ñøp�°òQ�Eðx;`Dð«žŒâ)<-ãÏÊxNÆó2^�ñ¢„ºôí½Y	±Ì	í¤–25+ŸvÃÊï—Ð`Úù¼îHØ”±�|J›Òr“zŠ”{N¤2bŠŒê,­ KˆºŽ–Ó3úIÝ”°e¹ýÇ°Ã�!�Ý9S+ãd÷Lâ9»P°­bœãQè¸Q˜2ãaÏmŸÁº ¿^v'œÆáË�Ô]#'aë2L6îº¢Âô<+Êõ€aî�j;»ŽRV½ö8eÕœ1,=[*ŒéÎˆ6fê\(;§™G5Çà_YçNE	»‚iû9¥üœRœS*�%°¾syÕ9øÖÎŠõæézQê%îƒc'ôœ+æå‚^,jy}ñªú!nÍÈ¤cŸâ´–äRœÐYâ1®�•ò”½aMØ4œÒ‹´ºãØ´bõš«Qéóº;¿Š[:»ªì¤&£ØÇˆýKq\¨û²¬&Eš±ËŠµFq€(
+-F¸DAƒcD®üßàm	W†­@ÈV«™Þ-aûÒ‰¬í¦í’5Þ?�Ó§\Ã¶„å5"r¦¿�jôéÅG‡í’“ÓÓo¢–ÀæH²½Œ—¼*�ºR`	&Y[õéžOÆ+
+-^Åk
+-öã ‹
+-vãZ×áGp;¥·€0`šz^3{œ|© [n LšëHURw©VÉ4U¯C¨†¥æh³»N)çÚÎ~uÊ.
+-ªµ*–X-Ešž0ò%Gcœ¤Œ×¼ÁtRö*xo)x›¿Þañ.‹÷X¼�½2þÈ,ÿ¤`Ã
+->À‡
+-Žò×Ïq½„nÚSIoO%ýc—ô�]’�]2PY£8®`ûm
+-ø	¢Éù~ à6Ø°Ì@ôác:¦�‚Qîšå"»~ï ´‹¨êîäµªe»*Ù¦×.êG†zzûœÅ'2>Uð>÷È„·L	­!ÛÇK{µÝ†¶×ÒCO{¦
+- ¹Ih>†�Ö©ß™Æi�ó’íH-gÂv²âh
+-é´Ñ©	žïJm�]a·Íòôj®ž·*€Lþ~­ÉÄŽ…œÛ*wÎÿÑðêûúÞqu³�lz�†c=Ct=Ö÷
+-
+-Ñ˜îéÉÐÚVèbt„v”ÊMO¡îæµ¥4ošŽ�Ö_Nƒ»a‹Qì¡³•>iÇ.p=—u,aI5ëÓ©Ó9„mèæx%r*GŸ0©:)aNäÚ+LÑ2¸„«Ân å*l£×ÉNÔÐ»)	›ùÐx�;�5Ü„hŒr 1Â§~ˆ¿ýíüm¤/je$Iý„$ÑØœ¸€†„ô5d‘s"Ä�$c¨#9NrÉ¥	:n"�â¹áfôÐÈ�}Èqò¬¡qëbÈD7‹ÄI³€¿
+-$ïà›hE[`‰8<,?qâ’ˆØëG<MïH¶J,ŽØ}k¿Et4¶æ”K‰î9¬õyâo§ò Å@|—r.QœiÄ1C¯ÊÓ‰2�„XæÑGEôxÜŠzaÕÂYÎ¢iÍÝÒZ¢EÅüëT·7¨-eÔ¤q‹�z«�:D¨µKPw† ~L¨gªêÙ/Cå¯Ü&–üPÖëBYŸ#üÙXªÂz](ëïõûU³ÎTae}™ðÿ²ëLÖ±PÖ'Ô¬šõá*¬[CYÿ“ðÿµëÃUX·†²þ‘PZ5ëlÖm¡¬ÿMøÿY�u¶
+-ë¶0ÖÝ�RÍªYVa½>Œµ¤þÚXVa½>”õFBÝ´jÖô˜ôñü†Üžø
+-òe4%hŒ\Änj¤ù²¦‰a%²´
+-1iG )·—›2=ü|X¯UÑ]À´çÐþE§�õRwÀ?Rö)ûïõi­ñÒn›ÃÆ¥× Ö”!î¨±>b(ÄÑJYlZêßšÅ±JšC(¥pg%ˆÖˆ‘ˆ?¡ÉŠ!²þuK\„ôeæ[ÔŽÒÝTwõ—„O�Ø¸Dº½ç·gáÞ…»…6†_‰7Àü-OùVÿE`‹‡g±™`lËEl=�ÍgÑ@š9üì<oÜžºÂ›êS³PY¹ÍSªB©Îaû›|“î�Å/àÊK¡F±«æp5¯Î?£ë<šÏ"zˆZ>}�›`÷Ó•¼r¯§+þ]C4{œæï!‹»p†rz÷–+x†2¾¿‹ ‰:�ýPK
+-    ƒv7ÒNWa  W  6   org/apache/commons/logging/impl/LogFactoryImpl$1.class•QËJÃ@=“¦¦ÆhÕúVÄ…‹*ØD·Š …B!¨ ¸ŸN‡t$ÉÈ$üý	]).ü ?J¼‰]Øî:0sï=÷îc¾>¿PÁv\Øh¸XÁªƒ5ë6fÎTªòs†JóàŽÁnë¾d¨‡*•—Ã¤'Í-ïÅ„,‡ZðøŽUÄ#ÐÎ*c ƒ×MSiÚ1Ï2IÈI¨Mäó.Ò:Itšù±Ž"•F¾Jb?ÔQ‡‹\›§.…ûÇ§Ô�¦+Íƒðž?r?æÄ½êÝK‘SÒ½ÑC#dGuãêVÁ÷0ÇÁ¦‡-l3Ó6À°8Y–a·„2)†FåOþµQ�Ô@$û"WšºmMW†æàBÈ,Û‚€aslÖr{¡æ}iN±GfÓb« ,º4E5ò|²´sTßÁÞÊôlI Ðz†K¾÷GÀPüN‹#qk$¶?`½Nh_þií‘ÖÂRù.cž¬K¹
+-ŠSûPK
+-    ƒv75—o.Ä    6   org/apache/commons/logging/impl/LogFactoryImpl$2.class•R]kA=³›f›íjjZ¿µF›Ò4UWú ‚"H¡PˆZˆô}²™n¦îî„ÙI`TE¡EñÁà�ïl©Í‹.ì�{îÜ{Î½3óó×÷pñ>ê¸ÝÀîXs×Ç=Ü÷°æá�‡6ƒ7ãIç£(Zýc>ãaÂ³8-³ø%CcPdf,ŒŒªÔ‘8b¨¿’™4¯6»óEó‘­C†Ú®	†f_fâÝ4
+-ý�aeUÄ“C®¥ÅU°fÆ2g C°ŸeBï&<ÏEvúJÇ!Ÿðh,ÂH¥©Êò0QqL:¡L'IØWñ�ŒÒÅ>ÁÎ
+-áêiÆ°ÚÝºÐÚûá±ˆmú5Õ‘Ø“Vwåïê§6?@€‡Ñ°„†‡GÖÑaxö¿­0,_n€a­å"šjiŠð@Ëµ‹Ñ›ÈHE}»]{~*EnDÊ°s ÕDhC×÷âß®b>„6½‹:µ-;'ù>ì×²ÿAý®¾JÞ[Â.­ÍÞW°ÞöœÞã3¸_ÊÄ&YK	çËä·ÏSq
+-«%U³’±ž•pÈ¿Žõó“Xï”XOá~Cíó%ÞO%opžWñ:¸YÚ[X¡Õ§½…Rmñ7PK
+-    ƒv7ð¹žÁ  G  6   org/apache/commons/logging/impl/LogFactoryImpl$3.class•R]OA=³[ºíºX( âV-¤Tq	>jL		fUïÓéd;d;Cf·Mú¯4I|Àw”ñÎÒ úÐMvî÷¹çÞ™_¿\ÂÇ66CTñ Ž9<tÇ£�±àI€V€§Õ1ÏÚ"cXMNù˜Ç×i¼—ñ<OïKû†¡~4ÑÅ@JPz1Py{‡a'16�ù3�Ç™ISEõjx–Å‰I÷¹(Œ��I8Õ·J«âÃ‡Î¬Åÿá¶uÂPÙ3}ÉÐH”–ŸFÃž´Ç¼—‘§™Á³n•³§ÎŠãÏ †è@kiK4IžÝ)µ_ÓD¾i†åÎÖ5~Ÿ{§R�ÌÈ
+-¹¯\ß¥›Õ¯\~„y<‹pQ„êžGhcƒv;+†…ÛÖKW.ÅÈªbZ5&*©ì¿…2ÄÛï¸ý­üsµtë©,¹•š ÖnLxýÐ¢GU¥uðÐtc�Â}M7Ù_Ë£wÉn�ö‘lŸd£{Ö}q¯ûòþ×2q�N	ï‹¤·®R	p¥„jL��æz¤ßÃêz—¤‹ÕºßàGåË-ÌŸ%æU}mŠéá~y®a™dH±¹²þ PK
+-    ƒv7´i§Ã"  2M  4   org/apache/commons/logging/impl/LogFactoryImpl.class­<	xTÕÕçÜ÷^æexlÃ	dAÀ ¬	�˜HÂq˜y!#“™83as«Ö¥Ö]ëÖ·¸Ð
+-ZÖº€´µê_÷­¶.U»ü¶Uk«ÿ9÷½yóf2ø¿~|¼»�{î¹g¿÷üâ›Ÿ>
+-”ŠÝ^x¯óB¼Þƒ?ðà
+-^XŽ7zAÅ›xäæ|x·yp»ò­Æ-üù!nõàm\Þ®ã^*wpãNþÜÅŸ»u¼‡Ë{y¬“?÷éx?—0²=¸ÓÃñfnü¨þâÏ.îæî‡ùó~ÂÄíáy]ÜËå>žò¨Ž?åò1þüLÇÇu|Â£ðI/,Æ§¼¸ðçiÞÅÏùsžáÑƒŒäqÏ³|NÇ_xð—^8oÖñy.åÅðE®½¤ãÿèøk®>ÅÛy™'½ÂµWÍk:¾®ã\}SÇ·t|[Çwt|×ƒ¿ñâ{ø[/þß÷àüÐMø‘ñ÷üØƒŸxaíÿˆòàŸ=ø¿^X�Ÿyð/^8ÿªãßtü\Ç/ó—:þ]Ç¯tü‡ŽÿÔñ_Ü÷o¿f¢þ£ã7:~K]t�ººPt¡r‡¦‹<.=D®Ðu‘Ï¥W½¸4tÑ›ûð§¯.úé¢¿.|Œó&]àÞ�ºÄS{0O¢‹¡\£Åqº¦‹áº¡‹ãu1R~]ŒÒÅh]ŒÑÅX9AãtQÈ¨Æëb‚.Š¸·X%^X%JùS¦‹r]LÔÅ$]œH’“uüTStq’.¦êb÷Mg'ë¢Â#fèân�ÊŸ™º˜Åã³u1Gsu1O•º¨â¾ùºXÀ´.ÔE5ÃÖðç4]Ôê¢Nõ¼ö"],ÖÅÒxÑ ‹F/ìMºXÊ³–1ŠåºX¡‹f]¬ÔÅ*]¬ÖÅ]œ®‹µº8C]¬ÓEP!]˜¼¯�Xï­µ‹,¨®_°¶ºnqíZjL©áï‚ª_í™���òH º¾¼1G×Ï@è=/M$Ñä²@¤ÃÌFPSyÚ¤)‚ã3‘/­›[ÕP3gÞiÀq �ü­rõÅ§Y®ÖVÕ#`5‚Ak7,Z\ÕÐÔŒÐÏÝ\»¨¶aÄœÚÚEË×Î¯�³¼ªrí¼EõMU+š\SFfŒWV7Î[´¬ª¡ù°««æ4Ì[è†èŒ	3Ñ«'‚±�faÀª\,ót$Ì¦yóh¸’È
+-…ë£±D2\7[Â›¼�$Á®ëHš	„AŠŽd8R¾0�hMÖELÂ’–|2Œ‰­ŸÇË×ÚH}¸Éb‰w“1¢c¤‹Z#b“å. Â6$sJcx}4�ìˆ2Ÿ{r^œÀëÌdk,ÄBëŽÜ#@ŸèFˆDb›æG›Ì-š47'º:SÜ’Ù½0lÆñ`+u–ÜË+�å•ÇZÜ%1ä¢¶qK4Ùj‡Š­‰±øú±�ö@°ÕŒµµÑÎÇ¥ë	ÅØÚØúùf-3åˆÐá¶öˆkJ55ÆÍ"y§„£áäLeü„eê¼Xˆ¸Ó·65ë;ÚÖ™ñ&–5^,ˆ,ÄÃÜ¶;Õdk˜D?±–V)·V)·W)·W)gâÊ3‰#vëÍäœ”†!Œß]I'¸º­;“DJóÔ¨Ô®þîé¬p¬¤ã'äTu#hQÆçRäe¦­wês�
+-q�UE;ÚHÎÉp,ÊÆ7‘$Áô¢u«m�G˜<¾› 'ôÄ
+-âaÓH0[·’…Umší¼!ž’“GÄ¥‡büG†¦}DÌ@‚å7ÛH¹]”‹ R#‘!¨Â`ÝåÄµ�–3öåã â£mu’oµ±@ˆ�UÁø	Ù,µ†hÎÀp¢ÒqS‰ª(«`Hê-y°>ŒÐ�©(—l‡º/Û€9õÓ –CCú;Â½y3Ø'·8R$<½‚n†v½Þ$—ôr´‡¶™b_ÚCm†˜ÁG£½•f{Ü’¼ÿþö,·¯•1/··=.œ¨	m˜4¹VZù™�à†9áˆeØý¬Á)™]´Ì”WW¯¨¹)m
+-yí�x -‘q‘+šz-%[Âë;,Ós³ƒN’x›Zã±Mv*Í±ÙêèFrX<¹)'eà"W?"§VSG<ˆXlmÜ’Hšm‹ã±v3ž$O<½gåÏá·‘)äcè2[Hª„zq nF35vb7�µõåðz+LŠÔ"Hä’Ò©
+-¯£à´Å%¢#ØkŠä•,ùRƒ-'kiZvzu$gílZowX§Ko@Ê@fAhçÆbä‰¢Ø) æ@¼’iSC-’™²QJ†�5kfAÈŽÖÄŽ0fq×ëMž?XoÎíhia>í¶ˆ5ÂöË™Õzxó,·OŒH´›ÁpKØešç p´%o[Ú‹6†Ûˆå¶«˜Õ}öG%Œe,†@4ØåŽh	GCKf¼17}êd'yÜ`Ü¤™sã±6»sÁQ)ÂÊ£ˆ9JGœ¤ÐÇš5“åKj9¢·bñ iQ52acÑi£Ej,9?Ö
+-9fˆ0:[­»ÁÖãcñ0­ˆÆ8ô¥1ÕÇ$d¥ÙbAÆãÒÛº@œÙÕô'œ"á­f<9€v;'h'Gàbr¯ É/˜lLJ‘xÓ0ìôÝ®·oÖt–eG\;%Û>Ö}ŠÀ†ß—³¨Œ_0Glì».{â@éú7™‰LÀ‡s$Çî_‚“øs"¥ö&Hé[I5#f·$yNÏ
+-v:Òn\fŸf8Ì‘$ ã	­ª„™Ûšl’!§Œ|/žE‰+//>ÚýË5ùÔ!Ý~K ˜ÉÞ>ë¡Œ=ÕA´„S^&!Óè~n,–ÊxÃ©v‚·$³q„Žà<Sç±™Y¿y"ŸÄ‚„"1vâDjè§#vÂîm”æ6?Ì~~@f†]Æ
+-ÆÑ†8/'9’­‘©õlD†Ø€
+-DÎaÀà�´nŽƒ¡†ÿ5à3þüþFš›µ¸ÿ†¯‰gÜ]ÆÝe#ü>^nÀçð…_Âß
+-ø†ÁN �Tfy¤2Û#•Ù©,½k¾¢iXH”á$F÷Oe&~Ë†Ê,%âED´Ùk»ÏöQ�ˆ¢Çâ,O¹$eˆ„H¢Cl4Ä&±Ù[˜%pˆtT=ùM§áClg#k�i8�øé`éß�mŠúÖŒ'qí@œË4žêN½+üANÆbþíf†?èŽ€„ˆ6Úâ§pË!‰vKºBV³6Fqž8ßßÁ‰q�!.ß5ÄE´KEú�'à8C\,.!�š»hQSí¢9•U
+-†¸T|�Hí!ß%§°´þ´úEËë)rçŽwÄÂU™Š9Û—‰ï{Äå†¸B\É�«È8ü-¨ü¤ïküü	Þ6ÄÕ$)øÕps·oVªŠpRZÁ¶Y–5£Vò×Àj¬!�"“[òGƒdŠ5•fÉü÷(fI¸Ô,—Y¹°G\CÚ ®õˆëq½øþþ?91ÑqY¯!n7’áŠ›R6›é~)ý<¶3üXrO@Q¿:µ#�™ðˆ›
+-±Ml'×œÓû"'2É·û¼É<ï‡e««æ-m¨nj^ã_*OŒdAþØºd õ·ËÜ/=s$åóçµšÁ
+-lšdFþBRÉBò\GC•á�?Kú9ã!�tŽ\ëWkÑâOÈw�,ô‡þ@*÷“
+-ËÉd“Ü&ó,^UU¿l�¿)¾…gY$¯,«fÂŒÐ@ó)e²¦Xë¦·ìwîêü«Ø¤n%“Z#'#Œ·¦ÔÇrÃ·HTjàœKÙ¦{	{;©4Þ¿
+-¡ÄÁ—=˜Fåt!L²ÀSÎƒ†Ì�Ät3ägåb™kNšäLnÐá)5Cn®Ô!9ŸI=ˆ²î7}.ÁþÁlòÑÏv²þyŒS�ôÄ€ñÔ1)\2
+-°lüáŒsKYéÝRŽfk‘â~)³�LÙRVWV¥x©“üs±t™ÕO-$tÈ_ÚÌØBŠ)QVÊu)E`Î&2ôÔÀÕ¸aÂ‘|^£$_æBq’\mÝ÷7#ªxGNbGóä[M?o:>�v´·ÇâI‹zie™˜Ì*ø>¥ ÌjÙ–YHŽ5
+-ø¼oˆÛÄíQülÎ[bþ6:ˆZ–>‹rçLsLóKF¨´Ýö,úB+!èâ¿³TäˆKÉS}]�Ke[à‘÷¶�øle¥~©ã$›dw‡p$<þRÿ“´È‰´ˆEš!î`Ã–ixÖ}+�Y0tú,40Ž£)¤·!m“ÆZ{pÅBºCÜIÞ¹Lvâ.q·!îwS0™—2K¥�ý¬oM¶q’9÷+ôo
+-$l[
+-$ý…”Ý‹{)×m"ƒaÖ¬“'£S˜2åtÚd�CJ_AŸSÊf˜XmÙ¸pTÐž:Å}^ˆßE˜*1µ…ÒŒCf»
+-™Ñ`ØLø7µšQÉ’Hw:N8ªãyŠÔ'”‡
+-		3ÒÒã:ž�çX…óé—�÷¦©ãƒ¸_<@1ÙŠ{mòµÈŸ1>]�@Ë2‹õUÕõó­áêh(fZ<™´dÜôÇä&‘6„‚Ã"$rjÝâã¬œ´j˜¿•Ä½Î¤ÑÞ(Á³£yWryßòé¨ì(’Q— 
+-œÍ9ÿF¤óó¹«–Ïi¨¯®_°FJÚ¾sÈ`˜­”)%ý±
+-TVÎTl
+-G8„G,Ün÷o
+-'[-<®ùÉÖ@2%Œ¬*ÂysÉPÜÐ­© 9#[íXë]2
+-t_Ä¦T’dÙ¼¤ÅºµÈµ7"àÃå�x”UÑÓþ)8ÈN¢…Ypô;œAéO´Æ:ˆSdÃ2¦ÚLŽ±R’D�lƒ\I™Ÿ�7ÐÞ	[™»ma–¦‚ž�ÉŒ&:âfO“r[c´ñ`2²¥ÌJUš'§3�Ü>ŒµŽÔW#�Ç.o'»¼‘Pý‡=I°ÁÿHÜˆ0ŠÁz0V¤#Â×†ø±xˆÖw».2ŸLó/¥¥×Éq’ž�¥®PÈ¬ÃÁV[Ê´¶d@,j¦XßÍÓ"TH*x"»
+-Ç=Ç:’í”‹§_¼IÄ´*ùÙ”62CNh295	H¿Ÿ›ßÕ9œ§+Ô!ýOfì¨p
+-Ži¦ô¢5°Ñô·Å¤ÌH—˜fÊt,hR'ZÊ[H:�[‡‚áŽJæÄ8îhÈbÀ^µîL¯°0ížœ”(åÞÓL¦õ¥}Bÿ‘ÜŒ!v‰�–;:†ƒšu»ÓÃÙ×y
+-³B/Èýnè!Ø·n¤«uÖ…?…Rjd½W¤^(s=Q9¯�9Þ€å <’<tI·Ê¾
+-”¯b›“v3û	ÏYÊ…˜A¹äëÐ“|á¬FÈ7-ð9rBuN¬Ú¯Å…t<ëÁÊ†:J^hÁˆˆËG~)¦ŠyVG ’8µ+)&cÎ Ò öKÑf½ µä~“rÓ`Oá7…uVÕ~xÒS�¼”\u(æ§˜$§:td¡;�TyäzÉÓÉö¨žµœ·"÷å Ì.ù‰”’�$sù*Ôú!ENf‘4‡eJ07Y@C`“û‰xD�ï¹ÌÔ¯®9%;ôp?•!^„Éëo ²OÎAöÑâç7Ž¬˜�0$C^îÇÛ¡ãû`ÝH'ì»ƒò92­gó�Ç"6{#[o$¿žŸÂS?¢pf¤ç¥ç$ø(ßH‰ šñÇúK—Ã=¹,ËÒ·Ãj¨£½ãæzÚB] Ik'ØY­¬îNeuµ|/¥F›ü½G{$ÀÏîƒÇÏ›—Sûù-
+-öÃe±‡7�ôC_úe<=ñÔ\/·GûÜ4Ãþù†[�'�ïþ“¯#ÿ¦!_:K—gç éèp:?ËwêÉáÈ·¶ ÌoBN€12µ¼·üyPúÕg`æO’R»Í‹˜ÑõÉVoÀ› 0Žƒ·àm@x‡ZQû]W»ŽÚ¿qµk¨ýž«}µëj¿FíßÁûT/€\ýWÑJºÚ×ÐøG®v’Ú¿wµ7QûcW{áý>•õ?Àeù'PùÉG–ŸÉRðÝ½lÿþ&ËÏáY~	—åW²-øN–ÿ´ËÉRç"Z÷? ²õMFë[w‹sL§u ?NÑW¡ÖK�G# [‹ö‚§HÝzÑc�ß¼¼{ Wºjáè]¤>}š•‡¡ï!èëë·ú7?};!�z÷€��8@h�4P
+-$ Á´Ð�}0täù
+-ºà¸Ý¼'Té{"ô=�vþäÃs0�¨IRK¯$žU?Â°ÚàH@€xD�fÖ0=T"ßÛ»;•¸%¨Ì/ú	ô*î‚a»œÅä¶±¿D0Ø²pÍ+EŠØ
+-Õ"‹a?Ã‰'#je_Wò(ŒDØŠ©FiåS0ªFw~ûZoÌã0ª^™ªRKŸ¸—R‹©]0–`/R±óÛOKÓ�£MŽ qýp$ &àh˜„c`Ž……TÖã8Iñ¢e
+-‡½I…yîb›v� ú`_¢½ÌÆ~ØŸv6‰èó‘J*´“8�VËd
+-ÑyBŒËfÍÔÃ°fë–ŠÐ(‘±‘¶Ó"\Ž&æÌï§ °®ä)5Æ×ÉÞ’.˜°¼$½Ú`f+Öƒ�‹hÛ‹a0.!66ÊÕý6gõÑ¶`‚Š„ÁMÇqŽVÏ&ªY'úùŠHÅxÝ.(NkZÆ‹ë ƒÐC.-êãhÑ0nc›k³ÊkkQÉò4&/�`Œør–‹_^‡b¯£J#H¬¾m6—f¾ÞÙJ‰HbS_g�N26®KfûÊº |ô/¢æÄ}0©N$CM1šäxxðjÚÎuÐ¯‡xâÍ0·ÁLü¡‹�³âfÙÄqm$i› ùÞis¸!öîƒÉ»$KÒÊ±ÓÅxù˜loÍ5gÊÎ¬9äEø!Õ†,g¦P©íƒ“²uïI—D4©q<^èÈ÷ÚCÔ�t§Öïƒi¬eù¾éõ� —ìƒ“¹¬P}3êÉ…�Bæzªofñ{Ìî‚9¾¹T'–ÏòÍ£OTî�ªÝ´–—|ùp¨°))¢6àÛ´þ;$Å÷H3~ñ}2ËßÃpüŽÇ�`~Õø‰¤v!x ?(8žXª¦TíxªMÀ"i¦56ë5¨²ìˆÖ˜�ÅXB¬EÆnÍPùÞÞé*[÷FJ—9ÌÞ
+-éF‘^l‘¿æg«öç¤Ú_‰w)åHGî#±LÊ]ÅrœhK»Æ6™¡„{«"³–<Ã^X¸œ»ve® (uÍ%ª¡Ö
+-8ÉÒ<'Óæ³±÷îŽ½w6öá„}a÷çÀîhž³ÎÒ?k“ÙËI¯æ«öÕì…Óvfj–(v!ÌÏ"÷¤\hj}u9ÐÌèÍÔ\hê}‹r YØši)¯ŠUvè‰a�Å>£¨˜W×	C)Ö.nVŠëy€Tz	;\ª8ƒ­±"96 „ÈíÖ—>YOÕ¥j�zz?�Íê^Xö$×J¹RïÔˆzAÎoÙ8—ó¡I–&,·7Q>ÚD3±
+-òÅjð‰µ0Lœ…"e"Ó„	sD+ÌgB¥ˆÁ|q,I¨Ð 6Âj±L±ZÄ¹’«)#/1O¦µ§‘ÙYµJZ¯gP­Ž´à<•²€´{Î¤¾bÝ,êS$‹R:³}›€¶n¡ÂË7¼¶ŒÆIÛ ½{V�i5ïƒ•OÁª,'nÎ˜=çÚ³+©�ç÷{V7³TÖÈù£²šxÐe‡ýpžLü¸VÉ4:¸ÙõTá|Ûô7P—�Áé÷Z›¶º"ß0p—Ô›¾êS>ËÇ^Füú‰Ð_<
+-CÄÏÇßŸ‹ä‡˜„‡M¸�¼±‰õa-ŒÓcÛ!}ÎHÇ…l—ã[gùŽ¬%¶!+{!X_z
+-³æ„ºÏQvfÁ˜ÝaÔ�õY@-) õ.D´™Ñ¤�ç�TVÀÙ²´QA~Ä‹�'^‚Ñâe˜(Þ€)âM¨oÁ2ñ¬¿�ÓÅ{°UüÎÀ¹âCø®øn;ùÕD¨ÅÓHs8Æ’®Í�ÒØá°n‡=w`-ÕÈQóc»ÍÄ}ìÈiì¹�ãœ}´¦ý6ó�ªáº’ƒP&ÁÆ8`gEû
+-¾H<' »²0¶e@ÓÊÑúÒƒPœ…1–
+-z™K³ÑµgwR›pV@Ö`<c�TT@î€ý$‘”ÖïwTõtBúŠ$ô!þ
+-cÄ×ä7þ¥â¨#6(
+-¬PTˆ)t(½a‹ÒÎWúÂíJØ¡„Ne<¡ƒýÊ8 …g•xO)ÇÃ×Ê(GŠ GÊ°z€r"Ä,Åo)~Ci'Kq¼�‹Ñ/¥¸ll¥6S;�í/Á
+-®
+-ßYj¥`ig.ÍN™ y
+-%
+-J1J‰\ß
+-ú�µJËGYk¤Cœ ïÐ›$u‚É`¯ºBzN£‹|IòÎ{`#U7YÕÍTÝbU·îÎ¢aôR¦Ã`åd¥T¸‚K*…ü[1;¬ì°ÃÊ›©ÓØÙ¬�{á
+-3{á\Ö¡³Œð¼”�ŸÖàÒb¢%ÈùWƒù¾³.àèÂpËTß…\®Â"êã(ø]Y©KUjR•‹¨bÅ#Â¼.~²dWŠ²KØÚùõ0\J)Î•Q}�z¢µº<L}@Ý2¢ù¾gMw˜§¼”jP
+-	§ú)‹À§4À¥	†)K‰YËàTe%T)k Z9š”µ°J9‚JÖ+&´+-¤€ëáB¥.WÎ„›•6Ø®\w(WÂ½ÊµÐ¥\OSùœrüJ¹^W¶KæÏ$7A%.Géýt®IØÞt”âMl–JáƒC¸’Æ\ÅJá
+-:‚cb«%úGu:¨»KT¥”NÜ—é¾¿
+-†û.g®Kû®à"­*ÇÓ|P(CV€|e(»ÁOÓÇ)�@©²Ç¥ºe•er(k^éì¸vº­ºk)�´Ü^›}¶Ù�Ý•¬#¾«ÈÍQX¬->©‘«åÈ5é‘ŠÔÈµ4â»ŠYm'Œ­“Ý#%¼Îr�ZÚå¹¦^ÏS¯9ÜÔt›ztrW7Ô³§šMYE
+-y¨³áB¸ØñTgÂqÄ®ý¤<Hy~NÖu�´ñ±ìYbÙ/a¢òLQ^„
+-å%˜­¼”· FyNS^ƒ%Êë°Ay—¼ØoÈ‹½g+�}
+-+Â%ÊGp…ò{R Ïàå/ð�ò¹ÃúÓHU&È`}‰S#¦Úâ·àVvÃ¿»³ìY{œæõ&Jçdí�©ÈyS:¼ÊÔ°¤±BÅ
+-+ò°ÂC&s…îLÚ–š´�>:©2=þ­6`q¿²~å]pƒþÐ©ðè¡o�^àí‚[+ò;a¸
+-ÌØ>¸­"¿ ÿ”8‹ÞžZô^TïpE¢	ÝïdÀ|Ž“éÍaE~±Ê$ßÅko¯ð¦fÝmcµÅ_ÑËÁwO
+-ß½®Ýú:¹Ñ‹´#­.û@0Òª
+-#©Ñ#Òûºáé„ð�”¯î¯È+Èc—·„øæÝ…tÎ/È¯ðx)•¯Ð:áÅ"âdþ^x vWäg,›Ÿ^ÖÛ}Ù»íÅ›ICÇ1¡ûÑ‘Ð�cq>Y‘_TlüãýäuBÚÀ^x¨BïüÏ]ÚAØ1‚Ô§¨x,(*Èã[Å�o1cpìæûÃÔÊw×ÛN˜NøÑ
+-õH.Eõý„?{ÒA*Ý•íé‚½ö„}l�¶ú¢À^HGQòÈg`�<ÚZ¼ß¢SÙ=ø¼,_Ä×¹ä~1vr¿,©ŸKÙ¿™Ž¨ÜÏ%÷S)ûÏ…å²ŸKî§R<$Þï:«Qä µ/ä©ý`´: JÔ�P®‚Õ!p’:f¨#`­:Lu\ Á%j1\§–ÂƒêDØ¥N‚7ÕÉð­:
+-…z2öR›±�Z�ýÔ™8A�…+Õz<C]�Aušê<OmÀ;U¢H]…»ÔÕø¨º÷«A|F
+-áóª‰/ªq|]½ßRøŽº¿T·Šqêb‚z¡(V/•ê÷E‡z­Ø¬^'¶ª7ˆsÕÅùêvñ=õVq¥z›¸F½KÜ¢Þ+îVï÷«÷‹‡Ô‰'TÚ¯ºO¼«îï©‹ÕGŸúSe¦ú”t�ƒ¡p5q?ˆ!:>Mví8Mr|^úÎÆ\O‡Å	”°ðuF/ì7`+õy)‘zO�¯ùÿð cb˜Ò:/~	S$œß�:r©gÒ‘µ2Õ'ŠeßêÛ*ïkfPí|û`™O…ÉV�Ýk*&R-b¥sTk¶b"ÕÚ(±S D$¯*”+>ŒR\×àD¥/Æhoyp’b`;Ñç�JžE'0=#ÖÇ�ãé·ö1bÓÃð(ß§ÿÔºOTÞ§?º¦ñ=´¾´bJ–«+*¡<õgœ§òìFò%©Àø8ŸvÉìè	ÎŽJKî¡Ã�„ñI˜ÁE¾'¥‰õv¥S¨ùt€õu(Pß¿ú©å»0N}JÕ÷a’ú1LW?�™ê§P©þæ«_Àbõß°TCX­	X§)°AëšÏ•\l²Y §cBBÇÁLÊË°R¨Áªe¦@q“�í³óòéûµ’]”øŠ9eõ•–ÜË
+-J}žªïüö/%Vgñ½—êÄô¾fÒ´Ñ jc O;¼Ú80´bè£•€O+…!Zhå0J›c´)P¨�%ÚT(Ó¦ÁT­ÂµŸéN²47Ëýpm‹ÜO(Â­¼Zõl<ÇN–Î¦¶NP/K<éx©ý)/uÀÊ·§ÊzËëRóéôám?4mƒKJŸ‚&N¹ù^Gc›tPýœýœ–‰‚ÛO»üÝ~Ø¹
+-æhOÁNF]ð…�I,mo™�ÅãÆBš´y;ÎÝÑî,/&æ.�éÚ2˜¥Qž­­‚Zm5,ÑÖÀ9Z .ÒÖÁåZ®ÓBp“fÂ-
+-Ïi1øµfÝª7›.‡ix.Yh\ñ<²FTÁ¹x>Î$ö×ÂFüõ1ôËŽ ^NY(Õ¬[V®] /‹ÿÓ²2ÊìÎ‰©1óa8Ävv•eg‡¤�¢mW¨”8>[¡)Sóåht
+-9¾@-Ðå�(yBi¸®Îì„ü‹òè$òÛÛpšêÆœøÈn+ò2²™›³Ï±èí˜ôþü’Y�çÎ¿èHîšü|ê¢à&·,¶n‡‚Eêû•<Œåù^°Ë­òp›µ¡^âRnÃ(b½`äò„–gŸÐäØî…þçØpPwÒAPªQ�ã¯mØ—­²$=û•£"¯Ü�ìÕÜHœéüÐ wC§ŠÀDRßkAh×Ápíz­ý JµàTíFRå›`.µj·�:ß
+-ÚÑvÀÝÚNèÔîƒûµûáí!xžRŠWµÝð®ö0|¤=Ö~‚½´=8@ëÂm/ŽÖÅrígx’ö8ÎÔžÀùÚ“X¯=…m?&µøí ^ªÂk´gñfí9¼Cû> ýÖžÇ}Ú¯p¿ö¾ ½Œ¯h¯à»Ú«ø‘ö~¦½Ž_ioÐÞ–&t�
+-N€1ò šòL‘AäÑ¡t¸myð*¬Ä2:äå‘AÍ²k×ÀL»ö.Í•56“”�QíbËÓQí
+-h|{ò-^*Càpü¿Gæ§Âh|/ƒ/@sys�ÿ!£äêåM3€¯ˆüú®ÚÇ@m&÷§í…¼'¥ñò=…â¾O…��ûÔ<J®  Ï½>¼RÞ¬¦ž½¯¢0ªd¿KaÖÝ.,pQ•šyµë)Q•}c}¯uÁë�ÀežÇaT³â[ÔØ¬úê›5_Mcsžï¢ÆGàÒÝfù,HGè\I\d]‹ ò8ÚÉ
+-kXm—§ËþPK
+-    ƒv7Á7Å!;  Å  2   org/apache/commons/logging/impl/LogKitLogger.class•UKpÛT=ÏI¬Ä¨‰�OÛ„PJ€’Ø!&NJKÒ_ê&…„Ê§È¶l+•­Žl'SÖeXÃ°‡a]:¦S–”é†5{v,î•UUó*#³9¾ï¾{Ï9ïéJ¾÷Ï�ïÑ…gq5†1œêÃ(N3œ‰œ�á––y¹ÂðRç±ÃË¸À�e¸È°Æ°Îp‰á†W66^cØbØfx�á
+-—¼©à-oDM«TÒm�YË.¥µkZ¾¬§)™Î:'º«ZEÌîh»ZÚÔª¥ôFÝ6ª%Ú‹.U£¾(02ùðöÔ5Ÿ³
+-Ô<�5ªúZ£’ÓíM-g:tV^3·4Ûàµ›ì®—�šÀŒßKÞªT¬j�=•ˆ5mT®™lî‚Q÷,ö•tw!0:9Õö(=u[Ëë’ÛõÜŽž¯;n•Š^«i%é´n�@2 Í—Ù,ÛÖÄáuÒ	Ü%=×(Ñy�jÑ¢Ÿ=Í®RV·m‹NÐSÔêš)ÐoÔ–¸n¹Êm�®É©ËNz™½4%V¸ÃKì3j«Dì/Øäƒû¶IÒ[Ç6¬†�×W~	ÿåÎðT<�wT<†C*Ça“˜RpEÅ» ½ò*f‘b˜QPP¡£¨ Äë	†²ŠGŽæ8šãhž£yŽŽŽžÇ1ÇvN0,à˜Àôÿ™�¸üœýµ	;=†•ÞÐi(Mã½ÖLÒ¥ÓÓ<(�ÔyC·5;_¾.0DÃ·¤µ†Y÷eÇCo—&@õ&v…y*èõi;Æq¹–&wW3úzQàHÐl½»#�ôÒ”»Õm§<æÌêrkp‡î¢o<itFéKÁ£'¼ÁS ›‰~‡!¨b‚ðIZ¨"B¿ãÉo ’âkDº’)†dÝ”¹Eû<E8†(á)âz}4Sý8�!œ!¥³xšvö·¸pÏ NÄšôfòüºŠYúæJ~…È]$’·ÑCaWQV§ä—ž^?Õ¡`
+-#¸äh¨­nWƒ.)—yÑ=K4™jByà:æd¯ ‡Þž.£žË(¦éïA8\3.×*)³¶’LM7Ñ+“]¥&Ó!;Ü*óÈ—Œ£4]S„âYÏbÖµOý€~¾ÞÔmô5»%y—®x¸î3÷4âžáYÏð¶k8AÌ÷™Éú#2õ
+-¢~Ÿ(>ðÙOxÔ	Ï~Â³Ÿ	³¯Ê’ÆGdÿãû™PûûdêOˆúS¢ø¬cûsaöûe�›¤ñ9Ùÿ"Äþ\¨ý™úQKßul>Ì~\Ö¸K?’ý{!öçCí'dêŸˆúg¢ø¥cûGÃìÊ¿’Æodÿ÷ûGCíÉÔõŸDñWÇöéïÑÉ8¢@/41|ÓãŽ:ù¿}_§^ïët¼]ÿˆÔ/"�ý/´ëß/÷ÇûO´ë? ÷öŸìôüb,°¡]ÿA¹"°ÿE§jñ_PK
+-    ƒv7q¯‡;  Ç  -   org/apache/commons/logging/impl/NoOpLog.class�“[oÓ0Ç�ÓK t—BÇn06`ô#BhBS�=À*!uÛC«!Á“›z©§$®œ”I|&^xBâ�À‡B»QUµç¡±}|~ÿ’&¿ÿüü98€f	‡}žØP³¡nCƒ@ñ5yü–@®Þ¸ �'ŒÀJ‡‡ìlô™ìÑ¾�•ÛáRÿ‚J®ÖI1yD ÑÒsèˆºCæ¸"D9¾ð<zF¾s&ÎGáµ¬Õ;Wôu|Š{ÝXbKKÒ@³°K Kê²9ö¼ÅÜX³vÀ¢ˆzsxÒ@ ™‚ÍTzC)®Õýè,ã9©»è1`ý±‡®<¼8\Sb•I)$Ž—4¦>�e½W}'¡ÂúÉ~ÒåÕ8-c¡­ˆia‰G0x¶¡§n|¶á#9]—ºb,]Öæê¿('Ïø¹r/ClµŒÿ�Õù'D`ç?°fªšáÂé2|+|þUiÁXø–Y�‡ T�(¼ÞÀ•ƒ#Á±Ðüä;N,¸‰×¢.îC	¯åIÜÂhx)��p´þ×4|wÒ�Àj¶+úÌU¨$1‡š„ÅˆÆL™Fà;w’ˆjqŒ¿\ZÄS±;Ù\ˆP³5} �u³Ï�ÁgÝìãdöÙ0û¼0øl˜}^föÙ4û|6Í>¯2ûl™}Ž>[fŸVfŸm³ÏƒÏ¶Ùç8£OîÁý$ìYò�[¹osií™ÜJÒ*°“�<M%d {©änòs*¹—�ì§’3�<…$ðH¯ÿPK
+-    ƒv7–Ÿá=Š  O  ;   org/apache/commons/logging/impl/ServletContextCleaner.class�V[wUþN›dÒ0PH)PH¡`RÚ„‹€¤ˆ­%…J�”B­ˆÓéI2íd&ÌLÒ–z¼-ÿ€/þ |ÔÐ%K}ÓµôÑÿ£î3“¶I@m×šsö>ûìë·÷Éïýø3Ú1€/B�0*á¢„K!Œá­±/‡°
+-	ã8€lWB´^ÄÛ!\CN|&$\b2„¸Ä”PóNÓxWìn	ö{nwà}(AÌ„ bV"/¡D1
+-sæ%è;®¥3éá\úvnìbvxâúµ4Cx:3§T•¤®…äˆ®Øö Ã>UlzÅA¯8èu2¦2Ë-RÓâFGnÉpŠÜÑT†À9ÍÐœóí±ø$ƒoÄœå�ÍàÙJi†[ÊŒNœpÆT}R±4A×™>§¨Ùg2¦UH*eE-ò¤j–J¦a'u³PÐÈ¨V*ëÉ·ª:wFLÃá‹ÎˆÎƒ[äÉvÕã\à¶c™K|–áHÌõx1i{w6ÜMW¹á
+-W;ÉÂ¨¢:¦µäÆ°Õâ¤ÙæãÜ)š¤joCìÏë\u’Þ™nã‹7f'k:£fÅ˜M/ª¼ìh¦A’=
+-BY3WQ‹ž’F™FEcºÎŠ>¬ªÜ¶…Zø3fT)±B`B±
+-Üi”o·UJò¡‘Q
+-U%ÔìÞ�‡”K)Q–ºAtefŽ¼Çz0ázIÆš¢kwEQÆÇ.ç‹*<o±¶ÅãâsL gÓ†PÎ¬X*ÕŠö¶DGB\“QÂCôEUbØßX#WèÏ{B–eZ&Ê2ŽàŽø¼B Ú UÆ!PˆÝ‚�ìDCe¼�!=8(�ŽŒ
+-ªá�É¤$Q;$¼vHÔÛ!Qo‡Df
+-´d,Šð¤:ne,á®„eàC¡*ãcaãÀ (ážŒûxÀ0´®?ª¶£*�æE¢EM-FgMnG
+-Ó‰Ú•rÙ´œhÝv´äªì‘ð‰ŒOq§)é­ÍpâEÖ4Ï–â^3£‡áèh†¾V&š}ŽæÂ‘pý3SøœáÔÿšG½Ïë´Œf;Ü“ò¦•UJÝ®õX&Š–¹à�Å…0..±3oÕÝ­i²	N¤‘+Ô|[ÕŠeQ—¯ÒÍ=®ÐXh¨áˆÄ65èÚPèny@/„˜õ©ÚáFãMÔ¡^o~“âÏ›»{žuFSF#ÌSÎÎÆ6�¨S+Þj�mihŠ…W‘À¦ìæ–¨œ%²Ü"¡nO•f&¯RP…Æ•Òàj�›Ù€² tÃkõg!m¹4ãbÏ¨A|’fÊúiA
+-‡6ú§	 (fñCüùhG#‹¾1¢rÐ8Ü÷�>ßO�¦Ú#ø:Ã+M}‡àCˆ“û[‘`âô
+-Ñ
+-¼JÊN£�v²§GÑO+½NHxØWôsG"Þ½È5l'Û²íý¹þ”/âûùˆ/ÜYÃö”?âïèû[j§‘ ¨¡ëFÄ_ÃÎºS¾‡ÿ™ò3±þ‘ò?Æîðž".ýÔ£÷­ÒßxôË«ô×ý+Øÿˆ|Ýƒ!Œ�çb½Œ]î:�½î:�—ê±ØGßóäõÅ5ŒíPÐ…’*PB‹™FQÏÑé2i›Gšn\¢ýezÆq×aá&ÑÓ4ØoÑ\ç¨Ò­e’\ h‰8wiT/Óÿ}šÈÜü•±Å-]’
+-å'aÃq*Mš²w'‰7N'(ã~Ò)v§hWrw§iGù­ç^ìÎà5Ê¾D¶Î"EQÉp0ˆs¤«‹î¼N<‚ó«5"]pëÉÖì¡âK×¹]ÞášV7Ï�	YR.¤Â}+`ßfž¢}êh
+-¾'ðÿâjò‘“mMºO¯é¸i>érÃx“’Š:V.¸¥ÿPK
+-    ƒv7Š\;­	  ‹  1   org/apache/commons/logging/impl/SimpleLog$1.class•SÛnÓ@=ë˜:1¦—´¥„K) ‰	Ï JU$¤J RUâqã¬œ­|‰ìM¤üU‘¸T<ðFÅåŸ³NT¥¥`igwfŽÏœ™µþþò%´Ñ¶aáVK¸mã¶mÜÅŽ6÷,Ü·ðÀB�¡<áQ=á±`¨úG|Â½ˆ'¡×S™LÂç•Þ4QC¡dÀ°ôB&Rí2l6þ†6Ìn: ¢_&âÕ8î‹ì€÷£‚:
+-xtÈ3©ýyÐTC™3€ÁÙO‘u#žç‚"m?ÍB��x0^�Æqšä^”†!Õñd<Š¼ž¶ÂOÃú3ÒXÊÆ	ÃF£¹ êuÿHŠ’e5Ìt}†­…|QÌOù@d²{é8ÄK©u-Ÿ±?Õx:¨À¶ðÈÁc4,4´à:x—Áýµ«52l¡\ãLª©÷&“ŠÁ^ dJ­•zºÍ®C
+-ñ y^ït:µs“9ßùæ¥	†õP¨·"/Æ²—Ó“„Ë.~’©·ŸŒÆj%æ1ô¦¹ñEìÐ7iÑ½—iUõdi¿
+-ý´\#™N»äëˆÝúÖr?Âx_`VÈ.Æ7¬Òùú…5l,öœ“Ú£ÜŒëÝœ«v‚’ïžÂq[`|‚y¬÷\9>£®Â¤ã)Lã;ÊÆ¬¿ÊÔæeL"ßÂ
+-¢7(¦ß½‰õ¢8ý)…ŒòPK
+-    ƒv7½yw3é  ž%  /   org/apache/commons/logging/impl/SimpleLog.class•Y|TÕ™ÿ¾É$÷frIÂð�4(QM&!¢�$82!H1 Æar“ŒLfÂÌØVjk«][¬k]úØÖÖš]Û]1Ô€âú¨Ûâkíê¶ÝÝnuÛÝícÛjmkÛ}ÔºÿïÜ››;áY~¿ÜsÎwÎ÷8ßë|ßðÂ’
+-h	ß ½ 7é—½¥Ñ¯ôkúM€üôv€~K¿Óè÷Å8ñ_ºž~'gÿ[§ÿ	ÐÿÒ”¦wdï�òy{Ls€‚ôŽÎ>Œ\ ?Ns¡ÎE2jòÑu.Ö9 Ós:}C§çuzA§uzIçÐbC>³4.
+-Ð¥Š—¸œgëÔyŽÎsuž§ó|�/Ðy�lWÕ÷è\©óBY_¨óE¸ûu^¤qU€ÖðÅ_ µ¼XàÕ2«°_Ä¾´˜~Ë—¸–ëd’O½ÐiÐy‰,uú¶Æah‰—x_àå¼Bã•¿WãUêàÕ¯Ñ¹)@×òZ�×	ö:¯”+5¾*@×A¡¼‘[4nÕ¸MÔ	-m’sWë.× È›´‹k4ŽêÜ.À-:wè¼UçkeµMãÎ í¡·5îÒx»Æ;4îÖø:&#{ ›3‡¶fÌþÄ(S0zsl_,œŒ¥Â�¹L"5°–iÖÆt*›‹¥r;bÉSç¦Òlbh8iFÓ[3éá,Ó|q$—H†dfr	3ä-­mÍÛ£]½-Í]­½]‘öÖÞ¶ŽmíÍ]L%ÙÁô~�Ø2™x'8	¤s0�ÉY0CÖ-±œÙ•�eiŸ=mKg†b9œ€µÈ™GŠœ9š·8[�¢,Ú±©7Úº£5ÚÛµ­yc+ØE
+-ˆˆó¶ZZ7lß$`xM�#[Ú:Z�ínÞ¶E þ<­Û¶ulpa¸­¹«9*à"=nŽ* å;ÚÚ¨!,’“Ê)‹�d2f*mEÍ}fÒRM&çho~<Ëf«åúÕb½ê®ÁŒëcší²èF9mwHåÍ\"Î¶Ó™�êØp,>hVÇÓCC0x5˜ÀªÅÒÕ�“öÅ3gù†mèL—Öžé8u^¾äß˜î“ûD)sËÈÐn3ÓÛ�4ÅóÒñXrG,“�µ
+-dü]è&cB‰Ü�ÖÑ¸9œK¤SB1¥à†0L«=™¡hzŸ9<IÂ¯‚¸â†t:iÆRSwœïAzg¼¶h]"•È­gšç¥…�-7˜@ŒÔG¡å°¥å°­å°­å°è7ìhâ$÷ÁÌœ€`Y3g[Ý_‚ú€)¨­‹Èa±L}mÄ%@Çî›ÍxÎ}{øDz¿hVI¥«hB¨ =•ÞÏTîŠa‰áËîw¢*‘¶ïÔ
+-˜ÙÆî<gw+6sÎ¦?w`vÑ†Ìl66`æç[6Ü/çP˜&"¤Ú=Ò�r†N7Œô÷+…û…Så™z·ÏÈ=‹v«9‚7‘UJkM	ƒ>K›°Ÿžt¢ª°ÏÜ=20Í’¶°B+ä?«‚s™X\\3‘êOcØËà­+43™4¤)ì�åbI%U‹0u¤‚Ew*p«tÀ ´	†˜•ÈF@Ø} Kºtƒ¥³ž¯A*—ì¨2A4ë½TÔÖMOÖT|‰k'’Lš±ds<“ºCp‰ë’$´Ž¤ö! å@W,ÆîóECfn0
+-‰Þã�Ø®öpêb×æ–tçH|ÐÚrS*‰»/rÁY¯1l3³é‘LÜlÎÂEÌØSÝÙ³Ü9’ÉYGEf+O2Õœ'ÕM&Yßè²|õ©�-é\[z$•w	ßèR¦@L©µzéR,ôuñ¤�Sà
+-;ÜAép£V{˜'302„§"�C"•G#ïf�N¥–¶„dÜR'5Êiƒ¾MßÑx§Á»èLUç»
+-ÓEn£©C-f¿uHÜYãë
+-¾�o4èËô Æ½ßDGÁçÈñí£ýý™œóç2#¦Æ1ƒws\hüØ »)kÐ=òù
+-}ÙÊ;ÀÚÈ¾�Vöm´³o£�}­r+�4ÜÇ¦Áý“xY
+- ßlðFÄ†gD¨Ïì—ÇD%æ‚XRRuº¿ß OÒaƒn¡ƒÐu~º5èýô�‡N1ÒWÁv©jå5UÕ‰Lµ]R‘X3©B¬mUyXSUmÜPeÐ!:(2ã]ä0øW-ì€°öU­î5×+µ‹b¡É9‰[¼×àg
+-Î‰öŸ¢§
+-á}ï7x”4èëô¬AÓ1ƒþ”îÅ«"TÅ�VMbÐ¿Š/w�4àƒ2ø~ŸÆï7ø|+×3ªó¼Ñ;5áEü$&ƒó™Vœã‘FX �ö'F2Š‚‹Sõö”9:f_ÕÙY@{·1-:Ob3è>ÑÜ¹VÜ¬Ñ‰Uƒ?DßÁmg\_T#7¡ê4"©”™QJ5³ØàÛù#.Ã»Å¤«L«ðºð/ÜÞîë«ºúê¦¡¡¦l¶©³³³êàÁƒ½�pdîTT;˜½F¯üQ¾ÃÍ°Ã¥Ò¥3Š3i0JhÐ—è¦•3Æë´kh«„\6c<©œrª%Y>³\�×·H.»�ßT¯bÙeªcÁÃqþ¼n9ÈÌìm‡¡»nAª>·§»“ƒ‰²<™8hUå53º3Šüiq‹|ÕŸÎXýÊ�¢	O‚¥}²^œ[ëY¦».Ò©zWT@›ªÓË§#dî‰%³‘�T:cnŒeÍ³ÔêRÌÇ†‡Íj“†µ4N-ªçÒ“Ü´}Ò'wôOk‹&ËH¯K•@?¹HªÏ4OÙPågGvgm&ók#ORs½Z`Ü«ßžT×N/ó=ÉÌ«õ&?§Ö)#ìR_ê“²ay":s±øž.«è]0uÎÝ¨º8žL‹	
+-P	ŸÑ?8eÉ0t«%áüÅÊW¬:ò*…�ù¼Ô�«Ú,ÏsHÕ:Ï²›îÉu¾CZPù…ãlT¡ô^‚=¸êGØunßpZ$iF§½#(u§ËâtM¡swÀù-J©´î7Õ*ß²v
+-¶Ti2i¤!0úÒ0È>‹ÒS¬°¹9S›ÍqU}zÞÉŸL‹F]Nâ®IëvÐÅ”¢4ùh˜öÒ<ZHÊâ½ÊÉo34‚5JBÌÒ¨~#©êsUù¨ñ{Ä;¤F”X+èV:ìà}ëÛ\ëaýa×úv¬?âZë;\ë;±þ˜ký'XßåZëO¸ÖGÈ/E«üv$Õ ‚Ý£Öº”L8÷)ùQ«û\«*
+-H
+-Œõ§±Úù•¨’£¡“¤EÇÈß^šf�Sqh‚XÖÃQi@Ó1~‡çS!¾Ãê.À�`çãTQ>«È`Nô9úsìƒ0}^‰äƒð_PJö÷Ûì¯Å(ìËÀ¼¤½á4iõ`ÙpL!«€"r/~Ê!�ã6Q™}Q-ÄI!ïÃˆÇÛ&¿Ã¾Ý\‡|å�†	šõÕi<>
+-Ÿqñ˜ëð˜�2›K×añà§qÚ�Ñ:A¥!~wÁ§<T/³¢	š}Š‚='hNpîÍ}�Ê0LÐ|¨þ$]\0Aë¹áAZ~¡ïj¬/¸pý¬©ÞcìÝ—©8X)ðàB¹ÒQ*	€ã^8	ð+À`ð¢I@¡tMŠ -X5	Ð`eðâI€® ÕÁK,€*·p‚ÁÅ¤8T.H�8:=Háû-hæ*¦oP)½Bsè»´€þ™.§ïÑ:új£ïS;ª·>z~øCÄâ¿!Î~„˜ù1ë'°øOáDÿIcô3ô?§“ôzšÞ çéMPû%¨¼Œ_aç×ô6ý†Þ¡·¹€~¯l²lÜ¿P?Œú•5¼_¥¿T6\GÏÑCˆš@ÑðÙ³;â
+-E¡ÊG©ú‘|õB.Tôç[§&écöI™LEmÓ
+-«5Q!¬^=ånEäYŠŒa°Éø¥Ý±�}w`UŒs{mOhò�SÍQZ{Š.Åò²¦ÂqªíiÒ¾Ž¡­k*ªÐž£’&c…þT…¿6š×]á†d¬|HÉIêgb‘‚¨ËÕ¥‰"øëÂ_/ÄáºÇh¦
+-Ö´Ó%ÖôbL­é|LÃÖ´Ó¥2§eGi3n\~šÂ!ñwùS>ë¿i‚.—Ð�]ù.wA+ü‚ƒJp…EµrœV¥yj«Ì½Uáo°–ÝK¾I×€÷{-(d\eßzµŒ§hMÏl?� ¦¦ÂS´¶§¢ð­k*Z"º¹B>ë¡'¨ïJ9ª@¬\õÌ´ˆ`=±à
+-5Z†»“.�îQ1_Be¼˜p
+--âK©Ž/£U\KWrmâ%4Ì�tˆÃt;/¥»y}–/§1^Nó*z”WÓÜD¯òZú)¯§wøJ.à«x·ð"ÞÄ‹ùj®ç¯äkø
+-ŽbÖÎ]¼…wr÷òV¾«aÞ¡œ§^YC>.Bd…iœŽÃ™VQ¹ãÞ¿¯Ñ£ðÚ.xìôP$.åDÅ^ÄÔaåŽ{é1z\ùø^:EO *Šy�þ†ž„ú¥9·}z£%ãÔ7™?A¦Iœlº‚¤Ä	’$ƒ'AÈ/½½MpƒM°´R¢ä~Òüx 
+-¦GË°‹^©C¯”þV‰?	æ›6½(¨Ë©rÉs�R TXÏÔ2%e©¤w¾•t>3Þæ¢\îP.Wê°(Ÿv¿zÜ”<(å»Aù×cr&e™‰¢}àñœ‡ô~›‡ßSúÏƒÇÀã‹ç‘þ9é§({Iÿ0(åñKÿ¼‡ôE6�"OéŸ�§Àã™óHÿ¼‡ôS”½¤”¿Ê¯ÌXú<¤×lš§ô¯�ÇëàñƒóHÿ‚‡ôS”½¤”ßå·f,ý‹Òë6ÝSú?€Ç;àñîy¤ÑCú)ÊÒûÒ}³¨ÌW6cé_r¤ßbKT•ÅF©9Ê=}ÇWIÅ¾…4Ûw‘Kþ Ã%èÈÿ’#ÿu¶üù´½nPÚ
+- ÝèºÁ™´e6yƒ¿£—m.KUY(…ƒd‡iùË×äzí'‹†Ù(�ÎÄÖ=°7ybÿ½ƒ½ÌÆÖ¬NGïr¡kú+Ì½°cžÌ_õÀö{`§<±ÿÁ[óÀ>ä��ÿJ°kï*Û´ysè4]7N­§Qk´�¤M=Ç©uŒŠ 	^�=2A×DQ<o¶æÑ§©}ó-n£Eíð„­Ï�~”ŠÆ¤X¿¶'¸M@'¨ó)<EQ^8NÛ…ð‹ðvExûuoÿT	«àÂ2®¥HÚM;QLY7Ù ‡'š%ß]Tä;B5¾{i…oœVùî£Õ×úŽÒ:ßCÔæû
+-E|S·o‚vúŽÓ.ßcÔë{œF}O*-¬ÀË¾š¤±ú®ª^+1ûGÌjPÓþªj¦]j÷{ª]E}ý}¥­×P][º^£j]ôL§èºt+='içÓ´ëØ4¥?ëRúd£¥Ëoí8eÅj�«'Éw�Š¿• 
+-«¢§Ž‚äQ<âÄjèþE»Eÿ®hO6©ÿ³Zª}P:I,Òñ-ä¹Éó?B›`¹ÁJ[¢Oœ¢ëQßpœŠŽÓJÿqZ†±&xãqêåãT¼é$Å6sèË´úÛÝø‹‹‘ƒ&*Í“Ô¬à JX5]DÍ­¦5ªø^LŒSïIºôNÑž,NP„Q
+-G—<¨T’!Z	«õÑXä
+-Ùj¹‘.P‰5@7 õì†*ú ž~Øtµç—`Ó€ù mº”Õðü5è,ZÐ[t IØ‰úî&T{{PÛ�")Bmw‹ªåC+þ„“¾Ö(�ø	Ôtx|ýƒv=ÕÏ”Ñ®¾¿à
+-ÊS©R©öÿ PK
+-    ƒv7Í ã5-  ¹  5   org/apache/commons/logging/impl/WeakHashtable$1.class�SKoÓ@þÖImâ8$„–By¥ �¦n$—ªˆ¢´Hµ·�»$.öº²�
+-þ�¨xxÞøQˆYÛ
+-P•ƒYÉ»³³3ß~ûÍøÇÏ�ŸP@}%\)á®ª©Y†‰kjºn eBGÛ@Ç@×ÀƒyÀ½¦�_„óƒ=~ÀíIìzöZâã±È;¥­—2‹ØuôxìFÍ{„#›ïsg,l'ðý@F¶ŒF®Ù®¿ïÙ;‚?À£qÌ‡ž ý®+ÝøÃz+gî?˜µ·Š«Á®`¨\)6'þP„OT
+-C}8ÜÛæ¡«ö™³¨Ø3€ÁZ—R„«�"Až~>FÍ>½§:æÑFŠ5OøBÆ„RhµŸ2”¥xgN†ÙV;¥ïq‚z4ÜNLÉôX<¡�13§ö.Ãíœl~ç²¹LBGÜwþ
+-\VD,ÔÐ³pUeXÎaÁÂy\0°Ìpëo¶`CµENjGÕa˜;¶Þ‰¾Tò^®+Hî8"Ššýâ·™³÷þÔö˜B¢A?Y‰úÉ„†ºÒ“ì
+-Ô¨+‰§»}5œ¢}�¬
+-ŠVžjçX§{­³tˆÂri8M³N�ÀWÌÒÜHC1‡³	T5V–ºP#›j˜Aß¤U�™�·(|@‘áÕÔÏ	ª•Fe¨L5@†ð�VM= E˜aø}Ð}ãõÉL"¾Ñã¾'hgÒŒ­‚\Äå§‘ä,b>9×H®tè¸�KXøPK
+-    ƒv7�§#›`  )  9   org/apache/commons/logging/impl/WeakHashtable$Entry.class�TYSÓPþnÒ6´‹EPq«;¤BDÜ±¸ ®(Î ¸�H(×6’š¤Ìøàø/ü¼ø 3.3./:ã�r<÷¦T©}rï9'ç|ç;Kòãç‡OPÑ�«)¤q4…K’t\'4œæþuˆ£_¼;-Ô¼PóBÐp¦	gSÐqNÃ †êŸgÈO[O-Ó±Ü¢929Ía?Cü©åT8Câ´íÚá Ã�Î¿Ýþ¶t�1Ä½)ŠLÛ.¿Q™�äþ-kÒá"‘W°œ1Ë·…^5ÆÂ’P¾!7ô‰Œ~Åu¹?èXAÀÉ|tØó‹¦U¶
+-%n¼ÙYÏ
+-LÇ+mÊiÏ–ó·f.[A)p{%
+-ÑOð'Ë!€¶´»îS>åk‹^WBÛ1¯[å óÄçAÅ	I¡€¦%‰*S;»®�!àáXÔ¤ý�’4êjS±³±³¡G‚<®ñy
+-C`¸ûO]_c“zå˜”¹CâèÇa†Þ5ƒ0$GçÝ°ÄC»À�õ*~�_´å¤WùöÂ:6¢Mul@FG+2.1´6€]:¶c‡ŽN!íÅ>ZÁß…ßvƒJ¹ìù!Ÿ)sß
+-mÏš+ð²²¥geBY;Èº^˜­Åô"—5ÐûþcÁZêgÀ`®±r�hÍ«ê¯ÛØÑÐ§x9¯î5áã}ý-´Aq(ÈˆŽô´Ê[#MƒÞ¶“v�4•î´±ÅÈ-B5."ö†L
+-6É°íâCÄØ8’ìÖ³	l&{6
+-Ãl¤$Ò0)‰D
+-É4Âjšw¤&Ô|îä¾"þ·r_¿a,!ñéî÷Ð¾#¿€VaŠô%4½„Az2rI	—ŽÈ%éÒE‹- ¦æ·½ªñn§âÁ
+-PØšG†=Æ8s%wƒ¸d0Œ�Õ*&jUL`—¬BÁ8vc�¬‚Ö¯ZÅM©û#Îšº€”—°.¢¸bI’åÅo.	Å™[�ªé÷�Uôâ¢Ð�úý^¦yë?×!ÌI„öÈ«Æ9%ûM?*ñµT±L©qã-b¯ë`žýA$^#b4VëƒŸ7-T7y‰àªBLZ3r—ÁÞÔ…ß­
+-@lâJ¸†žêòh”=#Ôh‹{	ì°ôPÐ'Ï#ØJwÙÓ8Ow‘8‰ŽD9é‡_PK
+-    ƒv7F”Oüâ  T	  >   org/apache/commons/logging/impl/WeakHashtable$Referenced.classµVïO[U~Þö¶·-†¶Ø`·r\ÊœNXQÇ†C
+-¸a0ìÛårÖv»ôn½­qÿÀ¾j¢_Ôd!ñœ:qKŒÆÄ%~ó2¾çôÒ±Ú‘”Ä=?ÞsÞçyÞ§í_ÿ<ýaŒb9�v\’CVÓ	tâ]ï%Átœ-ïKËe¹šÑq5�>Hàæt|(.Ëãy9B¼,n‰²(9‚p2wÛþÔ¶\»”·Øl}"ì;7öŽ§±‚íf¼u¾Js„è¥b©X™&ô¤ö9.­ÝNejx… ÕîÉKb±º±&ÊÛk.[ºržc»+v¹(÷�Q«Š>!Qg\'s¥’(Ï¸¶ï>›Ìyå¼eßµ�‚°ocÃ+ù–ëåóE&.nÜu•äk¬²"1‡^@Iõ*R»T‘üÿÑK8ß$Š†„Ôñ®WEU¨ÃwÄ}Bäž4NìÀ×SÃœ¹X^TVlWzt§†›‰‰Š{UÛõ_‘Û›áU
+-¢</É
+-™8^ˆí{'Áž<†+¿êrätSÇ„Ùfá¶–ÞŒÊ@è³q9d™–ý¹ÿ–ï—Xo¥èpémÇ¾?”gÄÅÔá‹Ý4¥ë-×÷�é˜àH–½jÙ³EÕí/]“”z0hà
+-œ•«crX$ôðü¼†.G1$‡nK„­é“;Õ0z°’´é¸nàÎ.6ßÎ!EèlL/Áj1ƒê�pG[ò#<ü¿k»¯¹ÕÇ_!†æïŒó—r'€ºd�yÕ%«ÌsŒmÜ!ü`�ónï�¤¹Í|†ÈjzÑ'ÐÍôbOßV '€ÆÏüshô:éKœ ¯�dû± zqP«S`xI3ÐÜ‚Î¿3@@“XM�˜´‹¶˜¾a¦oq”¢�6Ó`
+-£ÎÔ�ÓŠI®^Çö&ÙÏ§Å³<‹˜?#þ¨•FúNµ`H>ŸÀy"pŽ±³¾ãqƒÿÖ>ÿXàO²kÿ¿ùv”ç…p6ý;Ú¿ÆÕôoh_äðC“Ú¨#Ií9Î%#Ï¡k[ÐÂÙ~mæ:Fù³¹gÝB[RKFvp$Ûÿ"ˆ1´1ß÷Ñ#ÄétÐ�è¦ŸÐK�1@Û0éXô3ôæéO%všu ‹aæVx&gOcñ¤y‘rë¹]ÀHPÅyþ0¦jÜÃ7C*¼+<ËZDMn—ðvCrì«V´Žå¤ÖªÅy¼É”=†·XK¨¡fœ¢Æœ?x©f
+-¶!¥] –˜–ÛGöÕÈ.¨¹6³v¥®M¯kÓYÛ­ŽwXe8 aR�SÜk`¿0?°+èã•HHð~½ÿPK
+-    ƒv7u—�GJ  ˆ  ;   org/apache/commons/logging/impl/WeakHashtable$WeakKey.class½T]kÓ`~Nš6m—mZ¿7~Tm»ué>D±Ã›�(E'Ä›4{m³¥ÉLRÙþŒ¿Á�RðÂà�w*ø_Äó&¡®*B:ðæ|åœçœçœ—|úñá#2¨c¹ˆ,®KQ)"‡j�­š†
+-uBÑ/…/\KliXdÿÉÐ'è÷]WøëŽ" Üny~Ç0wM«+Ëëõ<70¯Ó±ÝŽa÷vã™0wî™A74ÛŽ(ÿ‚jrk¶k‡w½JkÛ|mŽÉU�ÚÛÂ
+-›‡"<�1,|Ü}Ñ¿mu“ ®{[‚0Ý²]ñ°ßkÿ©L#”Zže:›¦oK?	ªa×fªš„| ö	7SvO
+-™qfGÖ—þdKÈ¾’Äsÿ&N˜ìˆððEÖ*Õ£¡hZ–‚òj£A*cR;ÒÊ·.lì»aW„¶¥Á €ðæ?¾Š”•KÑ3Rö–¤X–b…°”„·¿áõ}KÜµ£×7ò}QRÕ¡cRÇYœ“VC‡†	
+-ÜöÆXw"ÌŽ.PÆ‡k Üw�#%yÂJêûÊ¥×SõAƒÿl9ÈçT’»cK…"—Ê‘)ö^ðÿPe­×æÈÔêï¡°¯`šå}AŽ¾b‚¾áÇjq>ŽãY'qŠÑ¤ug¸RZ²W†m¾\ÒÉ`-³²µwPß[äd�¾GÐzœ�@ç1ƒYÎ-@ù½øóHñù¨ø�Lw1�xÎsg%,3­@EY�s†ìòŒ³ËãRÂ.�Ë;i]A™qãn
+-®FòŠ¬g8#�yØÊ².±ž‹‡ú	PK
+-    ƒv7Ô‡Æ˜  î  3   org/apache/commons/logging/impl/WeakHashtable.class�WkpTå~¾dwÏ²9!H$!Ø’Í†…
+-ÀÆ˜@J.®-6‡das6î…[[Em­ÚV{­¶Å(¶Ú*0*ŒÎÐ™vzïŒÓ_í´lgÚ™ö_ï}Þ³‡³»aCI2³ßùÎwy¾ç}Ÿ÷}Ï—ýç­wQŒ\`Žiød E86a|JšOkx  ”éãŽ<$½‡¥yDÃgÐq¬ŸÅ£%ø“æq
+-Ÿ/A¾ û¾(½'5<@¾$¿,[¿"ÍW5|-€Z<-/ÏhøºÏp3žóãrÒ7à[2y¢Oà;!¯ÏKó‚4/Jó’4'¥9%ä_ÖðJ€�Öðª†o+h;LãàFó¨‚ÞcYf¢3f$“fR!0hî7¦1‡¼]V*Á5ú:vîéÜÐÑ¿¾kËž»»º»ölÚ6¸¾KAõ(”vÆ­dÊ°RÛ�XÚ,À½ó6uníéèÍ,ÜÓ9°­«L{ÚL›
+-‹{‡ŒpÌ°FÂ	sØ=z³Ì·+”DF9gvÆÓVJÁ·&jESëŠ›¶+x:ãÃ)ë�ZfzlŸ™Øjì‹q¤²71bÛ�DTÞ�AOj4JóÂ½ñÄHØ7"£f8#óp,>2%‡èØx,,ŽÙ`$GS²Ïæ·RFÔJÚÞªjÌá<°ï€Iµ7í"¥ƒ2[yí$=šÈñhÛÌÎ¯ÏªA$¿3ÇL+E;j›2g¥SÑX¸ËJ�™	#�[ö2Qm‹I—Uä-ã§+†Í,#GàÕ3¤eo#–×Ìì¯Ê9¥ÏwçK³'Ùîó’Q(Š’ÜüœM=)áO¿|vQ‰Ê²k¬˜—¶
+-¬+«
+-‰THÝ…°Ùy("A|¦íN…›¦u±�+mûÙÙž±inž­Ä)Ï¥˜*OsSk~7ÈXfL°C¤ŽXŒ1×˜ïûvÉ
+-•Ê÷™Œs�í}ÒX��ñXŒèŽe	s,~ˆæhÑd×Øxê¨�nŒpO2zÌ´_˜ñþT|]n�PÅÆ\¢™ÑÎ(Ã…’�§#ÜxÇCÌ)PÏ6Â€E�À–x:1»£vžçmX.$t¬Ã]
+-‹®WWt´c�Žµ¸�JÌ6å ïèèB·Ž4îÒ±½:úÐÏøÍzVv2L4¼¦ãu|WÃ÷t|qgpVÃÅÒFÇ8«ãÞÔqgn›En
+-¿	„ß.ìÖqzYýf†´RtQÇ^±lqÖ­ýéXlS<j1m»ŽDÌq‰V%®“,ª3f�OÕ±XüpÆ_o),´dÂðÚ%‡Å‘ë0©c”é b:Æ„¼%>Çý:HêHÉº·ñëÖ¬bJÇ»¸¤Ð2£ÍybåŒvJæúÙÎÙÒ¼Ç°�:5Q¡:/_sjeåµ£Ì\&^¿y„Ë~ä§¨[KJó‚�)Ëâi×Á€‰˜ÉdýÊ+úgÿÉ*x¬ŸÇ8%sç
+-ÂYy³Øæç¶g†äÛ§©ø‚˜÷éwêœŒ_ßˆ›Yä�K¹_˜§ex{V¹U¢\r¦Ê]-¹M³W+y!]Ákž‡—ØÕ¸,ü|+B+ßïÌyoã�uØî³óYÁ9Vo¶ãÛFÞÀY~Pœ€
+-N¢hhÅoÂdã=koë`[Éƒ€GÙ>€2Ç|öï†”-{3:qŸJ
+-µ<Èµr-Ÿ„o¨YM@ë†&àÝÅ”3ð$ŸOÙXu™õ–ôÖcÑä*Þƒ�sµ’òïàßÁ§œ=‡Äå83øix&‡ä—$?U/Ç�¨RÒ;	�(ík¾ˆ¹LÊ–‹(Sx=ì”+\FE›§Æs•Ò÷µyk¼0¯Í'CóyëÔj|WP;‰ª¡_�F£«Ûü¡ÿEÜT„§ÿ{.”%ùQÒN�äó¤ðeyKñB8IOQ —iý+${»ñ*FðšmÌ½\½›¿l‚Ÿ«[±Ùöu+û[è%/wÞj{ÎÇß"le«a×oÃvÛÃQÇsøµÙ��tEÛ!þÄÃüŠ]_ÁSýŸçþ¯‚÷:
+-Þç*8@|Ù?Ïq~
+-�_;lžÀÂìsmÈI.}›„ß±�©ÎlsÍàØc‡ÃÞ«Êâ=®ññÙí€/šNÙ†«ÊúDYQ“¢^�ªñ^•íƒÙìxù	ùü”½ŸÑu?§l¿ ó‰Ûð+Êðk²úÀæ¹ŽBL1ÝÃÙ¹0è/Å¹bt»V¬Å>GŒÕˆ8bðûìØócî“ÜÝüC”Nâæ¡ÊÅXr)tõ­NÞ‚CçàÝåÙËÔ->…2ÛvIäÓ¨rª<0þ4Ž.µ%å�‡²ÞÒl¡®É¹%lËGÒ¿göÿ�‘ô!iÿ‘EçO4òÏ4ð/$ÿWÆ×ßlcƒz®ö»í¥'1XÄVÃ~ºB
+-ÎFÃNòÝËçÚæ+h§6õÌÏP¾Dõ9Ét²ÏÉ¸ó¸•ý&[¨jmÕÿN2ÿ ÿÄBü‹šýkÈDh®âa
+-Œ�LÒT’vF‰VÔ>Ûë¤â±–ÉrÀŽ,^’¦)<
+-SòAùèU­`ássë8iÈQ­7.YÐMÃ	,;“o°*§ƒ*è�J,RUhPÕª9ÉÒêšÔêè¢ä¶7�I�SŠ´ZB“ê
+-šÄÛâ4 MSA–¤± o›Ó€§:7L�@<r[u@Ú§€4gÃÃ.'ª• wÂ¯Ú
+- ÉÿÐC|“¨n‘Lê}OçºŒ–¡¾+Ô*tË)#ðÃæ÷OÃßßü~Ë¥³Ü¤¡Ë¸qãk™{xµºê€¦:Q­îÁ-ª!µÞ•i?­ëqÈ¬Å¥sØ¥ó°C'x
+-�¾+–Kg*—¥d›Qý”° —ML§Íä3ˆ%j+šÔ6—O%J]>A—Ï»=Ê˜ŒzÉ4ÌÜ¼0k\-ë]˜YVË:öVùæ°gÿýPK
+-    ƒv7îc`Á	  ß  $   org/apache/commons/logging/Log.classm�ÑNÂ0†Oacˆn/½Ýx+$&$^H4ñ®¥””ÖtCÞ�À‡2ž.'ËbìÅ¾|Ozþìûçô]¸ƒë®"˜0HTù(òƒœžk±fÐ�ÎÞëxîœuMŒÁ‚W\7A¬Ê'³±í�•ã…h¼qg+Í`2]îø'Ï472{Îw¢¨f¯nÿÉ[ÉjëìÑ?U‡k_šA °âˆ›0¾3rã«2¼Øƒ+ÄBiÜÛ_Zyïßcpc�Ìø/¶"+ì~oM™i+¥Â=8Å ýÛ¤Ç€Aüø“  @†Ä1"ö‰gÄœ/jÆä1yBž�É‡ä)yJ>"yÇfcüvàòPK
+-    ƒv7Ó0$–a  Ï  :   org/apache/commons/logging/LogConfigurationException.class�SMoÓ@}›&qêšÜ&-¥hqœ´†RqI‚
+-�P ý�8ppÜ­ë*±#Çæãq		$®Hü(Ä¬mÒ´M.\vgÖoÞÌ{»þýçûOL`
+-›2¦QžÄ%ÜÑ-·±"Sº*áŽŒ<ÊbÑ¨ˆÝ( *ö	5	k9ÛŠºœ¡Ø8±ÞYfËòsï8ðß[Í¯3ä·\Ï
+-2Lè•†ì¶Hè™†ëñWQ»Éƒ=dP¾mµ¬Àyz˜
+-�Ý.Ãƒ†8¦Õ±ìcnÚ~»í{]³å;ŽKÍ¾³í{G®VèúÞÓ6ïˆ€šõ¡©vÃ€ðu1…ÔæÝ®åÄm/ ô‘bD¥1‚q,¸àðp;±g^¯Œ1HÞõ£ÀæÏ\!xy¬šuQ­à
+-T3¸,¢	ë
+-LÜÉCéüdO¢£#(¸‡
+-EÓãYµæGMœÝg`†Íÿñ–añ´ÙëÈÝ6ú8;B*ÙúÉ\sgìŸ·:î2ÔF]Ü…£D_ý|§yÂíp<ezÜÓ è}	+)ÊQLÎÒ:KÙ2²Ñ3Ø7d¾P–Á­ÓôÏ «T¹�Iè(R¦$h”0³ÒÍ¤LÏ©*Cû”Qícb$Õ5ß§âÍ˜ª”ÀS*]Å"‘	Òk)éª(Õ¨þ‚Ä>Aªö�¥¹Sn9F<¢ªÇC¼ê€W�…'¼K)oD¼b¢ªñù7ý˜¶ NÒRëAV§(èAù§Ã¨�£’#@‰YÁKØ‰k	å q5$"1‚pú:–ÓÌx$ºã+2Ÿäùøðí�Ù¹�Ù7b”öPK
+-    ƒv7Õ<÷Îa  I  -   org/apache/commons/logging/LogFactory$1.class�QMK1}iWW×ÕÖZ?jE<(¶‚.ž+‚aQAñ¦�nÃ6e›H6ýWzR<øüQâìZD{2�ÌÌ›y3“™�Ï·w±‹5<T±èbÉÅ²‹†É©¤=d(6š×N[wC)”Jœ
+-a®x'!¤êˆ'×ÜÈÌ�ŽíÉ”þ©RÂ´ž¦‚�f¨Mð;õDéÁ@«4HtK¡Ž�ydµyÜÜoQa3TÕF3ìó{$œBÎ;}Yrz—zh"q,“¼«æ^ëc®‹š�UÔ¶ÿY“¡<^‰a=‡R
+-�´�Á…‘÷T3Ý£ÈJM
+-ný+;C½+
+-e<¶­•6J¨yW†ÚŸoþrµ°A[rh” 
+-téodM‘�¤)cbçì9wOçoà‘î`sÈöQByDÞ‘�WžÆ¸·¿¸Îˆ[À|þV0KÒ#_Ù™úPK
+-    ƒv7eÝ±Æ  D  -   org/apache/commons/logging/LogFactory$2.class•R]kA=³›f›ucÚP­Ÿ5Ú´&iuÁ_ü 	„õRú>™L7S6;2™ò¯*´(>øüQâ�Mˆ¥E¨{çž¹÷žsçÎüúýã'|<Ãnˆ2îU°‚ûÎ<ñ[hxÌ°6åYó˜«Í¬›ññ˜¡žœð)�3ž§qÏ•§¯*½Yn‡Ò*ÁPs5Â%'š¤aØ¼PÒý ºòk•+û–a¿u•öUí#†RW$I%*—'£¾4‡¼ŸI×�<;âF9¼Ø,Ù¡¢ÎÁ½Ïsi
+-6I;íD›4æ_¸ÊXèÑHçã8ÓiJòq¢ÓƒùÉ›/¨UßLr†�VûB[Ÿú'RX
+-†==1B¨¬èjYùÜåF¨âI„UT"Ü@`;B;O¯©N÷pY“a«ØK11ÊÎâÏFMI=•ƒwÂ*M­ú-7©�ki0T…‘ÜÊ%~óru"hÐk*ÓÀx¨»£“Â}u7ƒ%òè¯â&áyû´Ö:ßÀ:{çð:ûçð¿‰kd%J-¬“ß˜§á­‚ª¶�qž“ðÈ¿�ÍõËQçŒXÏàGéôo»à�æy^w
+-{´†[)ÔVÿ PK
+-    ƒv7«º@Zñ  V  -   org/apache/commons/logging/LogFactory$3.class�R]kA=³›d“¸&5±ÖZ­U£ù°º>*B)
+-i«Fú>Ù›)»;ewÈ¿ª`U|ðÑ”xgB¨\˜û5÷žsæ²¿~ÿ/Ð­ÂÃV%Ü7æAÛxhÌŽ‡G{xÂP�ò¸+>ÃFÿŒOyó4
+-öcžç}{ñš¡2˜¥z,´Êf$å‰`h¬t&ÓˆzKod*õ[†ÝÎ?ðþžêž2öÕˆ0ë}™ŠãI2ÙG>Œ-‹
+-y|Ê3iòE± Ç2g ƒ˜¦"³ø‚*Ý¾Ê¢€Ÿóp,‚P%‰Jó VQD<A_E<Ô*›µ^‘T7›¤·;ÝE'Ã3jº¬Ô$Å�Œ­ªåäKÓë£†–�
+-ª>|ÜôðÔÇ3´}tÐfhÿ§†µ«ÄÛ¶”‹p’I=ÞerJ"1ÚµT¤×í˜u­_»[†f$ô‘[í{9íWð„¶Ò¹féó’TÁaz>ÑóVzø&!f¹ÉUìÐ�äÑÎËpÐ0¯§øÌ×0kXf�ê”¯QtD¹K¾Þû
+-Ö{~	§·{	÷“m¼E¶D�(ˆÂ¶¢‰;ª¾ 1‘¡p(ÞÀÝhs·Õûç'1�£ã~AáÂøo(^,ijºx¯x‚fñ½¥óçã:›ÖÞÃ:yC[²"Ê PK
+-    ƒv7õN6Ç4  ¼  -   org/apache/commons/logging/LogFactory$4.class�T[oGþÆÎ²Î²mÀ!Pš€˜b;�
+-è%”‚›PÕ(Rû6Y�×C×3f/I­þ’þ‹T*!j¥>ö�UõÌ:XiH+íœsæÜ¾sÙ}óÏ¡ˆëØpPF}§Ñ0Ç¼ƒ\7Ç
+-žƒEÜ´qËA	õ>7ôv	wÜÅFøÒX|eãkK6îÙø†ÁÙæQ5Ò¼#b†sþ¾Í½ˆ«Ð[‰x’ø¹b‰a²=TiO¤2`(Åû‚¡|È¡�ÆR…d{âžT2½Ï°PûŸxïzÕ7&Vt‡bNùR‰�¬¿%âç|+Ê³è€G›<–F>¸œH{2a ƒÛRJÄy|A7u_Ç¡Ç<è	/Ðý¾V‰é0¤<ž¯ÃU¤:VoÔbœ)†3µú!DÏ¶^ˆ %%£,3#…Ô^ëYóç@R©é.rØÐí,è­‹´§;Í8Ö¦_N[gq Ve”W4ÎzÃ¸¹8�û.Î`ÆÅ9|bã[°ìâ!–¦�ÉhcÅÅ#4ÎmÝÃ¬Û5³»56®ìô(m%�‡¤®¤ºÒ•ªS	´êÊ0‹ynÒ5.Vñ˜ê¤}xâ¢…5OÍác�aö=2\ûÀ3œ:ÚY†‹ùU"‚,–éÐû.–Û'�åÀ€£±ÔÌ>Ì»<4ïP¤ß‹$o0Í{¾vÌ:�®²TF^Se}1*›S&çö0IEÿPˆ«T
+--ŠLI*�Ð‡�4•ÙÄN÷GZ{>Õ9²öÿôÎÜ–ÞÎ;×<ïÅzg´Þá\IÂCqtAÇZ)Õ#žÌy@•$ÕÅÅEjÜq 6Q¡?F™¾—iˆÒöæ)›5KzÏãS’g‰['¹Htªñ¬1ÿ
+-…ÆÂ+Ë
+-çè<A†°$._™â".å¡¦ÒÎ¤(WB¿!Ù$ó¿£ð7e Boq»†îÃÚõ÷aÿŠÚŸ(ýð“eg'G&'Ë.ó{øˆÈ>ÞÇÛõÙ.&ò‚f	×4a¨‘[8•Ë†Žp†IÂýl+Â´¥0k
+-0g½Äe+Æck-kkÖ/ãºæèÿ[ÅUÂ¾Fªäoêòj-àZ~ÖÈpHw:ï@é_PK
+-    ƒv7è)´§  \  -   org/apache/commons/logging/LogFactory$5.class�TYOAþv˜e9–[Vuw9¼@T.EG1¢$ú6Ì6Ë�az33KäOÏ(1>ûŠ‰ã£þ(cõìz ã&]=]U]õÕWµýýÇç¯¨Æ îjH [‹&ôkÀ Š!
+-1d¥04ã”ŠÓÎà¬Š
+-²qœ“ûy).HqQš/©U1¦â2ƒºf¹}Eße¨7W¬5Ëðxh<¸gŽ2ÔÎ¯{á2›¡fÌñœpœ¡)½×-³À›9ÎÐ`:¿S\]äþ}kÑ%MÂ¶å.X¾#Ïee,\v0è³žÇýI×
+-NšŒ)ü¼a,{™¶X]^`¸"Ÿw¼¼aŠüŒe‡Â_ï!lÕ~ÑchIgJh\‹\æW¸’Q)ø¢@ÛJÆbè¸Æ]Rq?tx@5Aèsk•¡µäácÖ+ÃùHMŒï±ÍM?¶y!t„G6m^}›Ï8nTóo\CÒ]G;Æu´ UÅWq�PVB¡c“*¦tLƒhm®�KÅŒŽë¸A…ü)’ Å¥%îÓµž$5Š$!Ï%©#I³¸)Å-&në¸ƒ9†“ÿÉ-Cã~Fº#UÀí¢ï„ëT…³FÕçyîš-�R;Òrô¿'ƒˆ¢Z½ù2Óí¿Zu€ë˜+¬CGº¢]Æm®` .Û®¨Çÿ«2jƒL9VÞMt0—‹ ?¢‰°
+-–Žis?Ù£™ªÿ£ûÜËø÷x(Jšý³[ÎD¤Y¶Íƒ oxx˜F°˜$éHÐÿ§™VBÎím�¿*Zíè s'}�ÓYj´ì6X¶ÿª>D>‡IÖ�”'8Bßm%/t¡'Š¢•c2Êt¬ëùTÓ>•ýˆª-T›ýßÐ¶‹ØÃm(·ú·PCKØ|�”¹ƒÚ
+-tíB#c]BßÂ¡Ò¥ú-4ì ‘mÊÜèF/âe4C¨#4OWžAWž£Ey�Nå%Ž*¯Ð£¼E¯ò)å
+-2Ê&”wê,½z-t¯)Š§ºûpœ"§¨Š8å˜*×T…t$3”UÖGïXTiü'PK
+-    ƒv7Í‹w»  ø  -   org/apache/commons/logging/LogFactory$6.class�RmkA~ö.Í5×ÓÔXmkµF1‰/÷­A
+-…BÔB¤ß7›õ²íå¶ìm÷¯Z?øüQâìõ(¥ùÒƒ›�yvæyfæîï¿ßàã
+-^„¨c³�%<rf+Äc<	°ài€6C0çiçT­Á	Ÿó8åY­QY²ÇÐ™�H«D•:–ßêïU¦ì†—ÝÅ¢E¤wÌPÛ×cÉÐ¨L~žMGÒ|å£T:Y-xzÌ�rqÖìDå`ˆ³Lšý”ç¹$¤7Ð&‰ù=�ê,�S�$¤trÀ…Õ¦èìRï¾™ekÝÞµŽ¾ŒN¤°tõÌy Ò²««Ê·.7B„g–Ñˆ°‚F€çvÐ¡yo©Î°zS“a»„r)fFÙ">2jNê‰VijÕïºM]«¹•S†•DÚ#£Ï¤±ô¡ÞÝné‹ÚôÔi©<´Üxä‡pOËÍyyôF¸Cñ]ò>QìÓÙìÿë¿º€×}ÿG™Ø$ë(QßÀ*ùíËTÜÃZIÕ¬dœç$<òàaE½[Æ$Ö?'Ösø¿Pû~ƒw³ä�.ó*^ë¥ÝÀ}:Cº[*Õ–ÿPK
+-    ƒv7k£Ñö¶%  ×S  +   org/apache/commons/logging/LogFactory.class½{w|[Õõø9WOOÏ²;"ÃÎ Êô¶CHBp¦ã8‰/l'ÁE~¶EdÉHr»-£@KË(4º 8Z2À1„6a%%¥lh�¶”V_
+-]@á{Î}ïIO²œ„þ>ßß~÷éŽsÏ÷]ýì�ŸƒÊÄûnØ€w¹ñnü‰êÂ{Ü0w»AÁ=nø÷j¸�gÜëÂû4ìçyû]8àÂûÝÐŒðÐ
+-ÌÂŸáÏÝðtÃ0ÜËc‡xì!
+-æö>ê†|÷·‡¹ó¿ýBÃÇùÇQ
+-ÉíþÊ
+-ø¤ŸÂ§ùñLu?«ás>¯á¾Èó~­áo4|‰__ÖðþVÃßiø{
+-_ÕðÜýšÿèÂ?iøg7ÌÅ¿¸á4|Ý…oð�7ùÇ[üx[Ã¿jøŽ†ïjøž†ïkø?.ü@Ã¿iø¡†iøw
+-ÿ¡á?5üÃü7£öq6Ü‡ŸðãSþ‡»?ãÇçôÀÔ„ ¤…ƒ
+-÷8‰-Bu	·š&²¸uó#›X*<šFÌÃ5‘ÃÓs]b„:ˆ‘â$1Ò%F1 ÑšÃƒy¶¸D>¯ëãÄx—˜à'‹‰.ás‰Iš˜ì†¸˜âSÝ°MLÓÄt—(` …¼ºˆ7-v‰7\$J5Q¦‰rMT¸!(f0ÈS41“ÛS51K³51G§ib®&N×D¥&æib¾&hb¡&ib±KT1Ø%š¨ÖÄRMÔhb™&–kb…&j5±R«4Q§‰z7Ü€{4Ñ ‰FM4iâÆ²Y-šhå
+-Wkb�&ÖjâL—hÓÄ:M¬w‰
+-nØ-6ºÄY.±É
+-ûøõl—ð»¡_lv‰ ïÜî:·^î�¢KAMœÃìÜ¢‰�&º5ÖDD=š8WQMÄx0î½n8*¶jb›&¶“‹Ì¥ó4q¾K\à†gÄ….q)µ¸Ø%.ÑÄ—4ñeM|E—ò´Ëxàr~\¡‰¯jâJ7™À“š¸JWkâkšøº&®ÑÄ74ñMM\Ë¦ôM\Çl¾^7hâ[¬üÄ�¹ë&M|[;5q³&¾CsÅ-š¸• Šï2¦ßcò¾Ï�ðã‡š¸Í%nGð45×66×¶¶mZUÓ†à­;Ç¿Õ_ò‡;+ZâÑ`¸sÂ°êH8÷‡ãkü¡^Ak­®®3æç.«ªnmlnÛÔÔÜØTÓÜJ]9V×ÒšeU«ëZ	hÚ¤ÚšwKMóšÚêšMµKò—ÖV-ohli­­n¡u-­6x#ÚƒþÎp$b„’îïFe ŒT4Žq£›0ÍMÎmŠêÁí“VTµ¬h­ZRG;Õ7ÕÕÔ×4´VµÖ66Ø¶È[[SµjSrbu]UKKCU}
+-Qï
+-ÆªCþX¬.âo×£cl,²
+-ÐîYþ@<
+-ê±†½ñ`¨b…?Ö÷oé4gt¸7²-[&—ì@(¨‹D;+ü=þ@—^ˆtwÏ+B‘ÎN’AE]¤ÓœÈ ¼|*ÃŸÊXLmí"òÛ‰Sé˜1N-;Âñ.�‚Pb,¤}¦ûL5÷™jî35¹‚:?Æ"8
+-‹Ö (Õ‘v’}N]0¬7ôvoÖ£­L«L$à­ñGƒüÛìT˜m¤]�z¼*Nz´¹7N½Ó«W‘­«qó9z NX�°¯kðwKŽ­Ï¤�Ù4·Vêg€¶8µpŠŽÃY‚á®ÙÐ{âAA˜•ËãÂpEõ�î�1�¢zwd«n#|T&�ÄTO,…?¦
+-f/ôHäqÝV=hù˜Â¢!´./Æ3j»{Bz·Žû™RÉ¡“‘L°ï«z£ÁøŽKhýIÁLK1žÐs¹’ô0²ÍÜQ�ê±ÞPœ5!ì>¾èâtÄ¢¤ªnjB‹
+-�Çþ¤q¸{c:»'‚Gì5r‡…/ñh¼mÏæÞp<Ø­Û	Q²£¼„wYÒÛÑ¡GõöfÝ4ñé‰¡ÕáXoOO$×ÛkÂ�H;ab”kßš5˜`cvÏUîéMz.;íp”°\ëÜj¸^gØ0†16A×„{»õ¨ß\à
+-DÂq}{<Åg¹:,^:{¢‘0Ú ‰ºôhœü­ÏÙL:œ²X%Y�i-ù�óÎC;ÈÆLÈš™°¯u›FQ
+-º¡CAÌ7Bd8AOÙ®8“årGñêç½fBÆ5µÔ
+-û	ÍqíÁ(ÙÙòÌ�'ÛàÖ†Bz§?Tè±˜]je¶I‡BŽä½•%OhõG	û|µ[�wEHõÆfXX/ÇhÖ$Û`C¤¥7Ðe¥èÇfÒž0ŸÅCŠë„­Êà9	ˆUCA<A€¬'î°¾-0xlÇ—²Åÿ+-sŽ3“„Þìì5ÊÎZo¦HÕ|â˜Ÿ8ŠÃR¼;Â‚/²I$'§OnˆÄ—EzÃ)šãKÑ.9m©ÞaL‹F#l9#a fÏp¹íîyˆ“Ó7ªöÇR='”Xg:å‘Ì�à�1=Ö²h¤»º—ÂW·e€£Ò@Xýy68”¤lñwêÞ'‘Q4ë±Ho4 W%’È!íbÈH5Èk«!ss�m"jÉ�Á“«D$½%$33ç¼[ƒäyôöª€9wíŸtãÉpÖã«›ëRvIq÷ŽÞ(¹¼á©³I*†�LÂ² §uCþ1éJÙ1»'Œ02D'7ÐdïÈ¶u�jQq ÉµÂ–­ƒ°1‚ªÖ“˜«ÉÐ¶šéáü±eG,®w›[ÓðÜcÑ1s’-:p´ë¤Áœ/M–$„T»£˜æèˆÄœ4…9ÖØÏäY�S¬Â3
+-²Fc¶=jÂœUµËTœlcY@r”|>ýnöo³wåS—M>5á­Áh$lßLG9+�LU<´|E�T1è"ÊK¿€ÿ!H#lä³©/&Å‘b±ŽÍ½©vkÌ6².¶€³ˆÓ"Ò•Õ¶§%’VFœIh! FÅƒ0í8é§U.‰í§ðcÅ'¿ŒêSgÌ Úü@È¬†Ü-ÒÈ
+-{ÈIºÁræÁpšKüÈ#î@*®}Çs»ä1�ít=¢Oìòà(œÆ�ÑTßP)7bH¹CÊÍRnC&‘üsÎïÁ¯â•”×#Ç§”å€Ùí—¯Õý[`=âNñcr¬Ê
+-«7µ$ðˆ»ÄÝ¼¯'Ö×4776oô%®ô±Rø"¾€tö¾.œ¯ÃO¬nw‰ŸxÄOÑå÷0/Na®¬ÆVJèÍ$Í'Emøc_0æã:»Üƒp#%»™5áÌõu��«V7ÙQñ¥Ö:¾¨~n/¸ÞîëˆD}TKû:‚ÑXÜÇ¥ƒì
+-d@À#v‹=ü>þÀ#öŠ]d]‰�<¸o&Ga2¹ÌbrOÂIzðB¼ˆ”ŽJ™Mñ@ äûp¦KÜë÷‰~�Ø�×{0=ÛmèG¶‰�ai>ÞßúR™�¾xÄGŽÊ{I¤�!±ÞÍ’6žA8•——“A�P–µ…b5ç4Œ£?ìšõ:Ü¶‘±K%,>ÌëÑÁŽ q~óŽATyðlô#Ô%à7DþkÊ
+-²Û‰¬®¸*Ÿo}ºe%¾H€º¨ômë"¥ôÅ£;˜ b‹‘°¥“Æ|4õ¹ÃNb¥o=©0ÎD(ÜXîk5 øC² ‰·êi*“;táŠpvïðÿ	¾S7’‰?�ã„æuuÒOfddG>ŽÝ¼W²¾õõ5­Ueµ
+-Ë(»‰n
+-’Ç­ø¿ÐÖÓþËm<Å˜å?�P˜Í�ZcÎÕ­ËÊæ’Ûü¸Ÿ8x"g<÷�8@N<ÈìFtâVD)ô yIÖ“y•°Bº|ÛhÅØiA“œìñÇ»º`x6Ê8ìÎ�øÙn·ºTÉnÒz)Û‚ÿ’é¤1ÿÊS‰M×¯¤a„zÒ{h°ÒUÄ‰%p¾‚ÜýiÖÜ2MiXœ�eAR@ú«r9@_8bÒ`À’Æ›¡QoH:/ˆ‰Á�Œ¥’4r3ÝL]&´:¨Üb²ž²ñØß.�ñ‚Øâï
+-Å�,�Åc™E$—rfRàÛôKÐ1Ö{�wùã>ùÞîãÃäÁ^Ô‰C<)¡6¥µ+"ŠÊ¿f<7yÄÏÄÏ=â \qˆó�ÜôDÂƒÓ±Àƒ³p¶'¢�“)|5ËS/éüL”e¢`Op÷`æzp
+-Žöˆ‡ÄÃFT=þ	�G<Â“2ïâ…ì;Å(	jb*¥]ðN™¦­[Ú@uR
+-Z	4}œÂ<†0©À×Þ+ç&â!</KÏ˜¯ŒHYÃPN÷©”_{jÃa=*“]=æ‡=âˆøUG+
+-Ž@¯Éùr,7>wxð6N±½ëeññ¸8ê¿ôˆ'Ä¯È‰¬\0¸Ä“ñ”x:%EÏ|š‡0ë¿9/"Æ­ëÛÉn9sÌš]ý3%_à¬Ð#žÏQ$±Ãj.ÂÄãœzp$zY)š=âyñÂ	Ëp&#”ÃÎädƒË”ôD#ds©™ÕL2„ÑT£¦“�Š´«ÛöwêiIô‹x»Gü‰”au†+0”Ó#~ÃIµWú«”5ÃÓã`¾åF2LöúÚ#zLºòz¸�³OfŸæ"
+-›Òý¤Àáë—T-õU×ùZ›kj6 )I›
+-±88·²P�Iê²×px©8¸ª­ˆ@Ã˜‘Ù¬›ûSåœaI™]0Nþ¸‡PŽùÈñÆ"ä?#ÄoË~¥ÿ4 QÑÊ ­¨:þXgt2»Ïn%Éù{zBACµd8Jæ¸ßÊ‡±®Ho¨�7§xImoÜ— v¬�XrÚ[uÎ‡˜�4è(('2Û[
+-ÞAhÄ¹¨ø
+-8;ŒTEf.FþÓMq)H{
+-$Ý §J¤Î”ÚYF)Þ‘¶Y±ÄØÒeö0J	^ñÂ®x¼§²Â2+€°™Xv×]å]ñîƒjªíðíˆô»¶ê¦V1ƒñÐû2qŽ
+-³L‰ÊPp‹Úa0™ŒÌ
+-j~
+-ÚQCäµ#a#×ŠOiÇ¨oK8²�Ô¬Sg<–Õ†MµõÇôR^²êôÆ,³L+?Ëüíþž83äÔÌÑYÓ*m©‡ŒÓ”q¶û£ívÔ¥]Y0i˜K,
+-›äÇ±,°Å^]¤ª	O]¹Bõ¤rñ	ðž„F%5‹pRlˆ�ÌÃnŒþöT”Áœ*Éœ¬Ú¨+ÕÑ[$”þJ&’i©HyJ45«*»=˜):ÍóKeîŠ�ÊÃbÒÝ‘m+_
+-7¥ÌöØSÎñä%*vÖW¯nim¬÷Õ5.÷™W/6ÊTßîÒtßfbš�VŠÀWzÄâeJU“¨¦$clÔ©ÀýCÛñab’ÆÀTŽ^™�AgVDD4²-,CŸÇ$ŠÛdŠ»­K—.ÑTN‰P0Ä9cœô&©
+-ayœJ_ÊÑ‘ý£Â¥‘´Ïùÿ‚ß®Ìh¤çÊéa…�ÚAå`"ÝÖ�ëÚË}µ±Lçf
+-vv¥(×¢N.Ne5~Å*þRkë2ËJ'Ó¿«œ0„ÙŒÆoFfúŒáÁ^ÜJ‰¬ý«‰wày.ñ;�ø½x•‚!+;Ã»‘o§8—cxë#†<7üÂ„!ËFú".£äÒSºÇ'MË·/>¦	Ù�‡¨úm¯à,Ûô0
+-×™ÓŽUgZ‡:´•–,â'I‹m¾§ÀÆfÂk',¨9,¨?R}ŒÏv…¬ÜøZ£¶´.m\ÝêB—Ut]5ÍÍyC}Âá�þlÓLÛå3ú‹]imy¸{Icck]c�§touÃª†Æµ
+-”Ù­O¢‚ˆ5øÌ#^ÇiñŸ •®¯iX³ÑWÃ!&ƒ„¼  ošù
+-eaDÑ‚ˆŒ±KðØ{*ŒÕU¶dNÚ¥<è1V§Ü!ä¤u",1`XúÃ	ˆ<„¢l«qvç: Ó Or5Ï±îœ–„jÍÍAÊ^-w˜)üvÈ$Äc¬¬6úñöx38š—˜SØ�ñá	TÊÕ!(œq!8}°æ½É¥ì¬ãâh§/ÙFØÊV2&]¯äÌ»°¥­¥µ¦¾ˆlû-ží++[èk©©n®iå}ù¡Á*Â×}zC!�x[ü{Ä;â]¶†÷<ø5.ßoÄ›<XˆE¤h<¿¥µ¹ªÉWÝÈ÷[k–¦œO•®)L[¶Ï—�"æWF¾eUO)E,þ,˜ñ3�M^¯K�”¸` êçöúC±´‹nÖ×¹u©'’u”â“Æ2=lC¡0îîáj&ó×ÆÁ¨%>jñˆõ‘1;ù|‰#¹dI$B¹mâ’÷¨;2ßµ³ïb.áË/›�Wóö«u?)í2@æ~'%'›wÈ¸7/3ÒØëòKyÝ*Â×	‡Y§ëæEÈüÂ¡ïäPyP‰ê5‰ûU$¿íñëâ•ƒ8tüo¨I¹7%.º?š&›!¿¾&dsrêÅãüƒ?ØE#Tó½‰öHò6CòêåÐW2¢™%õØ¸Aµ8ƒ\ŸÙÁºgeSVëjí0y¼Ž[¿SíÀè�gEŽP‰•ÁðÖÈbåéX˜áˆ*#¡ÅÇþŸ¼€)ïˆW	�IG<qcÓAŠ˜vKÂÜ÷‘ËbGhú˜Ü`¬*vÊÒˆïð�é"†ÛÉ+çL7�Ö�ÀU'ëû}é¸ Â7Ò¯É¬I‘þRY]ò•4¦[¿2^æ%ç;®pé1La\aõ1F�só×†²#Âb�‰O<œŸt-)—OxÌ)}-µ¡ÞX—qÉ§eðµ¶¦&Ô¸¨iÝÎdW–‰á¹”c†ãdªüýß¸"ž1Ô2j‡ä€2	6À§ �ùðø>§_„|Ûï)ôm¿‹è·°ý®§ßÛïI0ÛïÙ4î´ý~ÜœýÑ»›Ó.jó1Ë6®ÁXtÛ~gÓ¼lôÐ»<Á—mæR«ñA5 ž �´ý*…¯oÐï1ôëT‚FD�³x?¸ö0XÌc<À‹ À¯1Ÿ“p,ƒWÇáxÙNÀ“e;}pÍQhf\öLNë™B›òÜ©8M¶Ó±€FÇra CÌà ¾V\åÕp ²êú@­Çº’# z³ëJ@Ô—öƒç[ÕSê½Ù%ý�s3ä@îNÈöŽ ìƒì½àõŽè‡“Š�@öÖ¶F®*ÞM°d%nM¢›ÃMZW‚—ö^K¿ÖAn"&®‡axä NÂÍ0u‡0{a:vAž30s01
+-Ëp+¬ÄmÐLEój!¨´�‹¥¨†Ü,¥½Ç‘ ÊH
+-`"–c…Ä¨gHÑå@�¹ÂÍŸãMñ,0Å“M´8qwq?ŒÚ�Òpf~‰xùePñR› ²ñT©?Yü5ˆf(å-B‹tKì€Ñ«ÜpÉ4Í;†˜V< yu%‡ÁY²[öN> ùÄ¶±Þqý0ž'PÓ'ÓLïDúé+öN€ÉõÅ
+-¥‡ab©wJ?L­Tò•ÃàÍW`Z?L¿\{¡ ÁÜ£�W±D�i³eÿTk"k|¾Bo	?Š»å+e´])©�…m™ñÆJEþžfA(7!8 ‚AÌH€èƒé“g¦M>Õ¶ßAÒµÌ½f1g¼„ëëËÀim`n[¾â=}?Tî‡y•Î>S©&öÃÙ�ïì‡…•*7‹òÕÃ°Ì»8_•Ê:_B/·�©bdTFc	?fó£šK“X©é\¨‘„•�8ˆ*�dµÆ\¿œºJ™Ï¦ØfÈþ‰œ	yÔC+%Ö¯UÆ.yæÏ:–x=©€\Dª5¯˜Ì—õe&Yp#o{?4!�®ñÛ‡ ¹ÒYÊ›Z©–ä;™)-}Ÿ¿\²›<È6x%Ëåö8+±Ï€ùdOGð(,3WB30N
+-ÞI¶öŽ?%Þyx/¹ÞûàdÒÀ©x?,À¡'«ýÔá“„ÇSp&>
+-ñ9èÂW „„(þ	¶á[p1¾
+-—â_á*|îÂ ?„ñ#xHäÂ£øo8ŒÃø	¼G¿?>ü[dá8‘ƒ'‹|œ,ÈÃ‰qX&|8[LÁJQˆ
+-¢ÏEØ"ŠQeåx®˜�—ˆ™x¹8÷ˆÓñA± ñˆhÄ£¢ŸËñY±?«ñ_b
+-~*Ö
+-!Î.±Qäˆ³ÄH±IŒg‹9¢]T‰.±\E£‹Õ""Ö‰4ã<9Ÿz¯1ñu±M\+.×‹KÄ
+-ârñ-ñMq£¸EÜ$nß÷ˆ[¥3é'Ïx&ŒÄ9äL¸–àiòí0â\òi
+-|%ôv:q¼�<^%Î#/Õ^ê›O.I'Onô… ÐZ•ÜÑu¸ÑŠ'J	.Eä�D$dqäb½9Åí$Á%¼B\EX�Ki7EükdÀË;qÅ"„•¢—ã
+-ò¤uBÇZu$£9À•™¤„™4‡�£6 ­äqV'©Êý;é@5\…R!MÎiM:¤C)�˜žTHS°Îôï/$…ÚÍÒlÆ[¸6Ýíî…3Ûê&¯=z/´†zöÃ:Rí¶>8™	‹õ‡`C=ÙWÙ×:£kãÚ’Gú@k(y¤ìàÚi´Qjô·I¶Îs(F�xŠ8ý4LÏÂ4ñ‰ç¡B¼ ³Å‹0_¼ËÅË°J¼�â·°V¼
+-~ñš¤q4A]N2cYpÆ°ë¥|²È>­ãˆIc‹éÎ2éYõ0=ûaS]‰é	F–˜Ž`Gùu}Ÿ¿%'œ-I–$¹XUl5‚x=�¯‡&ÙÚ‰z�ˆz²Å0Bü�”æC˜$>‚ñw˜)þ	sÅ¿a¡ø–ŠO`…ø4‹ÏD•�‚6J¢ò(Ø7‘úQ�È_§M¢.�Á`±Ù¿».ÕofñõCÀÛN/ÒœI?|P*…NN±$¦£é“Àé˜ªc
+-xS¡ÜQ˜ÀD…b™@ðº†Z&-Øj*ãx9B0@gEÄ¤":–ÚÔÎÍwTÍ5Ó%î”A€Â¸s ºA0}õzÛjy±ÂXM3™¦�‡«öÂ9G Ç»e BmûàJ×¨ÇÛ�‡ ÜÎØzèýÜ~ˆ|ÊÙJê@¼ÍÛ[º¶d)oÜ;Aíƒr`wñXL¨Ûç3ð"øùøùp'sÊ¦gPö“í"
+-ÖÃYpžÉÕJÊŽÀARr\“—ÁÇmpªã
+-˜åø*,r\‹ß�•Ž[ Þñ}Xï¸ÎrÜ›wÀvÇ~ÉùY$•Y”GÍåÄS8Ï”9|%¶Q¢ˆdBùÔ·žÞl7Ô>…Ûp£©+g™º2ëÈ‚Ý¤ÈE“V[W’t †6%¼Ÿ mx†9žƒ<Ç‹	m`(†$Í4] ›ï™{m$Îð¬|
+-¹cx·é#<¼iâ…k÷¤mõ&(Ž·@s¼
+-9Žwh«÷m[å›ÖÌoÆVò¦«©D¯J5è> µ—ì‡‹I�Ê‚øN(-;q3=™`™Å%VzbÏ·ä”BkÊ—h¨Ìp|Þ/Ó£Ôî	æ†$§¦S’
+-Êt¦”ÁH¥Æ*àSf@¥2(s Z9
+-º”y	iŽ¥¾„ÒyvEÝ2Ü€|cQ¾1_ù�³)%¤„&»Ýäð<“Ã®âJ'JÓ|¿ÒhãŸ+±�ËÜÆƒ:U�ãgœrëKã%¤
+-_©Ï¨ód—î„S$«.µXu³§.gV]Á~ÆÎª>Ø g¯±fÕ6ûJãÝoòù*zdÜÖœ~u2ùÿmâ3*°
+-»(
+-Üe©¾ïë†ïï½&§²ƒ}˜m.2’àYÖ¢oX‹¾É�k“+½×ñãz;8bÂ8HÊñ­9ŠãFÆMÇ¡çÛ´Jç(e'Ì6—sÞ9Þ»“7óã;ü¸…·òã»Öš>ÈOYñ=k ¥÷ûV¯òò©ÅpC[¾s?ü€ªÕPûIî?´Q|[‚Øâd½KÜ6£çíœº†â!åföêäJTF~t7¿ÒË»ÉTJèö“örû)µ8n UíÓ(‰Þ/¦ÊÖPç½PJê ¡è *[À£„ Pé†r%k”‹`ƒr1Ü©\
+-÷(_…ýÊU0 \
+-•¯ÃcÊ5ð†r¼¥<ï(ß‚w•á#åÛð±²K”ïa™ò<ÎP~ˆ§(·á\åN\¨ìÆíÊ½x¡rÞ£<ˆ�)?ÇW”Cøšò¾®<Š(�áGÊø±ò¦ÈSÞ”÷Ä4å}1]ù@”*§(‰3”Š
+-Ê§Òô:(²P‰P‚�Dë»°˜¼tYóB¢6H¥»‚ÛáÜÂI&¥óš¢´ôx„æ…À!¦Ã"z[ÌŽLÓ4`6RiÀB°[ñn¾�d\|‰f³_Ùç˜_|~Ê9A}éÈööI[\çÝEºêó9¨¹³¡ŒÆ/�?ÎV ï2tWªç�mF<)Ó„»lªë­wFí´
+-NOþtð`V½÷zw·Tˆ0œKlãöø‰lïb7'a
+-Œpáª3²�# Çé…1Î‘0Á9
+-¦9Ç@‰3*œùÐäaç8×éƒ¨s:\Mï×8‹àÎ°‹Þïrž
+-w;çÁç")¬ä§A-Fˆ¥È† öH'•Á•OM¾!ßÎ¥·»I`sI¨ìY÷I!pÜ#…ÊA0Š1ÓEs­À³rÀn™öÈgoš¯v®²ùê\Œ›±Î¨@b/n5!¶sõAíÈ°OB¼·¾TF»Cp_Ú�Œ³ÜÎ‹‰C—HèÅÆºô‘t‚¿�TQ@Ñ%õìÀóÌkÍ0CyQ[ñ~ØÏÉ1�ÜNÒ9¿YÎïÛ�çãœ‚SéÁ eâEXÁA›3•ï`ýð•Xéäªü~öHò|)_5Rqôñ›ÌÅ¨tå»à@¥–¯F'iu}¾«Ò™¯Õ—zäZ=køÊü¬Ã�•Ÿ5 ?[™ÎÎßÅ™0$xÒ£¨Y:¸?_³`œîf n	ätwž»è¦ïB«Ve{h0°<7Aó>ÌÎ!v1‘Ís¯ìƒå'ð‘cìûì·}�[©šþøQê’¯+‰5	{}ÌHüÇ{ÛL.Á–#Öè/¬�r'÷ÃãÆ¼R>©t‘ž,"�Âù²5þC($�ßO–ø (q\ÎŸÁpçA8ÉyF9�‰ÎGÉÃLç8Íù˜ç|9�Âç/a¥ó	¨sþ
+-Îp>	k�ÏÀFç³p™ó×d�¿�k�/Á�Î—áVçïàvçïáÇÎWáMçëðŽó
+-xßù&üÝù6|âü+Îw~Œ‹œÿÀ*ç?q¹ó_Xçü›�ÿÁ5ÎÏ0®
+-Ü©jRÏ#[	sñbÒô,ò(wá%òíZØ…_Â/=%8\ª©f¢¿Bõ»Ã±/¥BK%É–Ö¯ŠjX½]&-‡ö1+~oÂË	žƒò«ð
+-‚Geÿƒ¡™¡ÚüÀQiµ¿”&ÔœæÔÑ)~à*3gËÅ«y¿DÈû5«ª%ÚŒ"è
+-ï|®É'ªÊž>pÖí)öþªrvrÎýä>xª*Š½O[=^ÙC)ñ3mÅÊ~x¶î <×F˜=/ûi5¥6|lv²¼/R™ qL­«Þûë:K~céÏK†víƒ—÷Hd²É™¸a¶¬ˆ_€Fr[�	åÙL•,¨àR![-�Z9j	äªå0B=Æª3aŠz*”ª³`¶:©§ÃJuÔ«•Ð Î‡Fu´¨uÐ¦ÖÃ&•`«-Ð©ž]j3lQ[áruu"þºÈ÷|]²‘Š³z]DB½¿Ao
+-²ï›ô¶�âïµR¨-ä·ê¥ëoOôqÔ6‚ÀØjÂÛãÍQùœ¦³œjÖÀÄà§ƒKé£¢æîÔjVõ“¼§™+ÖšG8äŠ|zî…—ûáz¡8{5ýðÛ´ZIÝªº�˜¶F«çÁxõÛ9Ï™RP9ŽßJl²ÒÜd¤Ü$wØ^Žêeûr¦^'©WÚàŽ4áºùÂ…©{Mæ‰Ê.r<7“ÚYzñ;Ö‰ßÀ«	§c�ü�G^³�PPçý#g™”VÔQªyA}Œk°üÉT1crb‡?[š÷—ôâÌšñº5ã
+-cˆŸ=Ò£Íƒ…¤µ$þ3J¹„Ô[‰öï’bþ&©wÀ<õNX¨ö‘î‚¥ê]P«ÞC
+-xœ¡î†fÊr»Ô{!¨î‡«Õ O=�øæ²ˆ"˜¡j|i(S3Œ‘}l»ÌÃ“ZØ„ß–*¤TÏ˜çæ„5¹û]³®}Àä.UÒåDÑ›oŠmÉú[\¯¦”ÀÛvNÊ’ä¯IN´ Ù‡ß1†÷Ã»
+-e&äµ%¥w€»Ìûž|ï‡÷ÉäT*eÞÿáŽ>È+ó~ ‡Ž|þT™÷oF§£ÌÜ„(š•°€ø|%ùßkü>‡Ê`P#~“™¨�“#8Jà—0G}
+-*Õça�ú4ñþhUŸƒÕêdì/B\ý
+-\¨¾_V_†+ÕßÃ5êáZõU¸^ýÜ¬¾·ª†ÛÕ¿À.õu¸G}öªoÃýê;R.Íä×sa:~‡øí Œx‹ä÷Â„\®'Þ—È³ä8Ôà­Ä}–Õø=Ó?`&Þ«A7×fñ¿2›¶Î´°ÂbþDøáî$W?2³å¿G©ÿè‡sÒr5õPÔO‰ŸÙ,®HÙŸÜÞ†·›‘¤ÁÌÆ¼\“í&G¬´ñ¹Þ~P“z{Lq\b;Àóà�(oåy^¼Cž[fûÈW;T$>ÄJ¦(˜•ò6Ä®ÄAë7ÍS½V¤`BgòaéP‡hû ` þ5Äè¿àcZo¦8Ÿ˜Þ´˜”	¨jTp6í^W¸ò¡Ø5–¸ÆÁ
+-×xhpM€×D¢áNIÉ�ÞL¢¦ÃÀ.2ÛÝf»ÏlûÍö¨Ñþ/PK
+-    ƒv7@·íç  0  *   org/apache/commons/logging/LogSource.class�WûwSUþN“öÞ¦—GS¥­"�¦%ì8ÎÀ ˆ …´8Á‚Žs›^ÒÛ&¹ñæ†t@Q|£ÎèŒŠ3®¥?H—Œ/ZâõküÅ¿dÖŒÏå®Yó�“Û$”¬¬œ}Ï>ßÙûÛûì³ïíWÿûàc°/‡°ûB|¾[Ã°Žýr~@ÎïiÆZÜ«áwRÞÂUø½3ÄÉˆœ¤$fTN-
+-CHcLƒBãryB
+-ÙäàhÈk¸_ªöIk®
+-:<E‡tL†p%G¤½t<¨ãŽ
+-3Nº °49n2EÏÎ$n7cž9’±6	,ærßxaë!ÓÎH�€ØOõøèÄ†¾‹Ô-Dögó™”ç¸�e{3—N¸ÖÁŒ•òÛœ\Ás‹@ËM›íœímD»÷’Ç6g”V%íœ5XÌŽXîž²ÝpÒI™™½¦kË¹¯zc6Y¯M:n:aæÍÔ˜•H9Ù,=$È#mÓmÒI9E7%ÃXR°¼d™Ÿ•µržéÙNŽQGkhy.·m’dtÚHeÌ]´Ö ¶I­é¦›öJy‹ËáuÖ…WI¨Òïs�I?¡ÍÊnÎÌªÐ.ñ.Ú~8eå%¿‚†cÒð°†ãaÑK¼Iº-iËëgnÍ\ŠVûêu™DÑo°Ì)@­@×åñ××árù]�ÿÈ†ž5'¬AkRJ…y�yeNÛjsº{dœµ³©$Ñƒd)ë5Ú} ^öôÍ©Œ_W¢Èd–+`‡-‹fa¥"âr'Woµò®•2=kÔ@	�âkpN\0ð7ðž4Ð‹õäXçt
+-¬CÔÀqR cþLÀmþ„§<�gìÀmòVÍ	[ÃŸ
+-üÏ
+-¬›ÇžÍªN:»óÊp7x5ð7<‘Ír’4¼`àEœš“çJÛê4ÝˆèAL`™ÄËLâª9Äé6mñÎ/—;ãrgÜ§VYê©ÙäÓ¯`$ýøNÙOfÑó )5¼dàïøÇü@•Œ_à†rîæuîçî
+-hÕ·s–æµWÒ|"Õ$³¹M˜ik»ëÊ¹¦ºP¹óýüo{¶™±�X®�ë¬â�¡bjlÀòÆœÑÊ�•5çh¥Š®í•jV»æÔó ãípŠ¹ZÚAÇT÷MÝîQ§ò:ú·£-Z°Pª_6ŒK{e÷e_ša£�^Úºëu‰@¾Hø�uàWh@£¿r&–\Vå~¬š—1ûTÎš¬¶´uÑ:Í¬®ã¦	«4$cm�õ«î U²9XêUÙ/°à¢URöœ­®k–¢u½Õm§µ}¡Tð¬l¹ÃÞá:yËõJsR^§|®æÅb A¨þÙ,Ù-”ìñ%[&¥ŽÙe!pg×S²³¢1öÄY>4`Ç%ð<Í½€�j³ÞGÙ,o4ÒÀ3ü<
+-P®Ž�GC2x��Þ@8x�C=½çÐ4m
+-zRPžUFV`•â Ý\Ã'àu>C—ÿäGÕ\›ˆ7Ñ�·¸þŽr#‘F,Å/q#mÈO·_á×´ÑAý&lVvWã7ØBy“¢Ûˆ›±·`nUt·ût÷’¬-"™&{|¦±ž2ÓjÂ´|D;° Ó÷'ŠI¤¼[1‘	iUL„òâžY¯Íò]âçxÔ÷Ù5�æØ9„>EKRôœF+Sf$¥’îìëy§â=BËÀghÁçŒõzÿ’±þ«†AnWÑ¶p­;éIzÜå{ÜèŸªNwÏcQÕr“Ò]s¨:’*–fù2ô÷¿âj¯�'º˜'š†Æól•ä§Ð4 TÆ‡³tÚ’d/è#ÂoßÙÓ�1#À¿9û4ü—\¿áú÷D|ËSþíø�uû#q?UNYÃ"b7÷¬àOž­Œ¶×�¶�˜ÙhïÀo}¶×)°œ©<‡%j\z‘÷±¬Ÿb¹Œ^T£
+-dxçì
+-?s·ŒõÝqÕð{X1ƒæÀVò×.‹V„W±°_C(Hå´€ú.)E¸C­µ‰pgÔ^µû v±+ÜuWïŠ}‰æð5òi
+-Ádì,ãñ¯žÂ–døZõ˜Â†i¬<…–ð¥‰L£]Î:ÕL÷qªÎ2_æd=#ÚÈ¬ÝI9ÊûQä:J8Š‡)Oà4ošÎ›ö6¦+gtš]Ìmˆu»�w%Ìˆ0·�ÌîZÑö>Z¿‹c/= â^VÙ}ô•¢7“ˆ"Òëµ6µã³d�á˜#‹¼âq˜O%Èe’lŠ8NÍ	<€“x�ŸIGq
+-Çð*µ§ù5ö:WÎàqò<I¦Ob†MFÖ‡Œ.îßxÐóìS–¿r8®ô²fJ¬�²n¦¢;SÑ
+-c¥¢ö¨ñ.ÆÇÿPK
+-     ˆv7               META-INF/maven/PK
+-     ˆv7               META-INF/maven/commons-logging/PK
+-     ˆv7            /   META-INF/maven/commons-logging/commons-logging/PK
+-    {v7$áò¼ô  wK  6   META-INF/maven/commons-logging/commons-logging/pom.xmlíkoã6ò{€ü^P í"’²ÛmqØs�Ë&Ù6Û<qzÛ~:Ðms#‹ªHÅq‹ü÷›áCOÚq²no‹6E±9Î‹ó•Á?‚`wçŒÇ,“,!J5cä0§1ü3µ #oD™%Tq‘‘/Go¾$ðÈ
+-"2¶»#
+-2 ‹L|\*H
+->B§cs–)2bL#¿¸¼>=:!žÂê„K³
+-6_p5.ÉB7dˆh’pÜ–¦„g00×DìîlJ‹„gSØ6_|:SD,2VÈÏa¯kdbôÆ"
+-Z³%ð¸¥e¡Á­Â>ù AV_„ä ØÝÙ³s{_þK¯�Ó%É„"¥d5fÂîb–+ ˆšç)§Yk-W~ îg‹BŒhª™ bÒ#Tíîìî2S*E‹Å"¤šÐPÓÈ1��,/F'‹ð?f)“’ì—’ Óñ’Ðh‰é(Lé‚ TQ-ZÙ°û¢ 	gÓýÝéÔÝTJ-&G°Û AQÐÈÞáˆœŽöÈëÃÑéhŸ¼?½þþòÇkòþðêêðâúôdD.¯ÈÑåÅñéõéå<½!‡?ïîüpzq¼O	¶awy�ä�%È’†Ý¸ýÑ.´VdÎb>á1°•MK:ed*nY‘¡Yä¬˜s‰j”@^†0çJ�ÜÝéñîîÁpwg�â‹¹›§™üvÏÊ~NoYÖ”þ»ËóèexìÈWw’WÐ¨©ÅWîÅÁÁóè§ó³,œÓ€gR¡QÀ*É_I=x&bMÖ›‘Uz ¸}ùßƒÿ„w2Ù¢áôÑ&ð�¡PˆT‘¤dî”kùÁÉ²Æ¢Ï)Za*¦S”a™q(&•Ü‡#.•C¦‡
+-»c±6°#Ä¸Ç3Å¦…fH¯Ü#ùŒ‚Î`h¦EN3£;ƒi¯’w)Ó°eFöæ·é#Âq·š”iJdÉ�/1qøè-å©¶t¤ÝÚÉÀ%º354ƒƒi!Êü4‚�@áìÎÁJ‘›³ ´P|Bc#$0¸QcÊß2üz¹_õîQcûÁ\$,µÎf¨5<ˆZcÊ‘á6µÚiÓç£®ì�7Èèœ
+-�9sPzTÏ;ŠŸ‡ð_‡�„É¸à9ê¤‹Ew!¡¹}Ó4ã¥³	Ÿ–…ÖÍ¸à‰^ êhûFj*½ÉÀ�W&(—R±¹QscMIY¤C{ ,Ç-ÿèØB0ãHàJvN3ðó†
+-˜=†oO¯‘}°S�=ôâÖxA£q!’Eg—ß}wzñ�Û5ÝßÍ‘a� .~f´¢ƒ ÐÖ˜LØ-Kø1é¨©Fì bK†|§àá KR�kežërÌRpøà"YCÉ
+-ÜO8ÄpGm08ˆ@¯ù¯úDMÔD­Á
+-´‡ªG;0|è±l"=X­‰š‹PãmvWð_,hšÌÄdâ‘À•H2¶$ï+ÿ‚†6äÞ—!y%²17qAùtÇfŽpŠœÇGî(8R?7Á§ÀŒ¤h¥‡—Q,”"#7ïcÄ.~šYnŸ—"Ù
+-Ï¼F6f…"¯Ë¢@vlá¼¦f�|*<%˜X'¹‡§wÝ÷±ž÷³b×>ÄÊæ†	†W¼Gz‚€'©ñ8^³7PŸˆ`!`ª_™ÏVx<ƒÂ…ŒÌ¼×FôÚO…“1MyyC=¬¼-Å¯T’×ÀÇ‹]ýï:jö¸øã…¼á*žé¤ ï�8$ä‡
+-Àë�Üúuìü1ç–e—©‡�c=CÎ`pJ+±ËÿïlŒ±’@g±ô°òº€šŒ 
+-^º{4ž¥K d\åq�~fPÖ!�0úJÞf¯lZ¿6sº‚åBFTN\NAEH]>):•Q'Ãl¢ÜØ¥Ë÷‘Ÿ ¹e
+-|ûõSÙmîXç»FÜú÷qÉÓª’¢,bvf¬D±Ê"Ž>Àñ†�» «¶‘gŽ"ß¬ÙÖ.½boíTZÃMW“xð'r4à„§�íá„¦w=Ð€‚4>-“–7«G‡ÏžEÏB#YÅ™ÔY¿žh`ˆz(ÃâÛƒ²æ?OKPN=ÐlàO cq)•˜ëê˜L
+-8TºÝf» RW×Uù•[¢cÖD£»Vh¡û^R€Žifz€"…GIrˆÖÌ5â”J™S5X‚šKCøÐ<5â©ÏM÷ÃrÚ­Òõ¢F½k:#@h`xjuç L}Úªb,6pú·¬5ˆÅ;¸½	è
+-H@›¢ˆÎ/NßœŒ®Ãó7PË7A:Ë[jqR=9g	è´Óî1_ïƒbŠ
+-ÇŸ(¼sÀ\ÓbÊTðöø¨½ûè…À"
+-l’#PÏ˜�–çâ{­3–AÁMÊ<¹VpgÃoÂÂ`•N°óÛ±{
+-à#uøÙoF…±™
+-•žºD^èÎ–Ñº=Q»]ei·ìÕíÀt¯°%ØÆR�w7‡…gÌ©¯ì¬îb
+-ÁHo(–Úæ±3à?úrÂa�:Ð¸õc—qßÒ5v«§ÛÍ^KÈMt7Ys"ŸX£MŸe�sÃ
+-U#ÕÊÎ	È{F4SÚ†V9ÿæ¼Œ4ÇBwÛm—öÉð�@ºOl“’æ¼�R·5L/J†Ú÷MxNM-„î_B�¤¦KŽ^Ê Ã_ÁÿÄfØFyžlß´O!5I0™GXÃäêLfŸ+@|‹¾Ï8s�‘ù…È2ÏE¡ÚaÙmýÆaÝ)ˆûœÀjißÊX‰à¾ºe†ï^d›´æñÜ’ã4t<à;íÂv³ÐÎ?å˜�&?â”=p*•7ýCˆ¸Mt^Ì4¿ÝÃ°éÀ¹¥i	ÏŸýf
+-/Ô	NX¥
+-÷�C¹{$Ú «±*ÒZº÷ðÔ3V¨÷fÏ	K¡`'@"´tø’z0”¢0¡S—4ÎqAýŠíÊM‚ÞZ™t§&<£)z�ûP„êo×Û·ƒ’{ÄázôaÃ‹ÙÓE\c‘ÞG¾è½ç!EÛ¬>ÉV•˜=›ÃU¥Î.gÆ×WÑ™˜¾|ûÌÏ×£‘‚Áˆl[ØÞ&7Ï¿Ú2àJçma±âÌy5:§Dï,º1e_NÚ
+-_ƒQ¨àõ²qæÀ­!Î®°:/ž:?1æ'
+-œí¬ÆäæOC_§?+Ñ[«^)£h��tøï»ÅÈùÅÍ“‚2ˆ'3þüâ¡0acû_;VX!ü0ÌfÎ€±-ïùžÑ›ï©œ)|ÕºEÿ†j�Âãßžùÿå™Û£Ÿ®_–\±°pý©Õ®á¶ì—õU*%ìáwÇ{œ^s
+-E©òRU½ÃûçV—œL9çŽ¾ºîòYƒ¹:9;9�—×'£PÝ©ÕÖ`7òÏzºDæÇ4òàŒ
+-"g¢Lìí˜ÎŽ«–t<
+-?ª”‚d¯‹äÖŠ,fØ/Â._AÊ•²î69ÇC@ž­úUXÞc×I_CÂKdhL=/M«Z#¯{T«°tÛPVV+4Ý%"–êÍÈ }Ÿólú­á±Ì—†3¼¾wC×¼9T
+-Â‡¶—�˜îKÎ±?"Ý�3Ûbqù6eð¾']¶Ñè’,xš¢=$,OÅÒ5-=X´5Y 
+-{"ØÖžÑR†sñA<ÔÑIB0c)äf�éŒlÚ9Ø^KDK8p®ñªOoAvöØb'²"ÛwdÜäêƒ=Ü(mÜ0+u¹0éwåí†j™³¡†Ñ¿yaô
+->á¬¨Š8Ìõ Ï1¬aó÷�·‰´mîsþtÆë©ÇxÆ­·¢·Ó,-˜¾¿º¡kxc¦hð�×C¬á¾—˜d /ÉK¤y]GÐJÉŽZX¹ß]êÞ*qíEm8¬.ô‚ZÙ|œ.;±¸ƒ­OÑ˜m¼Q'ï #bÆîÅ´4wŽml0Km+=ìmRÁƒwVÖ(d7Ø´¿ôžø^âœfúrþÛ£³Ï¥½ü¬/þ<¾�\“Å³ŒÿR2Í‡yë‰ÜLÔÑT±¤�
+-°Ô¯4Dçí¨~@Ac¥$-¤
+-”sF3ÙF¨Ó)Äb(›—Ré$ªÌÈ3:ÇôÌ\Í¶QaOÛEâî\_ÏX�
+-­úÝ¯¹»Í¥y‡8æÓ ,,‚#û:Ä»½­âÚè
+-6ÆÛ"NÅ+/ˆãÕxF7�ÞO?¤²FÀq>ý}°÷-?i½ç7­Z¼ÍŠk`òEmî<ô_úßkŸdþÐ•üêü¡ù¤w™[ÌVÈ¼+÷g{¥Àí”¹ þ®º§áÛÒ[–U½;ÈÔ——úŸ„¶ÏÑœN3¼ÄË0ÑÒËú/h-.ÝyŽ®�/¼†è¡Ÿ|qw
+-EÞ*jz¯’"ÓôChî=‘‹'è„åÑDošWýqlTYçÇñòPšü»1„.B>¶9]!˜|žJ§ûÚcåaÿ&¡.aÛ8}a²Pÿ«ûõY(9ú+H›·5òEÎª¤Nß.äX¦x2:]nº;uö©á¾úEO7õ”¾~å�Æ�;ÞÍÓú‹!Ñ-JV.…‡µK›�Èz&²)^õ:r¦Y‰-Ÿöà¶RÔ-¥B�®?¶Xùºo&=’Ý€‘Ð ªoƒêg8Ž:ùµ´!]Û[=ú:aüÈ›j_×vå�×Äá—¼}»¸úx¸è}
+-¦!j›í¤~x1E‹[f4—3áéÂçf¯LÛìˆŸŒìrUa÷ø=}O÷³ß\v`Ž®Ç«£JÄ"½E9yÊš—x‹…g‰æ/GnP4övWw�½\ÜÒ«¿¤LÖp�W…×’Ž;
+-[ôšfUÆ6í³y{Ú¬l§Î`×³áa:ª¯Š5Ü1-•À¯çcš¦K’”xy™Øý{žù‰>F/|bHÒkWÔ5í9_�÷×"ÕÔP·)óV$FY«lÒR]•tfº=y�Whu{º0ggMÔžÿ+_f a(Út»‡Ç7à¹Íkž¼¹Î)™Â·rÃ®Ç
+-‘…TW¾q?ûÍð@=|<­XÐÃlÊ•9§ÙDUQ‚Šûã�É
+-ûÑ:êžßfHì:Šê©úŒØdYÂ²¸ÎOë±†;r&ðïî÷-¢iÄ£ýJï_…ÿô]çÈre[Þ›ß=šÖR	üËë©´ ë¨|¾Ÿ¿ð�)róWC¬J«Ç'{ó�LÌzr¼BÝ.µTwŸ‚êËŽõt÷¡×qð2|îs[æ »7w¡4÷ ×“o�LU¿Žr¯#³æGî–',i›ôãÙjðú WwªL ëý¤ß-Û‡eñ�TËô#ZŸfÊýÅ’a�ÒTM�éGU;fÀóIÐ
+-A<êýmœòâq/n_ôÿô…—àmRùÁÏ#é<XY¿wˆí–eM³4�fm:‹Õb+wµ¦¸`cs‹§™Â~DÂ¾úoyDÍô|U­IÄ]ÁÙnï|÷Á0–"ïŒw•éH™�¼3U4¯7×�ØcþPK
+-    ˆv7 “Ÿ!f   x   =   META-INF/maven/commons-logging/commons-logging/pom.propertiesSvOÍK-J,IMQHªTðM,KÍãåRÉ(UðË/S02R00°2²°24Qpv
+-Q0200çå*K-*ÎÌÏ³5ÔB^®ô¢üÒÏÛäüÜÜü¼bÝœüôôÌ¼t^®Ä¢’Ì´Äälr PK
+-     ˆv7            	          íA    META-INF/PK
+-    ‡v7€r%9ò   ñ             ¤�'   META-INF/MANIFEST.MFPK
+-     ƒv7                      íAK  org/PK
+-     ƒv7                      íAm  org/apache/PK
+-     ƒv7                      íA–  org/apache/commons/PK
+-     ƒv7                      íAÇ  org/apache/commons/logging/PK
+-     ƒv7                       íA   org/apache/commons/logging/impl/PK
+-    ‡v7´´â†m  ^,             ¤�>  META-INF/LICENSEPK
+-    ‡v7ŠA8…               ¤�Ù  META-INF/NOTICEPK
+-    ƒv7¦µîª�  ƒ
+-  2           ¤�
+-  org/apache/commons/logging/impl/AvalonLogger.classPK
+-    ƒv7±±‡;J     ;           ¤�ú  org/apache/commons/logging/impl/Jdk13LumberjackLogger.classPK
+-    ƒv7ÔÌ³×‰    1           ¤��   org/apache/commons/logging/impl/Jdk14Logger.classPK
+-    ƒv7NfPú  P  1           ¤�u&  org/apache/commons/logging/impl/Log4JLogger.classPK
+-    ƒv7ÒNWa  W  6           ¤�á-  org/apache/commons/logging/impl/LogFactoryImpl$1.classPK
+-    ƒv75—o.Ä    6           ¤�–/  org/apache/commons/logging/impl/LogFactoryImpl$2.classPK
+-    ƒv7ð¹žÁ  G  6           ¤�®1  org/apache/commons/logging/impl/LogFactoryImpl$3.classPK
+-    ƒv7´i§Ã"  2M  4           ¤�Ã3  org/apache/commons/logging/impl/LogFactoryImpl.classPK
+-    ƒv7Á7Å!;  Å  2           ¤�ØV  org/apache/commons/logging/impl/LogKitLogger.classPK
+-    ƒv7q¯‡;  Ç  -           ¤�c[  org/apache/commons/logging/impl/NoOpLog.classPK
+-    ƒv7–Ÿá=Š  O  ;           ¤�é]  org/apache/commons/logging/impl/ServletContextCleaner.classPK
+-    ƒv7Š\;­	  ‹  1           ¤�Ìc  org/apache/commons/logging/impl/SimpleLog$1.classPK
+-    ƒv7½yw3é  ž%  /           ¤�$f  org/apache/commons/logging/impl/SimpleLog.classPK
+-    ƒv7Í ã5-  ¹  5           ¤�Zw  org/apache/commons/logging/impl/WeakHashtable$1.classPK
+-    ƒv7�§#›`  )  9           ¤�Úy  org/apache/commons/logging/impl/WeakHashtable$Entry.classPK
+-    ƒv7F”Oüâ  T	  >           ¤�‘}  org/apache/commons/logging/impl/WeakHashtable$Referenced.classPK
+-    ƒv7u—�GJ  ˆ  ;           ¤�Ï�  org/apache/commons/logging/impl/WeakHashtable$WeakKey.classPK
+-    ƒv7Ô‡Æ˜  î  3           ¤�r„  org/apache/commons/logging/impl/WeakHashtable.classPK
+-    ƒv7îc`Á	  ß  $           ¤�[�  org/apache/commons/logging/Log.classPK
+-    ƒv7Ó0$–a  Ï  :           ¤�¦Ž  org/apache/commons/logging/LogConfigurationException.classPK
+-    ƒv7Õ<÷Îa  I  -           ¤�_‘  org/apache/commons/logging/LogFactory$1.classPK
+-    ƒv7eÝ±Æ  D  -           ¤�“  org/apache/commons/logging/LogFactory$2.classPK
+-    ƒv7«º@Zñ  V  -           ¤�•  org/apache/commons/logging/LogFactory$3.classPK
+-    ƒv7õN6Ç4  ¼  -           ¤�X—  org/apache/commons/logging/LogFactory$4.classPK
+-    ƒv7è)´§  \  -           ¤�×š  org/apache/commons/logging/LogFactory$5.classPK
+-    ƒv7Í‹w»  ø  -           ¤�0ž  org/apache/commons/logging/LogFactory$6.classPK
+-    ƒv7k£Ñö¶%  ×S  +           ¤�6   org/apache/commons/logging/LogFactory.classPK
+-    ƒv7@·íç  0  *           ¤�5Æ  org/apache/commons/logging/LogSource.classPK
+-     ˆv7                      íAdÍ  META-INF/maven/PK
+-     ˆv7                      íA‘Í  META-INF/maven/commons-logging/PK
+-     ˆv7            /          íAÎÍ  META-INF/maven/commons-logging/commons-logging/PK
+-    {v7$áò¼ô  wK  6           ¤�Î  META-INF/maven/commons-logging/commons-logging/pom.xmlPK
+-    ˆv7 “Ÿ!f   x   =           ¤�cÞ  META-INF/maven/commons-logging/commons-logging/pom.propertiesPK    * * o  $ß    
+\ No newline at end of file
+Index: ../jfo-fs/gradle/wrapper/gradle-wrapper.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../jfo-fs/gradle/wrapper/gradle-wrapper.properties	(revision 27889+:aee7ca4ff736+)
++++ ../jfo-fs/gradle/wrapper/gradle-wrapper.properties	(revision 27889+:aee7ca4ff736+)
+@@ -0,0 +1,6 @@
++#Mon Jun 01 14:51:33 AEST 2015
++distributionBase=GRADLE_USER_HOME
++distributionPath=wrapper/dists
++zipStoreBase=GRADLE_USER_HOME
++zipStorePath=wrapper/dists
++distributionUrl=https\://services.gradle.org/distributions/gradle-2.4-bin.zip
+Index: ../jfo-fs/src/de/northbit/jfo/rtf/PicHandler.java
+===================================================================
+--- ../jfo-fs/src/de/northbit/jfo/rtf/PicHandler.java	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/src/main/java/de/northbit/jfo/rtf/PicHandler.java	(revision 27889+:aee7ca4ff736+)
+@@ -1,10 +1,5 @@
+ package de.northbit.jfo.rtf;
+ 
+-import java.io.IOException;
+-import java.util.zip.CRC32;
+-
+-import java.awt.Dimension;
+-
+ import de.northbit.io.ByteArrayBuffer;
+ import de.northbit.jfo.FormattingObject;
+ import de.northbit.jfo.attributes.Values;
+@@ -20,6 +15,10 @@
+ import de.northbit.util.rtf.StateLeavedListener;
+ import de.northbit.util.rtf.Token;
+ import de.northbit.xml.DefaultNode;
++
++import java.awt.Dimension;
++import java.io.IOException;
++import java.util.zip.CRC32;
+ 
+ class PicHandler
+     extends DefaultTokenHandler implements StateLeavedListener {
+Index: ../jfo-fs/src/de/northbit/jfo/Document.java
+===================================================================
+--- ../jfo-fs/src/de/northbit/jfo/Document.java	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/src/main/java/de/northbit/jfo/Document.java	(revision 27889+:aee7ca4ff736+)
+@@ -6,17 +6,6 @@
+  */
+ package de.northbit.jfo;
+ 
+-import java.io.BufferedOutputStream;
+-import java.io.File;
+-import java.io.FileOutputStream;
+-import java.io.IOException;
+-import java.io.InputStream;
+-import java.io.OutputStream;
+-import java.util.ArrayList;
+-import java.util.List;
+-
+-import org.xml.sax.SAXException;
+-
+ import de.northbit.jfo.env.JFOConfig;
+ import de.northbit.jfo.pagination.Declarations;
+ import de.northbit.jfo.pagination.LayoutMasterSet;
+@@ -29,6 +18,16 @@
+ import de.northbit.jfo.tools.DocumentAppender;
+ import de.northbit.xml.XML2ObjectTransformer;
+ import de.northbit.xml.XMLWriter;
++import org.xml.sax.SAXException;
++
++import java.io.BufferedOutputStream;
++import java.io.File;
++import java.io.FileOutputStream;
++import java.io.IOException;
++import java.io.InputStream;
++import java.io.OutputStream;
++import java.util.ArrayList;
++import java.util.List;
+ 
+ /**
+  * This is the top node/object of the formatting object tree. It holds
+Index: ../jfo-fs/gradlew.bat
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../jfo-fs/gradlew.bat	(revision 27889+:aee7ca4ff736+)
++++ ../jfo-fs/gradlew.bat	(revision 27889+:aee7ca4ff736+)
+@@ -0,0 +1,90 @@
++@if "%DEBUG%" == "" @echo off
++@rem ##########################################################################
++@rem
++@rem  Gradle startup script for Windows
++@rem
++@rem ##########################################################################
++
++@rem Set local scope for the variables with windows NT shell
++if "%OS%"=="Windows_NT" setlocal
++
++@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
++set DEFAULT_JVM_OPTS=
++
++set DIRNAME=%~dp0
++if "%DIRNAME%" == "" set DIRNAME=.
++set APP_BASE_NAME=%~n0
++set APP_HOME=%DIRNAME%
++
++@rem Find java.exe
++if defined JAVA_HOME goto findJavaFromJavaHome
++
++set JAVA_EXE=java.exe
++%JAVA_EXE% -version >NUL 2>&1
++if "%ERRORLEVEL%" == "0" goto init
++
++echo.
++echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
++echo.
++echo Please set the JAVA_HOME variable in your environment to match the
++echo location of your Java installation.
++
++goto fail
++
++:findJavaFromJavaHome
++set JAVA_HOME=%JAVA_HOME:"=%
++set JAVA_EXE=%JAVA_HOME%/bin/java.exe
++
++if exist "%JAVA_EXE%" goto init
++
++echo.
++echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
++echo.
++echo Please set the JAVA_HOME variable in your environment to match the
++echo location of your Java installation.
++
++goto fail
++
++:init
++@rem Get command-line arguments, handling Windowz variants
++
++if not "%OS%" == "Windows_NT" goto win9xME_args
++if "%@eval[2+2]" == "4" goto 4NT_args
++
++:win9xME_args
++@rem Slurp the command line arguments.
++set CMD_LINE_ARGS=
++set _SKIP=2
++
++:win9xME_args_slurp
++if "x%~1" == "x" goto execute
++
++set CMD_LINE_ARGS=%*
++goto execute
++
++:4NT_args
++@rem Get arguments from the 4NT Shell from JP Software
++set CMD_LINE_ARGS=%$
++
++:execute
++@rem Setup the command line
++
++set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
++
++@rem Execute Gradle
++"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %CMD_LINE_ARGS%
++
++:end
++@rem End local scope for the variables with windows NT shell
++if "%ERRORLEVEL%"=="0" goto mainEnd
++
++:fail
++rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
++rem the _cmd.exe /c_ return code!
++if  not "" == "%GRADLE_EXIT_CONSOLE%" exit 1
++exit /b 1
++
++:mainEnd
++if "%OS%"=="Windows_NT" endlocal
++
++:omega
+Index: ../jfo-fs/src/de/northbit/report/sources/XMLDataSource.java
+===================================================================
+--- ../jfo-fs/src/de/northbit/report/sources/XMLDataSource.java	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/src/main/java/de/northbit/report/sources/XMLDataSource.java	(revision 27889+:aee7ca4ff736+)
+@@ -1,23 +1,21 @@
+ package de.northbit.report.sources;
+ 
+-import java.io.BufferedInputStream;
+-import java.io.File;
+-import java.io.FileInputStream;
+-import java.io.IOException;
+-import java.io.InputStream;
+-import javax.xml.parsers.FactoryConfigurationError;
+-import javax.xml.parsers.ParserConfigurationException;
+-import javax.xml.parsers.SAXParser;
+-import javax.xml.parsers.SAXParserFactory;
+-
+-import org.apache.commons.logging.Log;
+-import org.xml.sax.SAXException;
+-
++import de.northbit.jfo.env.JFOConfig;
+ import de.northbit.report.DataSource;
+ import de.northbit.report.ReportData;
+ import de.northbit.report.ReportException;
+ import de.northbit.util.log.LogUtil;
+-import de.northbit.jfo.env.JFOConfig;
++import org.apache.commons.logging.Log;
++import org.xml.sax.SAXException;
++
++import javax.xml.parsers.FactoryConfigurationError;
++import javax.xml.parsers.ParserConfigurationException;
++import javax.xml.parsers.SAXParser;
++import javax.xml.parsers.SAXParserFactory;
++import java.io.BufferedInputStream;
++import java.io.FileInputStream;
++import java.io.IOException;
++import java.io.InputStream;
+ 
+ /**
+  * Data source from XML.<br>
+Index: ../jfo-fs/src/de/northbit/jfo/rtf/ShapePropHandler.java
+===================================================================
+--- ../jfo-fs/src/de/northbit/jfo/rtf/ShapePropHandler.java	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/src/main/java/de/northbit/jfo/rtf/ShapePropHandler.java	(revision 27889+:aee7ca4ff736+)
+@@ -1,15 +1,15 @@
+ package de.northbit.jfo.rtf;
+ 
+-import java.awt.Color;
+-
+ import de.northbit.jfo.env.JFOConfig;
++import de.northbit.jfo.tools.Util;
+ import de.northbit.util.Measure;
+ import de.northbit.util.rtf.DefaultTokenHandler;
+ import de.northbit.util.rtf.ParserState;
+ import de.northbit.util.rtf.PositionProperties;
+ import de.northbit.util.rtf.StateLeavedListener;
+ import de.northbit.util.rtf.Token;
+-import de.northbit.jfo.tools.Util;
++
++import java.awt.Color;
+ 
+ class ShapePropHandler
+     extends DefaultTokenHandler implements StateLeavedListener {
+Index: ../jfo-fs/src/de/northbit/jfo/rtf/DocumentBuilder.java
+===================================================================
+--- ../jfo-fs/src/de/northbit/jfo/rtf/DocumentBuilder.java	(revision 27889:aee7ca4ff736762d31925abdef0cb757440503ca)
++++ ../jfo-fs/src/main/java/de/northbit/jfo/rtf/DocumentBuilder.java	(revision 27889+:aee7ca4ff736+)
+@@ -1,11 +1,5 @@
+ package de.northbit.jfo.rtf;
+ 
+-import java.awt.Color;
+-import java.util.LinkedList;
+-import java.util.List;
+-
+-import org.apache.commons.logging.Log;
+-
+ import de.northbit.jfo.Document;
+ import de.northbit.jfo.FormattingObject;
+ import de.northbit.jfo.attributes.Attributes;
+@@ -51,6 +45,11 @@
+ import de.northbit.util.rtf.TabulatorProperties;
+ import de.northbit.util.rtf.TokenInput;
+ import de.northbit.xml.Node;
++import org.apache.commons.logging.Log;
++
++import java.awt.Color;
++import java.util.LinkedList;
++import java.util.List;
+ 
+ class DocumentBuilder
+     extends de.northbit.util.rtf.DocumentBuilder {
+Index: ../jfo-fs/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../jfo-fs/build.gradle	(revision 27889+:aee7ca4ff736+)
++++ ../jfo-fs/build.gradle	(revision 27889+:aee7ca4ff736+)
+@@ -0,0 +1,32 @@
++// Buildscript stuff
++
++buildscript {
++    repositories {
++        maven { url 'http://fspc143:8081/artifactory/repo' }
++    }
++
++    dependencies {
++        classpath 'au.com.finsyn:gradle-common-plugin:1.0.0-SNAPSHOT'
++    }
++
++    configurations.all {
++        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
++    }
++}
++
++apply plugin: "java"
++apply plugin: 'au.com.finsyn.gradlecommonplugin'
++
++task wrapper(type: Wrapper) {
++    gradleVersion = '2.4'
++}
++
++dependencies {
++    compile 'commons-logging:commons-logging:1.1.1'
++    compile files('lib/jfo.jar')
++}
++
++jar {
++    archiveName 'jfo-fs.jar'
++    from configurations.compile
++}
+\ No newline at end of file

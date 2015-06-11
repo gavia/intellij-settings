@@ -1,0 +1,15 @@
+Index: src/main/java/au/com/finsyn/workbench/manage/ManageWorkbenchLinesView.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/workbench/manage/ManageWorkbenchLinesView.java	(revision 27901:83291e73c0a44904082b19b3a6982ce6aeb5ae9e)
++++ src/main/java/au/com/finsyn/workbench/manage/ManageWorkbenchLinesView.java	(revision 27901+:83291e73c0a4+)
+@@ -787,7 +787,6 @@
+                     --i;
+                 } else if (!CONTRIBUTION_REFUNDABLE_STATUS.contains(getContributionLineStatus(contributionLine))) {
+                     ContributionLineRejectHolder h = new ContributionLineRejectHolder();
+-                    h.contributionLine = contributionLine;
+                     h.rejectReason = "Invalid status of: " + contributionLine.getFCz_Status();
+                     rejectedContributionLines.add(h);
+ 
