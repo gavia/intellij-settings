@@ -5,6 +5,7 @@
     <EXCLUDED_PACKAGE NAME="com.google.common.base.Function" />
     <EXCLUDED_PACKAGE NAME="com.google.common.base.Optional" />
     <EXCLUDED_PACKAGE NAME="com.sun.xml.internal.bind.v2.runtime.property.Property" />
+    <EXCLUDED_PACKAGE NAME="edu.umd.cs.findbugs.annotations.Nullable" />
     <EXCLUDED_PACKAGE NAME="jSSS.entity.generated" />
     <EXCLUDED_PACKAGE NAME="junit.framework.TestCase" />
     <EXCLUDED_PACKAGE NAME="org.parboiled.common.ImmutableList" />
