@@ -1,0 +1,480 @@
+Index: src/main/java/au/com/finsyn/hibernate/tools/databasetablemodel/model/SequentialDatabasePagingModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/hibernate/tools/databasetablemodel/model/SequentialDatabasePagingModel.java	(revision 30078:da3d11e66f9868d1b0c5ac049f9c1591af840c2f)
++++ src/main/java/au/com/finsyn/hibernate/tools/databasetablemodel/model/SequentialDatabasePagingModel.java	(revision 30078+:da3d11e66f98+)
+@@ -40,8 +40,8 @@
+ import java.util.function.Function;
+ 
+ /**
+- * A paging model that supports sequential (as opposed to random-access) paging. Note that unlike
+- * {@link RandomAccessDatabasePagingModel}, this class is designed to handle one-to-many joins in the query.
++ * A paging model that supports sequential (as opposed to random-access) paging. This class is designed to handle
++ * one-to-many joins in the query.
+  * <p>
+  * This class works by remembering the bounds of the most recent query, and then constructing a {@linkplain
+  * HibernateUtils#constructSeekPredicate(boolean, boolean, List, Function) seek predicate} from the bound in the
+Index: src/main/java/au/com/finsyn/swing/components/dynamichints/acurityentityhints/AcurityEntityHintsTextField.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/swing/components/dynamichints/acurityentityhints/AcurityEntityHintsTextField.java	(revision 30078:da3d11e66f9868d1b0c5ac049f9c1591af840c2f)
++++ src/main/java/au/com/finsyn/swing/components/dynamichints/acurityentityhints/AcurityEntityHintsTextField.java	(revision 30078+:da3d11e66f98+)
+@@ -9,6 +9,7 @@
+ import au.com.finsyn.hibernate.tools.JoinSpec;
+ import au.com.finsyn.hibernate.tools.ReflectionDataHandler;
+ import au.com.finsyn.hibernate.tools.RowDataInterface;
++import au.com.finsyn.hibernate.tools.entityutils.HibernateFundExitSecurityHelper;
+ import au.com.finsyn.hibernate.tools.querybuilder.ParameterisedSQLFragment;
+ import au.com.finsyn.hibernate.tools.querybuilder.ParameterisedSQLUtils;
+ import au.com.finsyn.hibernate.tools.querybuilder.SQLQueryBuilder;
+@@ -105,11 +106,19 @@
+         query.append("ORDER BY " + this.primaryField + " ASC");
+         query.setMaxResults(MAX_HINTS_RESULTS);
+ 
+-        return query
++        List<E> results = query
+                 .constructAcurityEntitySqlExecutor(this.getEntityClass())
+                 .setHandle(hibernateSession)
+                 .execute()
+                 .getResults();
++
++        filterResults(results);
++
++        return results;
++    }
++
++    private void filterResults(List<E> results) {
++        HibernateFundExitSecurityHelper.get().filterEntities(results);
+     }
+ 
+     @Override
+Index: src/main/java/au/com/finsyn/hibernate/tools/entityutils/MemberUtils.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/hibernate/tools/entityutils/MemberUtils.java	(revision 30078:da3d11e66f9868d1b0c5ac049f9c1591af840c2f)
++++ src/main/java/au/com/finsyn/hibernate/tools/entityutils/MemberUtils.java	(revision 30078+:da3d11e66f98+)
+@@ -33,6 +33,10 @@
+      * The database query is performed on the calling thread. This method is not suitable to be called on the EDT.
+      */
+     public static Optional<String> getAccountNumber(String fund, String member) {
++        if (!HibernateFundExitSecurityHelper.get().allows(fund)) {
++            return Optional.empty();
++        }
++
+         SQLQueryBuilder query = new SQLQueryBuilder()
+                 .append("SELECT").append(MDZ_ACCT_NO.getName())
+                 .append("FROM").append(MemberDetails.getTableName())
+Index: src/main/java/au/com/finsyn/hibernate/tools/databasetablemodel/model/DatabasePagingTableModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/hibernate/tools/databasetablemodel/model/DatabasePagingTableModel.java	(revision 30078:da3d11e66f9868d1b0c5ac049f9c1591af840c2f)
++++ src/main/java/au/com/finsyn/hibernate/tools/databasetablemodel/model/DatabasePagingTableModel.java	(revision 30078+:da3d11e66f98+)
+@@ -1,9 +1,9 @@
+ package au.com.finsyn.hibernate.tools.databasetablemodel.model;
+ 
+ import au.com.finsyn.hibernate.AcurityEntity;
++import au.com.finsyn.hibernate.AcurityEntityInstanceUtils;
+ import au.com.finsyn.hibernate.AcurityEntityUtils;
+ import au.com.finsyn.hibernate.entitytransformer.RetainTuplesEntityTransformer;
+-import au.com.finsyn.hibernate.AcurityEntityInstanceUtils;
+ import au.com.finsyn.hibernate.tools.JoinSpec;
+ import au.com.finsyn.hibernate.tools.OrderBySpec;
+ import au.com.finsyn.hibernate.tools.SortOrder;
+@@ -11,6 +11,7 @@
+ import au.com.finsyn.hibernate.tools.databasetablemodel.columns.DatabaseColumnSpec;
+ import au.com.finsyn.hibernate.tools.databasetablemodel.columns.SubSelectDatabaseColumnSpec;
+ import au.com.finsyn.hibernate.tools.databasetablemodel.filters.filterimplementations.AcurityFilter;
++import au.com.finsyn.hibernate.tools.entityutils.HibernateFundExitSecurityHelper;
+ import au.com.finsyn.hibernate.tools.querybuilder.ParameterisedSQLFragment;
+ import au.com.finsyn.hibernate.tools.querybuilder.SQLQueryBuilder;
+ import au.com.finsyn.swing.tables.export.DatabaseExportableTableSnapshot;
+@@ -37,6 +38,7 @@
+ import java.util.SortedSet;
+ import java.util.TreeSet;
+ import java.util.concurrent.ExecutionException;
++import java.util.concurrent.Future;
+ import java.util.stream.Collectors;
+ import java.util.stream.Stream;
+ 
+@@ -156,8 +158,6 @@
+      */
+     @Override
+     protected void refreshImpl(@Nullable Runnable onComplete) {
+-        Optional<Runnable> onCompleteOptional = Optional.ofNullable(onComplete);
+-
+         try {
+             if (this.filtersChangedSinceLastRefresh) {
+                 this.getPagingModel().nextRefreshFirst();
+@@ -169,26 +169,37 @@
+             this.getPagingModel().setOrderByClause(this.constructOrderBySpecs());
+ 
+             this.getPagingModel().setRetainTupleAliases(this.computeRetainTupleAliases());
+-            this.getPagingModel().computeResult(result -> {
++            this.getPagingModel().computeResult(result -> handleResult(result, onComplete), () -> {});
++        } catch (Exception e) {
++            this.exceptionHandler.handleException(e, "An error occurred while constructing the database query", true);
++        }
++    }
++
++    private void handleResult(Future<List<E>> result, @Nullable Runnable onComplete) {
++        Optional<Runnable> onCompleteOptional = Optional.ofNullable(onComplete);
++
+-                        try {
++        try {
+-                            this.setEntityData(result.get());
++            List<E> newEntityData = result.get();
++
++            filterNewEntityData(newEntityData);
++
++            this.setEntityData(newEntityData);
+-                        } catch (InterruptedException e) {
+-                            setEntityData(Collections.emptyList());
+-                            exceptionHandler.handleException(e, "The database query task was interrupted", true);
+-                        } catch (ExecutionException e) {
+-                            setEntityData(Collections.emptyList());
+-                            exceptionHandler.handleException(e.getCause(),
+-                                    "An exception occurred while performing the database query", true);
+-                        } finally {
+-                            filtersChangedSinceLastRefresh = false;
+-                            fireTableDataChanged();
+-                            onCompleteOptional.ifPresent(Runnable::run);
+-                        }
++        } catch (InterruptedException e) {
++            setEntityData(Collections.emptyList());
++            exceptionHandler.handleException(e, "The database query task was interrupted", true);
++        } catch (ExecutionException e) {
++            setEntityData(Collections.emptyList());
++            exceptionHandler.handleException(e.getCause(),
++                    "An exception occurred while performing the database query", true);
++        } finally {
++            filtersChangedSinceLastRefresh = false;
++            fireTableDataChanged();
++            onCompleteOptional.ifPresent(Runnable::run);
++        }
+-                    },
+-                    () -> {});
+-        } catch (Exception e) {
+-            this.exceptionHandler.handleException(e, "An error occurred while constructing the database query", true);
+-        }
++    }
++
++    private void filterNewEntityData(List<E> newEntityData) {
++        HibernateFundExitSecurityHelper.get().filterEntities(newEntityData);
+     }
+ 
+     /**
+Index: src/main/java/au/com/finsyn/hibernate/tools/databasetablemodel/model/RandomAccessDatabasePagingModel.java
+===================================================================
+--- src/main/java/au/com/finsyn/hibernate/tools/databasetablemodel/model/RandomAccessDatabasePagingModel.java	(revision 30078:da3d11e66f9868d1b0c5ac049f9c1591af840c2f)
++++ src/main/java/au/com/finsyn/hibernate/tools/databasetablemodel/model/RandomAccessDatabasePagingModel.java	(revision 30078:da3d11e66f9868d1b0c5ac049f9c1591af840c2f)
+@@ -1,302 +0,0 @@
+-package au.com.finsyn.hibernate.tools.databasetablemodel.model;
+-
+-import au.com.finsyn.hibernate.AcurityEntity;
+-
+-import javax.annotation.ParametersAreNonnullByDefault;
+-
+-/**
+- * A {@link DatabasePagingModel} that provides random access into pages of a query. Note that this paging model is not
+- * designed for queries involving one-to-many joins, as for these queries there is not a predictable relationship
+- * between the number of rows in the result set and the number of returned entities.
+- *
+- * @author timothym
+- * @deprecated This class was put together during the initial development phase of the paging tables, but it is not
+- *             currently used and is hence not supported. Changes will have been made to the
+- *             {@link SequentialDatabasePagingModel} since development on this class ceased that should be applied to
+- *             this class before it can be used in production, and it will need a full testing effort.
+- */
+-@Deprecated
+-@ParametersAreNonnullByDefault
+-public class RandomAccessDatabasePagingModel<E extends AcurityEntity> {/* extends DatabasePagingModel<E> {
+-
+-    private static final Log LOG = AcurityLogging.getInstance().getLogger(RandomAccessDatabasePagingModel.class);
+-
+-    private Optional<QueryWorker> lastQueryWorker = Optional.empty();
+-
+-    private OptionalInt nextRefreshPage = OptionalInt.of(1);
+-    private Optional<E> nextRefreshCentreEntity = Optional.empty();
+-
+-    private ReadOnlyIntegerWrapper currentPage = new ReadOnlyIntegerWrapper(this.nextRefreshPage.getAsInt());
+-    private ReadOnlyIntegerWrapper numElements = new ReadOnlyIntegerWrapper();
+-    private ReadOnlyIntegerWrapper numPages = new ReadOnlyIntegerWrapper();
+-
+-    private boolean queryStructureChangedSinceLastRefresh = true;
+-
+-    public RandomAccessDatabasePagingModel() {
+-        this.initListeners();
+-    }
+-
+-    private void initListeners() {
+-        ChangeListener<Object> updateNextPrevious = (observable, oldValue, newValue) -> {
+-            this.hasNextMutableProperty().set(this.currentPage.get() < this.numPages.get());
+-            this.hasPreviousMutableProperty().set(this.currentPage.get() > 1);
+-        };
+-
+-        this.numPages.addListener(updateNextPrevious);
+-        this.currentPage.addListener(updateNextPrevious);
+-    }
+-
+-    @Override
+-    public void cancel() {
+-        this.lastQueryWorker.ifPresent(CancellableDatabaseTask::cancelTask);
+-    }
+-
+-    @Override
+-    public void computeResult(Consumer<Future<List<E>>> resultConsumer, Runnable cancelCallback) {
+-        if (queryStructureChangedSinceLastRefresh) {
+-            this.nextRefreshPage = OptionalInt.of(1);
+-        }
+-
+-        QueryWorker queryWorker = new QueryWorker(
+-                resultConsumer,
+-                cancelCallback,
+-                this.getSelectClause().get(),
+-                this.getTable().get(),
+-                this.getJoins().orElse(null),
+-                this.getWhereClause().orElse(null),
+-                this.getOrderByClause().orElse(null),
+-                queryStructureChangedSinceLastRefresh,
+-                this.getPageSize(),
+-                this.nextRefreshPage,
+-                this.nextRefreshCentreEntity.orElse(null),
+-                this.getRetainTuples());
+-
+-        if (!(this.getThreadPool().isTerminating() || this.getThreadPool().isTerminated())) {
+-            this.getThreadPool().getQueue().clear();
+-            this.getThreadPool().submit(queryWorker);
+-            this.lastQueryWorker = Optional.of(queryWorker);
+-        }
+-    }
+-
+-    private class QueryWorker extends CancellableDatabaseTask<E, Void> {
+-        private final Consumer<Future<List<E>>> resultConsumer;
+-        private final Runnable cancelCallback;
+-        private final ParameterisedSQLFragment selectClause;
+-        private final Class<E> table;
+-        private final List<JoinSpec> joins;
+-        private final Optional<ParameterisedSQLFragment> whereClause;
+-        private final List<OrderBySpec> orderByClause;
+-        private final boolean shouldRecomputeQuerySize;
+-        private int pageSize;
+-        private OptionalInt page;
+-        private Optional<E> nextRefreshCentreEntity;
+-        private final boolean retainTuples;
+-
+-        private OptionalInt querySize = OptionalInt.empty();
+-        private int refreshedPage;
+-
+-        public QueryWorker(Consumer<Future<List<E>>> resultConsumer,
+-                           Runnable cancelCallback,
+-                           ParameterisedSQLFragment selectClause,
+-                           Class<E> table,
+-                           @Nullable List<JoinSpec> joins,
+-                           @Nullable ParameterisedSQLFragment whereClause,
+-                           @Nullable List<OrderBySpec> orderByClause,
+-                           boolean shouldRecomputeQuerySize,
+-                           int pageSize,
+-                           OptionalInt page,
+-                           @Nullable E nextRefreshCentreEntity,
+-                           boolean retainTuples) {
+-            this.resultConsumer = resultConsumer;
+-            this.cancelCallback = cancelCallback;
+-            this.selectClause = selectClause;
+-            this.table = table;
+-            this.joins = Optional.ofNullable(joins).orElse(Collections.emptyList());
+-            this.whereClause = Optional.ofNullable(whereClause);
+-            this.orderByClause = Optional.ofNullable(orderByClause).orElse(Collections.emptyList());
+-            this.shouldRecomputeQuerySize = shouldRecomputeQuerySize;
+-            this.pageSize = pageSize;
+-            this.page = page;
+-            this.nextRefreshCentreEntity = Optional.ofNullable(nextRefreshCentreEntity);
+-            this.retainTuples = retainTuples;
+-        }
+-
+-        @Override
+-        protected List<E> performTask(Session session) throws Exception {
+-
+-            Stopwatch stopwatch = Stopwatch.createStarted();
+-
+-            int fromIndex;
+-            int toIndex;
+-
+-            refreshedPage = this.page.orElse(1);
+-
+-            if (this.nextRefreshCentreEntity.isPresent()) {
+-
+-                OptionalInt matchingRowNumber = HibernateUtils.rowNumberMatching(
+-                        selectClause,
+-                        JoinSpec.constructFromClause(table, joins),
+-                        whereClause.orElse(null),
+-                        orderByClause,
+-                        new ParameterisedSQLFragment("theSelect." + AcurityEntityUtils.getIdColumnName(table)
+-                                + " = :id")
+-                                .setParameter("id", this.nextRefreshCentreEntity.get().getID())
+-                );
+-
+-                if (matchingRowNumber.isPresent()) {
+-                    refreshedPage = GuiUtil.numPages(matchingRowNumber.getAsInt(), pageSize);
+-                }
+-            }
+-
+-            fromIndex = (refreshedPage - 1) * this.pageSize + 1;
+-            toIndex = fromIndex + this.pageSize;
+-
+-            if (this.shouldRecomputeQuerySize) {
+-                querySize = OptionalInt.of(HibernateUtils.querySize(table, joins, whereClause.orElse(null)));
+-            }
+-
+-            List<E> result = HibernateUtils.buildAndExecuteSqlQueryBuilder(
+-                    HibernateUtils.pagingQuery(
+-                            selectClause,
+-                            JoinSpec.constructFromClause(table, joins),
+-                            whereClause.orElse(null),
+-                            orderByClause,
+-                            fromIndex,
+-                            toIndex),
+-                    table,
+-                    retainTuples,
+-                    null,
+-                    session);
+-
+-            LOG.info("Query completed in " + stopwatch);
+-
+-            return result;
+-        }
+-
+-        @Override
+-        protected void onTaskCompleted() {
+-            lastQueryWorker = Optional.empty();
+-
+-            queryStructureChangedSinceLastRefresh = false;
+-            this.querySize.ifPresent(RandomAccessDatabasePagingModel.this.numElements::set);
+-            numPages.set(GuiUtil.numPages(numElements.get(), pageSize));
+-            currentPage.set(this.refreshedPage);
+-            nextRefreshCentreEntity = Optional.empty();
+-
+-            fireEvent(RandomAccessDatabasePagingModel.this);
+-
+-            this.resultConsumer.accept(this);
+-        }
+-
+-        @Override
+-        protected void onTaskCancelled() {
+-            lastQueryWorker = Optional.empty();
+-
+-            cancelCallback.run();
+-        }
+-    }
+-
+-    @Override
+-    public RandomAccessDatabasePagingModel<E> nextRefreshNext() {
+-        if (this.hasNext()) {
+-            this.setNextRefreshPage(this.currentPage.get() + 1);
+-        }
+-        return this;
+-    }
+-
+-    @Override
+-    public RandomAccessDatabasePagingModel<E> nextRefreshFirst() {
+-        this.setNextRefreshPage(1);
+-        return this;
+-    }
+-
+-    @Override
+-    public RandomAccessDatabasePagingModel<E> nextRefreshLast() {
+-        this.setNextRefreshPage(this.getNumPages());
+-        return this;
+-    }
+-
+-    @Override
+-    public RandomAccessDatabasePagingModel<E> nextRefreshPrevious() {
+-        if (this.hasPrevious()) {
+-            this.setNextRefreshPage(this.currentPage.get() - 1);
+-        }
+-        return this;
+-    }
+-
+-    @Override
+-    public DatabasePagingModel<E> nextRefreshCenteredAround(E entity) {
+-        this.nextRefreshCentreEntity = Optional.of(entity);
+-        return this;
+-    }
+-
+-    @Override
+-    public boolean supportsRandomAccess() {
+-        return true;
+-    }
+-
+-    @Override
+-    public RandomAccessDatabasePagingModel<E> setNextRefreshPage(int nextRefreshPage) {
+-        this.nextRefreshPage = OptionalInt.of(nextRefreshPage);
+-        return this;
+-    }
+-
+-    @Override
+-    public int getNextRefreshPage() {
+-        return this.nextRefreshPage.orElse(-1);
+-    }
+-
+-    @Override
+-    public ObservableIntegerValue currentPageProperty() {
+-        return this.currentPage.getReadOnlyProperty();
+-    }
+-
+-    @Override
+-    public int getCurrentPage() {
+-        return this.currentPage.get();
+-    }
+-
+-    @Override
+-    public ObservableIntegerValue numElementsProperty() {
+-        return this.numElements.getReadOnlyProperty();
+-    }
+-
+-    @Override
+-    public int getNumElements() {
+-        return this.numElements.get();
+-    }
+-
+-    @Override
+-    public ObservableIntegerValue numPagesProperty() {
+-        return this.numPages.getReadOnlyProperty();
+-    }
+-
+-    @Override
+-    public int getNumPages() {
+-        return this.numPages.get();
+-    }
+-
+-    @Override
+-    public DatabasePagingModel<E> setSelectClause(@Nullable ParameterisedSQLFragment selectClause) {
+-        this.queryStructureChangedSinceLastRefresh = this.queryStructureChangedSinceLastRefresh
+-                || !Objects.equals(selectClause, this.getSelectClause().orElse(null));
+-
+-        return super.setSelectClause(selectClause);
+-    }
+-
+-    @Override
+-    public DatabasePagingModel<E> setJoins(@Nullable List<JoinSpec> joins) {
+-        this.queryStructureChangedSinceLastRefresh = this.queryStructureChangedSinceLastRefresh
+-                || !Objects.equals(joins, this.getJoins().orElse(null));
+-
+-        return super.setJoins(joins);
+-    }
+-
+-    @Override
+-    public DatabasePagingModel<E> setWhereClause(@Nullable ParameterisedSQLFragment whereClause) {
+-        this.queryStructureChangedSinceLastRefresh = this.queryStructureChangedSinceLastRefresh
+-                || !Objects.equals(whereClause, this.getWhereClause().orElse(null));
+-
+-        return super.setWhereClause(whereClause);
+-    }*/
+-}
