@@ -1,0 +1,85 @@
+Index: buildSrc/src/main/groovy/au/com/finsyn/acuritywebservices/build/IntegrationTestSetup.groovy
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- buildSrc/src/main/groovy/au/com/finsyn/acuritywebservices/build/IntegrationTestSetup.groovy	(revision 30121+:e368fdb8403d+)
++++ buildSrc/src/main/groovy/au/com/finsyn/acuritywebservices/build/IntegrationTestSetup.groovy	(revision 30121+:e368fdb8403d+)
+@@ -0,0 +1,77 @@
++package au.com.finsyn.acuritywebservices.build
++
++import org.apache.commons.io.FileUtils
++import org.gradle.api.GradleException
++import org.gradle.api.Project
++
++// If you're running IDEA 14.1.4, this class will be marked as in error with the message "Class already exists in
++// package" or something of that sort. This is an IDEA bug (see https://youtrack.jetbrains.com/issue/IDEA-129535), and
++// can be safely ignored. If you're in a later version of IDEA and you don't see any error, just delete this comment.
++class IntegrationTestSetup implements Runnable {
++
++    private static final String ENVIRONMENT_CONFIG_PROPERTIES_LOCATION = "environmentConfig.properties"
++    public static final String DEFAULT_DB_SERVER = "localhost"
++
++    private final Project integrationTestProject
++    private final File environmentConfigPropertiesFile;
++
++    private boolean hasRun = false;
++
++    static IntegrationTestSetup forProject(Project integrationTestProject) {
++        return new IntegrationTestSetup(integrationTestProject)
++    }
++
++    protected IntegrationTestSetup(Project integrationTestProject) {
++        this.integrationTestProject = integrationTestProject
++
++        throwIfNotIntegrationTestProject(this.integrationTestProject)
++
++        environmentConfigPropertiesFile = this.integrationTestProject.file(ENVIRONMENT_CONFIG_PROPERTIES_LOCATION)
++    }
++
++    private static void throwIfNotIntegrationTestProject(Project project) {
++        if (!"integrationTest".equals(project.getName())) {
++            throw new GradleException("Attempted to perform integration test setup on a project that isn't the " +
++                    "integration test project");
++        }
++    }
++
++    void run() {
++
++        throwIfHasRun()
++        hasRun = true;
++
++        Properties properties = loadProperties()
++        File environmentLocation = extractEnvironmentLocationOrThrow(properties)
++        String dbServer = extractDBServer(properties).orElse(DEFAULT_DB_SERVER)
++        String dbName = extractDBNameOrThrow(properties)
++
++        throwIfInvalidEnvironment(environmentLocation)
++        throwIfAbsentDatabase(dbServer, dbName)
++
++        // TODO find a way of getting these values into the testing environment
++    }
++
++    private Properties loadProperties() {
++        throwIfConfigPropertiesFileAbsent()
++
++        Properties properties = new Properties();
++        properties.load(FileUtils.openInputStream(environmentConfigPropertiesFile))
++
++        return properties;
++    }
++
++    private throwIfConfigPropertiesFileAbsent() {
++        if (!environmentConfigPropertiesFile.isFile()) {
++            throw new GradleException("Attempted to setup the integration tests without an " +
++                    "environmentConfig.properties file. You need to add an environmentConfig.properties file into " +
++                    "the integrationTest directory. There should be an example there already.")
++        }
++    }
++
++    private void throwIfHasRun() {
++        if (hasRun) {
++            throw new IllegalStateException("Attempting to run integration test setup more than once")
++        }
++    }
++}
