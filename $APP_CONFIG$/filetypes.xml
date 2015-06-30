@@ -5,6 +5,7 @@
       <mapping pattern="members" type="PLAIN_TEXT" />
       <mapping pattern="gradlew" type="PLAIN_TEXT" />
       <mapping pattern="getStatus" type="PLAIN_TEXT" />
+      <mapping ext="example" type="PLAIN_TEXT" />
       <mapping ext="svg" type="XHTML" />
     </extensionMap>
   </component>
