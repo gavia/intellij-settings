@@ -23,234 +23,17 @@
       <component name="GradleLocalSettings">
         <option name="modificationStamps">
           <map>
-            <entry key="C:/Playground/dependencyMucking/AcurityWebServices" value="4292934770308" />
-            <entry key="C:/Playground/dependencyMucking/AcurityWebVaadin" value="7154896038318" />
-            <entry key="C:/build/devel/srcjava/AcurityManager" value="1432880809260" />
-            <entry key="C:/build/devel/srcjava/AcurityServer" value="10033694346956" />
-            <entry key="C:/build/devel/srcjava/AcurityWebServices" value="14341882275249" />
-            <entry key="C:/build/devel/srcjava/AcurityWebVaadin" value="5727613663941" />
-            <entry key="C:/build/devel/srcjava/acurity" value="7153420384533" />
-            <entry key="C:/build/devel/srcjava/acurityDataModel" value="1409189478002" />
-            <entry key="C:/build/devel/srcjava/architect-std" value="4300166511752" />
-            <entry key="C:/build/devel/srcjava/gradleCommonPlugin" value="1431932047854" />
-            <entry key="C:/build/devel/srcjava/jfo-fs" value="1433394291839" />
-            <entry key="C:/build/v15_0/srcjava/acurity" value="5730396476665" />
+            <entry key="C:/build/devel/srcjava/AcurityServer" value="10042732446977" />
+            <entry key="C:/build/devel/srcjava/acurityDataModel" value="4303976978576" />
+            <entry key="C:/build/devel/srcjava/keystore-encrypt" value="4305207794693" />
           </map>
         </option>
         <option name="externalProjectsViewState">
           <projects_view />
         </option>
       </component>
-      <component name="InspectionProjectProfileManager">
-        <profile version="1.0">
-          <option name="myName" value="Project Default" />
-          <option name="myLocal" value="true" />
-          <inspection_tool class="Anonymous2MethodRef" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="AutoCloseableResource" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="CollectionsFieldAccessReplaceableByMethodCall" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="ConditionalExpressionWithIdenticalBranches" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="ConstantConditions" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="SUGGEST_NULLABLE_ANNOTATIONS" value="false" />
-            <option name="DONT_REPORT_TRUE_ASSERT_STATEMENTS" value="false" />
-            <option name="REPORT_CONSTANT_REFERENCE_VALUES" value="false" />
-          </inspection_tool>
-          <inspection_tool class="Contract" enabled="false" level="WARNING" enabled_by_default="false" />
-          <inspection_tool class="Convert2Diamond" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="Convert2Lambda" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="Convert2MethodRef" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="CyclomaticComplexity" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="m_limit" value="5" />
-          </inspection_tool>
-          <inspection_tool class="DeclareCollectionAsInterface" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="ignoreLocalVariables" value="false" />
-            <option name="ignorePrivateMethodsAndFields" value="false" />
-          </inspection_tool>
-          <inspection_tool class="DefaultNotLastCaseInSwitch" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="Deprecation" enabled="true" level="WARNING" enabled_by_default="true">
-            <option name="IGNORE_INSIDE_DEPRECATED" value="true" />
-          </inspection_tool>
-          <inspection_tool class="EmptyStatementBody" enabled="true" level="WARNING" enabled_by_default="true">
-            <option name="m_reportEmptyBlocks" value="true" />
-            <option name="commentsAreContent" value="true" />
-          </inspection_tool>
-          <inspection_tool class="EnumSwitchStatementWhichMissesCases" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="ignoreSwitchStatementsWithDefault" value="true" />
-          </inspection_tool>
-          <inspection_tool class="FieldCanBeLocal" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="FieldMayBeStatic" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="GroovyOverlyLongMethod" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="m_limit" value="20" />
-          </inspection_tool>
-          <inspection_tool class="JavaDoc" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="TOP_LEVEL_CLASS_OPTIONS">
-              <value>
-                <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-                <option name="REQUIRED_TAGS" value="" />
-              </value>
-            </option>
-            <option name="INNER_CLASS_OPTIONS">
-              <value>
-                <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-                <option name="REQUIRED_TAGS" value="" />
-              </value>
-            </option>
-            <option name="METHOD_OPTIONS">
-              <value>
-                <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-                <option name="REQUIRED_TAGS" value="@return@param@throws or @exception" />
-              </value>
-            </option>
-            <option name="FIELD_OPTIONS">
-              <value>
-                <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-                <option name="REQUIRED_TAGS" value="" />
-              </value>
-            </option>
-            <option name="IGNORE_DEPRECATED" value="false" />
-            <option name="IGNORE_JAVADOC_PERIOD" value="true" />
-            <option name="IGNORE_DUPLICATED_THROWS" value="false" />
-            <option name="IGNORE_POINT_TO_ITSELF" value="false" />
-            <option name="myAdditionalJavadocTags" value="" />
-          </inspection_tool>
-          <inspection_tool class="JavadocReference" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="LiteralAsArgToStringEquals" enabled="true" level="WARNING" enabled_by_default="true" />
-          <inspection_tool class="LoggerInitializedWithForeignClass" enabled="false" level="WARNING" enabled_by_default="false">
-            <option name="loggerClassName" value="org.apache.log4j.Logger,org.slf4j.LoggerFactory,org.apache.commons.logging.LogFactory,java.util.logging.Logger" />
-            <option name="loggerFactoryMethodName" value="getLogger,getLogger,getLog,getLogger" />
-          </inspection_tool>
-          <inspection_tool class="MethodCoupling" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="m_includeJavaClasses" value="false" />
-            <option name="m_includeLibraryClasses" value="false" />
-            <option name="m_limit" value="10" />
-          </inspection_tool>
-          <inspection_tool class="MethodMayBeStatic" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="m_onlyPrivateOrFinal" value="false" />
-            <option name="m_ignoreEmptyMethods" value="true" />
-          </inspection_tool>
-          <inspection_tool class="MismatchedCollectionQueryUpdate" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="queryNames">
-              <value />
-            </option>
-            <option name="updateNames">
-              <value />
-            </option>
-          </inspection_tool>
-          <inspection_tool class="MissingOverrideAnnotation" enabled="true" level="WARNING" enabled_by_default="true">
-            <option name="ignoreObjectMethods" value="false" />
-            <option name="ignoreAnonymousClassMethods" value="false" />
-          </inspection_tool>
-          <inspection_tool class="NewExceptionWithoutArguments" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="NonCommentSourceStatements" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="m_limit" value="10" />
-          </inspection_tool>
-          <inspection_tool class="NonFinalFieldInImmutable" enabled="true" level="WARNING" enabled_by_default="true" />
-          <inspection_tool class="NonFinalUtilityClass" enabled="true" level="WARNING" enabled_by_default="true" />
-          <inspection_tool class="NullThrown" enabled="true" level="WARNING" enabled_by_default="true" />
-          <inspection_tool class="NullableProblems" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="REPORT_NULLABLE_METHOD_OVERRIDES_NOTNULL" value="true" />
-            <option name="REPORT_NOT_ANNOTATED_METHOD_OVERRIDES_NOTNULL" value="true" />
-            <option name="REPORT_NOTNULL_PARAMETER_OVERRIDES_NULLABLE" value="true" />
-            <option name="REPORT_NOT_ANNOTATED_PARAMETER_OVERRIDES_NOTNULL" value="true" />
-            <option name="REPORT_NOT_ANNOTATED_GETTER" value="true" />
-            <option name="REPORT_NOT_ANNOTATED_SETTER_PARAMETER" value="true" />
-            <option name="REPORT_ANNOTATION_NOT_PROPAGATED_TO_OVERRIDERS" value="true" />
-            <option name="REPORT_NULLS_PASSED_TO_NON_ANNOTATED_METHOD" value="true" />
-          </inspection_tool>
-          <inspection_tool class="ObsoleteCollection" enabled="true" level="WARNING" enabled_by_default="true">
-            <option name="ignoreRequiredObsoleteCollectionTypes" value="false" />
-          </inspection_tool>
-          <inspection_tool class="PackageDotHtmlMayBePackageInfo" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="ParameterCanBeLocal" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="ParametersPerMethod" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="m_limit" value="3" />
-          </inspection_tool>
-          <inspection_tool class="PublicConstructor" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="RedundantMethodOverride" enabled="true" level="INFO" enabled_by_default="true" />
-          <inspection_tool class="SimplifiableConditionalExpression" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="SimplifiableIfStatement" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="SizeReplaceableByIsEmpty" enabled="true" level="WARNING" enabled_by_default="true" />
-          <inspection_tool class="SqlDialectInspection" enabled="false" level="WARNING" enabled_by_default="false" />
-          <inspection_tool class="StaticFieldReferenceOnSubclass" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="StringConcatenationInsideStringBufferAppend" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="SuspiciousNameCombination" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <group names="x,width,left,right" />
-            <group names="y,height,top,bottom" />
-          </inspection_tool>
-          <inspection_tool class="SystemOutErr" enabled="true" level="WARNING" enabled_by_default="true" />
-          <inspection_tool class="ThrowableResultOfMethodCallIgnored" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="ThrowsRuntimeException" enabled="true" level="WARNING" enabled_by_default="true" />
-          <inspection_tool class="UNUSED_SYMBOL" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="LOCAL_VARIABLE" value="true" />
-            <option name="FIELD" value="true" />
-            <option name="METHOD" value="true" />
-            <option name="CLASS" value="true" />
-            <option name="PARAMETER" value="true" />
-            <option name="REPORT_PARAMETER_FOR_PUBLIC_METHODS" value="true" />
-          </inspection_tool>
-          <inspection_tool class="UnclearBinaryExpression" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
-          <inspection_tool class="UnnecessaryContinue" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="UnnecessaryEnumModifier" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
-          <inspection_tool class="UnnecessaryFullyQualifiedName" enabled="true" level="WARNING" enabled_by_default="true">
-            <option name="m_ignoreJavadoc" value="false" />
-          </inspection_tool>
-          <inspection_tool class="UnnecessaryInterfaceModifier" enabled="false" level="WARNING" enabled_by_default="false" />
-          <inspection_tool class="UnnecessaryLocalVariable" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="m_ignoreImmediatelyReturnedVariables" value="true" />
-            <option name="m_ignoreAnnotatedVariables" value="false" />
-          </inspection_tool>
-          <inspection_tool class="UnnecessarySemicolon" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="UnnecessaryThis" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-          <inspection_tool class="UnusedAssignment" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="REPORT_PREFIX_EXPRESSIONS" value="false" />
-            <option name="REPORT_POSTFIX_EXPRESSIONS" value="true" />
-            <option name="REPORT_REDUNDANT_INITIALIZER" value="true" />
-          </inspection_tool>
-          <inspection_tool class="UnusedDeclaration" enabled="true" level="WEAK WARNING" enabled_by_default="true">
-            <option name="ADD_MAINS_TO_ENTRIES" value="true" />
-            <option name="ADD_APPLET_TO_ENTRIES" value="true" />
-            <option name="ADD_SERVLET_TO_ENTRIES" value="true" />
-            <option name="ADD_NONJAVA_TO_ENTRIES" value="true" />
-          </inspection_tool>
-          <inspection_tool class="UseOfClone" enabled="true" level="WARNING" enabled_by_default="true" />
-          <inspection_tool class="UtilityClassWithoutPrivateConstructor" enabled="true" level="WARNING" enabled_by_default="true">
-            <option name="ignorableAnnotations">
-              <value />
-            </option>
-            <option name="ignoreClassesWithOnlyMain" value="false" />
-          </inspection_tool>
-        </profile>
-        <option name="PROJECT_PROFILE" value="Project Default" />
-        <option name="USE_PROJECT_PROFILE" value="true" />
-        <version value="1.0" />
-      </component>
-      <component name="MavenImportPreferences">
-        <option name="generalSettings">
-          <MavenGeneralSettings>
-            <option name="mavenHome" value="Bundled (Maven 3)" />
-          </MavenGeneralSettings>
-        </option>
-      </component>
       <component name="NamedScopeManager">
         <order />
-      </component>
-      <component name="ProjectInspectionProfilesVisibleTreeState">
-        <entry key="Project Default">
-          <profile-state>
-            <expanded-state>
-              <State>
-                <id />
-              </State>
-              <State>
-                <id>General</id>
-              </State>
-            </expanded-state>
-            <selected-state>
-              <State>
-                <id>Ant inspections</id>
-              </State>
-            </selected-state>
-          </profile-state>
-        </entry>
       </component>
       <component name="ProjectLevelVcsManager" settingsEditedManually="false">
         <OptionsSetting value="true" id="Add" />
@@ -266,10 +49,6 @@
         <modules />
       </component>
       <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" default="true" assert-keyword="true" jdk-15="true" />
-      <component name="PropertiesComponent">
-        <property name="settings.editor.selected.configurable" value="org.jetbrains.plugins.scala.compiler.ScalaCompileServerForm" />
-        <property name="settings.editor.splitter.proportion" value="0.2" />
-      </component>
       <component name="RunManager">
         <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
           <module name="" />
@@ -356,9 +135,6 @@
           <listeners />
           <method />
         </configuration>
-      </component>
-      <component name="VcsContentAnnotationSettings">
-        <option name="myLimit" value="2678400000" />
       </component>
       <component name="masterDetails">
         <states>

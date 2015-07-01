@@ -6,8 +6,17 @@
           <option name="url" value="http://github.com" />
           <option name="userName" value="tmccarthy" />
         </UrlAndUserName>
+        <UrlAndUserName>
+          <option name="url" value="http://wpmverctl01:5000" />
+          <option name="userName" value="timothym" />
+        </UrlAndUserName>
+        <UrlAndUserName>
+          <option name="url" value="http://wpmverctl01:5000/AcurityArchitectGrammar" />
+          <option name="userName" value="" />
+        </UrlAndUserName>
       </list>
     </option>
+    <option name="cloneParentDir" value="C:\Users\timothym\Projects" />
   </component>
   <component name="HgRememberedInputs">
     <option name="visitedUrls">
