@@ -1,0 +1,243 @@
+Index: ../../.hgignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../../.hgignore	(revision 30138:44b16ab20c4b2d497616ed3306c2796a48e28f82)
++++ ../../.hgignore	(revision 30138+:44b16ab20c4b+)
+@@ -6,6 +6,7 @@
+ # use glob syntax.
+ syntax: glob
+ 
++srcjava/nativeProjects/build
+ srcjava/masterProject/buildSrc/build
+ srcjava/AcurityWebServices/.*
+ srcjava/AcurityWebServices/build
+Index: ../nativeProjects/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../nativeProjects/build.gradle	(revision 30138+:44b16ab20c4b+)
++++ ../nativeProjects/build.gradle	(revision 30138+:44b16ab20c4b+)
+@@ -0,0 +1,219 @@
++import au.com.finsyn.gradlecommonplugin.DevNull
++import au.com.finsyn.gradlecommonplugin.VisualStudioFinder
++
++def msBuildBinaryLocation = VisualStudioFinder.findMSBuildBinary(project).absolutePath
++
++buildscript {
++    repositories {
++        maven { url 'http://fspc143:8081/artifactory/repo' }
++    }
++
++    dependencies {
++        classpath 'au.com.finsyn:gradle-common-plugin:1.0.0-SNAPSHOT'
++    }
++
++    configurations.all {
++        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
++    }
++}
++
++apply plugin: 'au.com.finsyn.gradlecommonplugin'
++
++buildDir = file('build')
++File nativeArtifactsDir = new File(buildDir, 'nativeArtifacts')
++
++File checkoutRootDir = file('../..')
++
++File header_location = new File(checkoutRootDir, 'inc/dat')
++File xtr_location = new File(checkoutRootDir, 'xtr')
++File release_source_location = new File(checkoutRootDir, 'release/src')
++File sys_var_location = new File(checkoutRootDir, 'inc/sys_var.h')
++File z_file_location = new File(checkoutRootDir, 'inc')
++
++File utilsLocation = new File(checkoutRootDir, 'utils')
++
++File makeDDFExeLocation = new File(utilsLocation, '/make_ddf_cvs.exe')
++File makeDDFSourceLocation = new File(utilsLocation, '/make_ddf_cvs')
++File makeDDFSolutionLocation = new File(makeDDFSourceLocation, '/make_ddf_cvs.vcxproj')
++
++task makeMakeDDFUtility(type: Exec, group: 'build') {
++    inputs.files(fileTree(makeDDFSourceLocation).include('**/*.c'))
++    outputs.files(makeDDFExeLocation)
++
++    executable = msBuildBinaryLocation
++
++    args = [makeDDFSolutionLocation, '/target:rebuild']
++
++    // Necessary to avoid an issue when running in cygwin
++    environment.remove("tmp")
++    environment.remove("TMP")
++    environment.remove("temp")
++    environment.remove("TEMP")
++
++    standardOutput = DevNull.output()
++}
++
++task cleanMakeDDFUtility(type: Exec, group: 'build') {
++    executable = msBuildBinaryLocation
++
++    args = [makeDDFSolutionLocation, '/target:clean']
++
++    // Necessary to avoid an issue when running in cygwin
++    environment.remove("tmp")
++    environment.remove("TMP")
++    environment.remove("temp")
++    environment.remove("TEMP")
++
++    standardOutput = DevNull.output()
++}
++
++task copyMakeDDFUtility(type: Copy, group: 'build') {
++    mustRunAfter makeMakeDDFUtility
++
++    from makeDDFExeLocation
++    into nativeArtifactsDir
++}
++
++task buildMakeDDFUtility(group: 'build') {
++    dependsOn makeMakeDDFUtility, copyMakeDDFUtility
++}
++
++task makeXTRDir(group: 'build') << {
++    xtr_location.mkdirs()
++}
++
++task regenerateZFiles(type: Exec, group: 'build') {
++    dependsOn(buildMakeDDFUtility, makeXTRDir)
++
++    inputs.files(
++            makeDDFExeLocation,
++            header_location,
++            release_source_location,
++            sys_var_location
++    )
++    outputs.files(z_file_location)
++
++    workingDir = file(utilsLocation)
++
++    executable = file(makeDDFExeLocation).absolutePath
++
++    args = [
++            'FULL-DIAGRAMS',
++            header_location.absolutePath,
++            xtr_location.absolutePath,
++            release_source_location.absolutePath,
++            sys_var_location.absolutePath
++    ]
++
++    standardOutput = DevNull.output()
++}
++
++def btrieveBuilderName = "build_btv.bat"
++
++task regenerateExtraBtrieveFiles(type: Exec, group: 'build') {
++    mustRunAfter(regenerateZFiles)
++
++    workingDir = utilsLocation
++
++    commandLine 'cmd', '/c', btrieveBuilderName
++
++    inputs.dir "$z_file_location/btv"
++    inputs.file "$utilsLocation/$btrieveBuilderName"
++
++    outputs.files new File(xtr_location, 'dfmax.dat'),
++            new File(xtr_location, 'dfmatx.dat'),
++            new File(xtr_location, 'dfax.dat'),
++            new File(xtr_location, 'dfatx.dat'),
++            new File(xtr_location, 'datxfm.dat'),
++            new File(xtr_location, 'datxf.dat'),
++            new File(xtr_location, 'datx.dat'),
++            new File(xtr_location, 'datfx.dat'),
++            new File(xtr_location, 'datfmx.dat')
++
++    standardOutput = DevNull.output()
++}
++
++task regenerateHeaders(group: 'build') {
++    dependsOn(regenerateZFiles, regenerateExtraBtrieveFiles)
++}
++
++def msgcodeSDFLocation = new File(utilsLocation, 'msgcode_sdf')
++
++task compileMsgcodeSDFProcessor(type: Exec, group: 'build') {
++    workingDir msgcodeSDFLocation
++
++    commandLine 'cmd', '/c', 'make.bat'
++
++    inputs.files new File(msgcodeSDFLocation, 'MsgcodeRecord.java'),
++        new File(msgcodeSDFLocation, 'MsgcodeSdfCreator.java'),
++        new File(msgcodeSDFLocation, 'MsgcodeSdfProcessor.java')
++
++    outputs.files new File(msgcodeSDFLocation, 'MsgcodeRecord.class'),
++        new File(msgcodeSDFLocation, 'MsgcodeSdfCreator.class'),
++        new File(msgcodeSDFLocation, 'MsgcodeSdfProcessor.class')
++
++    standardOutput = DevNull.output()
++}
++
++task updateSWVersion(type: Exec, group: 'build') {
++    workingDir utilsLocation
++
++    commandLine 'cmd', '/c', 'update_software_version.bat', checkoutRootDir.absolutePath
++
++    // TODO define inputs and outputs
++}
++
++task regenSSSErrHeader(type: JavaExec, group: 'build', dependsOn: compileMsgcodeSDFProcessor) {
++    mustRunAfter compileMsgcodeSDFProcessor
++
++    classpath msgcodeSDFLocation
++
++    main = 'MsgcodeSdfProcessor'
++
++    args checkoutRootDir.absolutePath
++}
++
++def ssbDLLSourceLocation = new File(checkoutRootDir, 'srccpp/AcuritySSBDLL')
++def ssbDLLSolutionLocation = new File(ssbDLLSourceLocation, 'AcuritySSBDLL2010.sln')
++def builtSSBDLLLocation = new File(ssbDLLSourceLocation, 'Debug/ssb.dll')
++
++task makeSSBDLL(type: Exec, group: 'build') {
++    dependsOn regenSSSErrHeader, regenerateHeaders, updateSWVersion
++
++    executable = msBuildBinaryLocation
++
++    args = [ssbDLLSolutionLocation, '/target:rebuild', '/p:Configuration=Debug']
++
++    // Necessary to avoid an issue when running in cygwin
++    environment.remove("tmp")
++    environment.remove("TMP")
++    environment.remove("temp")
++    environment.remove("TEMP")
++}
++
++task cleanSSBDLL(type: Exec, group: 'build') {
++    executable = msBuildBinaryLocation
++
++    args = [ssbDLLSolutionLocation, '/target:clean']
++}
++
++task copySSBDLL(type: Copy, group: 'build') {
++    mustRunAfter makeSSBDLL
++
++    from builtSSBDLLLocation
++    into nativeArtifactsDir
++}
++
++task buildSSBDLL(group: 'build') {
++    dependsOn makeSSBDLL, copySSBDLL
++}
++
++task buildAll(group: 'build') {
++    dependsOn updateSWVersion, buildSSBDLL, buildMakeDDFUtility, regenerateHeaders
++}
++
++task cleanAll(type: Delete, group: 'other') {
++    dependsOn cleanMakeDDFUtility, cleanSSBDLL
++
++    delete buildDir
++}
+\ No newline at end of file
