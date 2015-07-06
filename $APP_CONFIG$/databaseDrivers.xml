@@ -33,10 +33,13 @@
       <driver id="sqlserver.jtds" name="jTds" />
       <driver id="sqlserver.ms" name="Microsoft">
         <library>
-          <url>file://$USER_HOME$/.IntelliJIdea13/config/jdbc-drivers/sqlserver-driver-license.txt</url>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/sqlserver-win-auth.jar</url>
         </library>
         <library>
-          <url>file://$USER_HOME$/.IntelliJIdea13/config/jdbc-drivers/sqljdbc4-4.0.2206.100.jar</url>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/sqlserver-driver-license.txt</url>
+        </library>
+        <library>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/sqljdbc4-4.0.2206.100.jar</url>
         </library>
       </driver>
     </driver>
