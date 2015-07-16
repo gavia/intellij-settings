@@ -1,0 +1,236 @@
+Index: ../finsynCommons/src/main/java/au/com/finsyn/i18n/C10NProvider.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../finsynCommons/src/main/java/au/com/finsyn/i18n/C10NProvider.java	(revision 30357+:74eeb64d8cfc+)
++++ ../finsynCommons/src/main/java/au/com/finsyn/i18n/C10NProvider.java	(revision 30357+:74eeb64d8cfc+)
+@@ -0,0 +1,10 @@
++package au.com.finsyn.i18n;
++
++import javax.annotation.ParametersAreNonnullByDefault;
++
++@ParametersAreNonnullByDefault
++public class C10NProvider {
++
++
++
++}
+Index: ../finsynCommons/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../finsynCommons/build.gradle	(revision 30357:74eeb64d8cfc782747a56bda35755db2f89483cc)
++++ ../finsynCommons/build.gradle	(revision 30357+:74eeb64d8cfc+)
+@@ -37,6 +37,8 @@
+ 
+     compile 'org.slf4j:slf4j-api:1.7.12'
+ 
++    compile 'com.github.rodionmoiseev.c10n:c10n-core:1.2'
++
+     compile group: 'junit', name: 'junit', version: '4.11'
+ }
+ 
+\ No newline at end of file
+Index: ../finsynCommons/src/main/resources/au/com/finsyn/i18n/FinsynCommonsMessages.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../finsynCommons/src/main/resources/au/com/finsyn/i18n/FinsynCommonsMessages.properties	(revision 30357+:74eeb64d8cfc+)
++++ ../finsynCommons/src/main/resources/au/com/finsyn/i18n/FinsynCommonsMessages.properties	(revision 30357+:74eeb64d8cfc+)
+@@ -0,0 +1,2 @@
++au.com.finsyn.i18n.FinsynCommonsMessages.ascending = Ascending
++au.com.finsyn.i18n.FinsynCommonsMessages.descending = Descending
+\ No newline at end of file
+Index: ../finsynCommons/src/main/java/au/com/finsyn/i18n/FinsynCommonsMessages.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../finsynCommons/src/main/java/au/com/finsyn/i18n/FinsynCommonsMessages.java	(revision 30357+:74eeb64d8cfc+)
++++ ../finsynCommons/src/main/java/au/com/finsyn/i18n/FinsynCommonsMessages.java	(revision 30357+:74eeb64d8cfc+)
+@@ -0,0 +1,22 @@
++package au.com.finsyn.i18n;
++
++import com.github.rodionmoiseev.c10n.C10N;
++import com.github.rodionmoiseev.c10n.C10NMessages;
++
++import java.util.Locale;
++
++@C10NMessages
++public interface FinsynCommonsMessages {
++
++    static FinsynCommonsMessages get() {
++        return C10N.get(FinsynCommonsMessages.class);
++    }
++
++    static FinsynCommonsMessages get(Locale locale) {
++        return C10N.get(FinsynCommonsMessages.class, locale);
++    }
++
++    String ascending();
++
++    String descending();
++}
+Index: ../finsynCommons/src/main/java/au/com/finsyn/hibernate/tools/SortOrder.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../finsynCommons/src/main/java/au/com/finsyn/hibernate/tools/SortOrder.java	(revision 30357:74eeb64d8cfc782747a56bda35755db2f89483cc)
++++ ../finsynCommons/src/main/java/au/com/finsyn/hibernate/tools/SortOrder.java	(revision 30357+:74eeb64d8cfc+)
+@@ -1,6 +1,8 @@
+ package au.com.finsyn.hibernate.tools;
+ 
+-import javax.annotation.ParametersAreNonnullByDefault;
++import au.com.finsyn.i18n.FinsynCommonsMessages;
++import com.github.rodionmoiseev.c10n.C10N;
++
+ import java.util.Objects;
+ 
+ public enum SortOrder {
+@@ -20,13 +22,15 @@
+     }
+ 
+     public String render() {
++        FinsynCommonsMessages messages = C10N.get(FinsynCommonsMessages.class);
++
+         switch (this) {
+             case ASCENDING:
+-                return "Ascending";
++                return messages.ascending();
+             case DESCENDING:
+-                return "Descending";
++                return messages.descending();
+             default:
+-                return this.toString();
++                throw new UnexpectedSortOrderException(this);
+         }
+     }
+ 
+@@ -36,9 +40,9 @@
+                 return DESCENDING;
+             case DESCENDING:
+                 return ASCENDING;
++            default:
++                throw new UnexpectedSortOrderException(this);
+         }
+-        throw new AssertionError("Encountered " + SortOrder.class.getName() + " that was neither " + ASCENDING
+-                + " nor " + DESCENDING);
+     }
+ 
+     public static SortOrder fromAscending(boolean isAscending) {
+@@ -54,5 +58,12 @@
+      */
+     public static SortOrder theDefault() {
+         return ASCENDING;
++    }
++
++    public class UnexpectedSortOrderException extends RuntimeException {
++        protected UnexpectedSortOrderException(SortOrder unexpected) {
++            super("Encountered " + SortOrder.class.getName() + " instance of type " + unexpected + " that was neither "
++                    + ASCENDING + " nor " + DESCENDING);
++        }
+     }
+ }
+Index: ../finsynCommons/src/test/java/au/com/finsyn/hibernate/tools/SortOrderTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../finsynCommons/src/test/java/au/com/finsyn/hibernate/tools/SortOrderTest.java	(revision 30357+:74eeb64d8cfc+)
++++ ../finsynCommons/src/test/java/au/com/finsyn/hibernate/tools/SortOrderTest.java	(revision 30357+:74eeb64d8cfc+)
+@@ -0,0 +1,48 @@
++package au.com.finsyn.hibernate.tools;
++
++import org.junit.Test;
++
++import static au.com.finsyn.hibernate.tools.SortOrder.ASCENDING;
++import static au.com.finsyn.hibernate.tools.SortOrder.DESCENDING;
++import static au.com.finsyn.hibernate.tools.SortOrder.fromAscending;
++import static au.com.finsyn.hibernate.tools.SortOrder.fromDescending;
++import static au.com.finsyn.hibernate.tools.SortOrder.theDefault;
++import static org.junit.Assert.assertEquals;
++
++public class SortOrderTest {
++
++    @Test
++    public void testGetSqlCode() throws Exception {
++        assertEquals("ASC", ASCENDING.getSqlCode());
++        assertEquals("DESC", DESCENDING.getSqlCode());
++    }
++
++    @Test
++    public void testRender() throws Exception {
++        assertEquals("Ascending", ASCENDING.render());
++        assertEquals("Descending", DESCENDING.render());
++    }
++
++    @Test
++    public void testInvert() throws Exception {
++        assertEquals(DESCENDING, ASCENDING.invert());
++        assertEquals(ASCENDING, DESCENDING.invert());
++    }
++
++    @Test
++    public void testFromAscending() throws Exception {
++        assertEquals(ASCENDING, fromAscending(true));
++        assertEquals(DESCENDING, fromAscending(false));
++    }
++
++    @Test
++    public void testFromDescending() throws Exception {
++        assertEquals(ASCENDING, fromDescending(false));
++        assertEquals(DESCENDING, fromDescending(true));
++    }
++
++    @Test
++    public void testTheDefault() throws Exception {
++        assertEquals(ASCENDING, theDefault());
++    }
++}
+\ No newline at end of file
+Index: ../finsynCommons/src/test/java/au/com/finsyn/i18n/C10NTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- ../finsynCommons/src/test/java/au/com/finsyn/i18n/C10NTest.java	(revision 30357+:74eeb64d8cfc+)
++++ ../finsynCommons/src/test/java/au/com/finsyn/i18n/C10NTest.java	(revision 30357+:74eeb64d8cfc+)
+@@ -0,0 +1,33 @@
++package au.com.finsyn.i18n;
++
++import com.github.rodionmoiseev.c10n.C10N;
++import com.github.rodionmoiseev.c10n.C10NConfigBase;
++import org.junit.Before;
++import org.junit.Test;
++
++import static org.junit.Assert.assertEquals;
++import static org.junit.Assert.assertNotSame;
++
++// TODO fix up this test
++public class C10NTest {
++
++    @Before
++    public void setUp() throws Exception {
++        C10N.configure(new C10NConfigBase() {
++            @Override
++            protected void configure() {
++                bindBundle(FinsynCommonsMessages.class.getName());
++            }
++        });
++    }
++
++    @Test
++    public void testC10NNoCache() throws Exception {
++        FinsynCommonsMessages firstMessagesInstance = C10N.get(FinsynCommonsMessages.class);
++        FinsynCommonsMessages secondMessagesInstance = C10N.get(FinsynCommonsMessages.class);
++
++        assertEquals("Ascending", firstMessagesInstance.ascending());
++
++        assertNotSame(firstMessagesInstance, secondMessagesInstance);
++    }
++}
+\ No newline at end of file
