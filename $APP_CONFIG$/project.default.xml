@@ -28,6 +28,7 @@
             <entry key="C:/build/devel/srcjava/acurityDataModel" value="4303976978576" />
             <entry key="C:/build/devel/srcjava/keystore-encrypt" value="4305207794693" />
             <entry key="C:/build/v15_0/srcjava/AcurityWebServices" value="7181164070690" />
+            <entry key="C:/build/v15_0/srcjava/nativeProjects" value="1437005415456" />
           </map>
         </option>
         <option name="externalProjectsViewState">
@@ -149,7 +150,7 @@
         <states>
           <state key="ProjectJDKs.UI">
             <settings>
-              <last-edited>1.8.0_45</last-edited>
+              <last-edited>1.7</last-edited>
               <splitter-proportions>
                 <option name="proportions">
                   <list>
