@@ -1,10 +1,5 @@
 <application>
   <component name="TaskStorage">
-    <tasks>
-      <task priority="Normal" completed="false" estimated="0" created="1431840127091" actual="0" highlighted="false" highlightingtype="Red" title="Replace PositivePoint with a normal point and a method that throws if negative" description="" />
-      <task priority="Normal" completed="false" estimated="0" created="1431840302810" actual="0" highlighted="false" highlightingtype="Red" title="Braces around single-line if statements?" description="" />
-      <task priority="Normal" completed="false" estimated="0" created="1431846289311" actual="0" highlighted="false" highlightingtype="Red" title="Colon format goes name: type" description="" />
-      <task priority="Normal" completed="false" estimated="0" created="1431854107367" actual="0" highlighted="false" highlightingtype="Red" title="Decide on portal/rectangle/window" description="" />
-    </tasks>
+    <tasks />
   </component>
 </application>

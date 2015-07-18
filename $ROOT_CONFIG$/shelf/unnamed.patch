@@ -1,277 +1,353 @@
-Index: subprojects/ide/src/main/groovy/org/gradle/plugins/ide/idea/model/IdeaModule.groovy
+Index: src/test/java/au/com/finsyn/i18n/I18NTest.java
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
+<+>windows-1252
 ===================================================================
---- subprojects/ide/src/main/groovy/org/gradle/plugins/ide/idea/model/IdeaModule.groovy	(revision fcd3b59307f1353c0d79e7313f4d114ed7f054f2)
-+++ subprojects/ide/src/main/groovy/org/gradle/plugins/ide/idea/model/IdeaModule.groovy	(revision )
-@@ -51,9 +51,15 @@
-  *     //if for some reason you want to add an extra sourceDirs
-  *     sourceDirs += file('some-extra-source-folder')
-  *
-+ *     //if for some reason you want to add an extra resourceDir
-+ *     resourceDirs += file('some-extra-resource-folder')
-+ *
-  *     //and some extra test source dirs
-  *     testSourceDirs += file('some-extra-test-dir')
-  *
-+ *     //if for some reason you want to add an extra resourceDir
-+ *     testResourceDirs += file('some-extra-test-resource-dir')
-+ *
-  *     //and hint to mark some of existing source dirs as generated sources
-  *     generatedSourceDirs += file('some-extra-source-folder')
-  *
-@@ -131,7 +137,7 @@
-  */
- class IdeaModule {
- 
--   /**
-+    /**
-      * Configures module name, that is the name of the *.iml file.
-      * <p>
-      * It's <b>optional</b> because the task should configure it correctly for you.
-@@ -171,6 +177,14 @@
-     Set<File> generatedSourceDirs = []
- 
-     /**
-+     * The directories containing the resources.
-+     * <p>
-+     * For example see docs for {@link IdeaModule}
-+     */
-+    @Incubating
-+    Set<File> resourceDirs
+--- src/test/java/au/com/finsyn/i18n/I18NTest.java	(revision 30357+:74eeb64d8cfc+)
++++ src/test/java/au/com/finsyn/i18n/I18NTest.java	(revision 30357+:74eeb64d8cfc+)
+@@ -0,0 +1,80 @@
++package au.com.finsyn.i18n;
 +
-+    /**
-      * The keys of this map are the IDEA scopes. Each key points to another map that has two keys, plus and minus.
-      * The values of those keys are collections of {@link org.gradle.api.artifacts.Configuration} objects. The files of the
-      * plus configurations are added minus the files from the minus configurations. See example below...
-@@ -227,6 +241,14 @@
-     Set<File> testSourceDirs
- 
-     /**
-+     * The directories containing the test resources.
-+     * <p>
-+     * For example see docs for {@link IdeaModule}
-+     */
-+    @Incubating
-+    Set<File> testResourceDirs
++import com.github.rodionmoiseev.c10n.C10N;
++import com.github.rodionmoiseev.c10n.C10NConfigBase;
++import com.github.rodionmoiseev.c10n.C10NMessages;
++import com.github.rodionmoiseev.c10n.C10NMsgFactory;
++import com.github.rodionmoiseev.c10n.annotations.En;
++import com.github.rodionmoiseev.c10n.annotations.Fr;
++import org.junit.After;
++import org.junit.Before;
++import org.junit.Test;
 +
-+    /**
-      * {@link ConventionProperty} for the directories to be excluded.
-      * <p>
-      * For example see docs for {@link IdeaModule}
-@@ -340,17 +362,23 @@
- 
-         def path = { File f -> getPathFactory().path(f) }
-         Path contentRoot = path(getContentRoot())
--        Set<Path> sourceFolders = getSourceDirs().findAll { it.exists() }.collect { path(it) }
--        Set<Path> generatedSourceFolders = getGeneratedSourceDirs().findAll { it.exists() }.collect { path(it) }
--        Set<Path> testSourceFolders = getTestSourceDirs().findAll { it.exists() }.collect { path(it) }
-+        Set<Path> sourceFolders = existingAsPaths(getSourceDirs(), path)
-+        Set<Path> generatedSourceFolders = existingAsPaths(getGeneratedSourceDirs(), path)
-+        Set<Path> resourceFolders = existingAsPaths(getResourceDirs(), path)
-+        Set<Path> testSourceFolders = existingAsPaths(getTestSourceDirs(), path)
-+        Set<Path> testResourceFolders = existingAsPaths(getTestResourceDirs(), path)
-         Set<Path> excludeFolders = getExcludeDirs().collect { path(it) }
-         Path outputDir = getOutputDir() ? path(getOutputDir()) : null
-         Path testOutputDir = getTestOutputDir() ? path(getTestOutputDir()) : null
-         Set<Dependency> dependencies = resolveDependencies()
- 
--        xmlModule.configure(contentRoot, sourceFolders, testSourceFolders, generatedSourceFolders, excludeFolders,
--                getInheritOutputDirs(), outputDir, testOutputDir, dependencies, getJdkName())
-+        xmlModule.configure(contentRoot, sourceFolders, resourceFolders, testSourceFolders, testResourceFolders, generatedSourceFolders,
-+            excludeFolders, getInheritOutputDirs(), outputDir, testOutputDir, dependencies, getJdkName())
- 
-         iml.whenMerged.execute(xmlModule)
++import java.util.Locale;
++
++import static org.junit.Assert.*;
++
++public class I18NTest {
++
++    @Before
++    public void setUp() throws Exception {
++        I18N.HELPER.clearFactory();
 +    }
 +
-+    private static Set<Path> existingAsPaths(Set<File> files, Closure<Path> fileToPath) {
-+        return files.findAll { it.exists() }.collect { fileToPath(it) }
++    @After
++    public void tearDown() throws Exception {
++        I18N.HELPER.clearFactory();
++    }
++
++    @Test
++    public void testGetBundleWithoutConfiguration() throws Exception {
++        TestBundle testBundle = I18N.HELPER.get(TestBundle.class);
++
++        assertEquals("Test String", testBundle.testString());
++    }
++
++    @Test
++    public void testGetBundleWithoutConfigurationFrench() throws Exception {
++        TestBundle testBundle = I18N.HELPER.get(TestBundle.class, Locale.FRENCH);
++
++        assertEquals("test de cordes", testBundle.testString());
++    }
++
++    @Test
++    public void testGetBundleUsingPropertiesSpanish() throws Exception {
++        C10NMsgFactory factory = C10N.createMsgFactory(new C10NConfigBase() {
++            @Override
++            protected void configure() {
++                bindBundle("au.com.finsyn.i18n.TestBundle");
++            }
++        });
++
++        I18N.HELPER.useFactory(factory);
++
++        TestBundle testBundle = I18N.HELPER.get(TestBundle.class, new Locale("ES"));
++
++        assertEquals("Prueba de cuerda", testBundle.testString());
++    }
++
++    @Test
++    public void testGetBundleWithEmptyConfiguration() throws Exception {
++        C10NMsgFactory factory = C10N.createMsgFactory(new C10NConfigBase() {
++            @Override
++            protected void configure() {
++            }
++        });
++
++        I18N.HELPER.useFactory(factory);
++
++        TestBundle testBundle = I18N.HELPER.get(TestBundle.class);
++
++        assertEquals("TestBundle.testString", testBundle.testString());
++    }
++
++    @C10NMessages
++    public interface TestBundle {
++        @En("test string")
++        @Fr("test de cordes")
++        String testString();
++    }
++}
+\ No newline at end of file
+Index: src/test/resources/au/com/finsyn/i18n/TestBundle_de.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/test/resources/au/com/finsyn/i18n/TestBundle_de.properties	(revision 30357+:74eeb64d8cfc+)
++++ src/test/resources/au/com/finsyn/i18n/TestBundle_de.properties	(revision 30357+:74eeb64d8cfc+)
+@@ -0,0 +1,1 @@
++au.com.finsyn.i18n.I18NTest.TestBundle.testString = Prueba de cuerda
+\ No newline at end of file
+Index: build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- build.gradle	(revision 30357:74eeb64d8cfc782747a56bda35755db2f89483cc)
++++ build.gradle	(revision 30357+:74eeb64d8cfc+)
+@@ -37,6 +37,8 @@
+ 
+     compile 'org.slf4j:slf4j-api:1.7.12'
+ 
++    compile 'com.github.rodionmoiseev.c10n:c10n-core:1.2'
++
+     compile group: 'junit', name: 'junit', version: '4.11'
+ }
+ 
+\ No newline at end of file
+Index: src/main/java/au/com/finsyn/hibernate/tools/SortOrder.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/hibernate/tools/SortOrder.java	(revision 30357:74eeb64d8cfc782747a56bda35755db2f89483cc)
++++ src/main/java/au/com/finsyn/hibernate/tools/SortOrder.java	(revision 30357+:74eeb64d8cfc+)
+@@ -1,20 +1,23 @@
+ package au.com.finsyn.hibernate.tools;
+ 
+-import javax.annotation.ParametersAreNonnullByDefault;
++import au.com.finsyn.i18n.FinsynCommonsBundle;
++import au.com.finsyn.i18n.I18N;
++import com.github.rodionmoiseev.c10n.C10N;
++
++import java.util.Locale;
+ import java.util.Objects;
+ 
+ public enum SortOrder {
+     ASCENDING("ASC"), DESCENDING("DESC");
+ 
++    private static final FinsynCommonsBundle BUNDLE = I18N.HELPER.get(FinsynCommonsBundle.class);
++
+     private String sqlCode;
+ 
+     private SortOrder(String sqlCode) {
+         this.sqlCode = Objects.requireNonNull(sqlCode);
+     }
+ 
+-    /**
+-     * Returns "{@code ASC}" for {@link #ASCENDING} and "{@code DESC}" for {@link #DESCENDING}.
+-     */
+     public String getSqlCode() {
+         return sqlCode;
+     }
+@@ -22,11 +25,11 @@
+     public String render() {
+         switch (this) {
+             case ASCENDING:
+-                return "Ascending";
++                return BUNDLE.sortOrder().ascending();
+             case DESCENDING:
+-                return "Descending";
++                return BUNDLE.sortOrder().descending();
+             default:
+-                return this.toString();
++                throw new UnexpectedSortOrderException(this);
+         }
+     }
+ 
+@@ -36,9 +39,9 @@
+                 return DESCENDING;
+             case DESCENDING:
+                 return ASCENDING;
++            default:
++                throw new UnexpectedSortOrderException(this);
+         }
+-        throw new AssertionError("Encountered " + SortOrder.class.getName() + " that was neither " + ASCENDING
+-                + " nor " + DESCENDING);
+     }
+ 
+     public static SortOrder fromAscending(boolean isAscending) {
+@@ -54,5 +57,12 @@
+      */
+     public static SortOrder theDefault() {
+         return ASCENDING;
++    }
++
++    public class UnexpectedSortOrderException extends RuntimeException {
++        protected UnexpectedSortOrderException(SortOrder unexpected) {
++            super("Encountered " + SortOrder.class.getName() + " instance of type " + unexpected + " that was neither "
++                    + ASCENDING + " nor " + DESCENDING);
++        }
      }
  }
-Index: subprojects/ide/src/test/groovy/org/gradle/plugins/ide/idea/model/ModuleTest.groovy
+Index: src/test/java/au/com/finsyn/hibernate/tools/SortOrderTest.java
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
+<+>windows-1252
 ===================================================================
---- subprojects/ide/src/test/groovy/org/gradle/plugins/ide/idea/model/ModuleTest.groovy	(revision fcd3b59307f1353c0d79e7313f4d114ed7f054f2)
-+++ subprojects/ide/src/test/groovy/org/gradle/plugins/ide/idea/model/ModuleTest.groovy	(revision )
-@@ -23,7 +23,9 @@
-     final PathFactory pathFactory = new PathFactory()
-     final XmlTransformer xmlTransformer = new XmlTransformer()
-     final customSourceFolders = [path('file://$MODULE_DIR$/src'), path('file://$MODULE_DIR$/generated-src')] as LinkedHashSet
-+    final customResourceFolders = [path('file://$MODULE_DIR$/custom-resources')] as LinkedHashSet
-     final customTestSourceFolders = [path('file://$MODULE_DIR$/srcTest'), path('file://$MODULE_DIR$/generated-test-src')] as LinkedHashSet
-+    final customTestResourceFolders = [path('file://$MODULE_DIR$/custom-test-resources')] as LinkedHashSet
-     final customGeneratedSourceFolders = [path('file://$MODULE_DIR$/generated-src'), path('file://$MODULE_DIR$/generated-test-src')] as LinkedHashSet
-     final customExcludeFolders = [path('file://$MODULE_DIR$/target')] as LinkedHashSet
-     final customDependencies = [
-@@ -43,7 +45,9 @@
-         then:
-         module.jdkName == "1.6"
-         module.sourceFolders == customSourceFolders
-+        module.resourceFolders == customResourceFolders
-         module.testSourceFolders == customTestSourceFolders
-+        module.testResourceFolders == customTestResourceFolders
-         module.generatedSourceFolders == customGeneratedSourceFolders
-         module.excludeFolders == customExcludeFolders
-         module.outputDir == path('file://$MODULE_DIR$/out')
-@@ -53,7 +57,9 @@
- 
-     def configureOverwritesDependenciesAndAppendsAllOtherEntries() {
-         def constructorSourceFolders = [path('a'), path('d')] as Set
-+        def constructorResourceFolders = [path('r'), path('s')] as Set
-         def constructorTestSourceFolders = [path('b'), path('e')] as Set
-+        def constructorTestResourceFolders = [path('t'), path('v')] as Set
-         def constructorExcludeFolders = [path('c')] as Set
-         def constructorGeneratedSourceFolders = [path('d'), path('e')] as Set
-         def constructorInheritOutputDirs = false
-@@ -66,12 +72,14 @@
- 
-         when:
-         module.load(customModuleReader)
--        module.configure(null, constructorSourceFolders, constructorTestSourceFolders, constructorGeneratedSourceFolders, constructorExcludeFolders,
--                constructorInheritOutputDirs, constructorOutputDir, constructorTestOutputDir, constructorModuleDependencies, constructorJavaVersion)
-+        module.configure(null, constructorSourceFolders, constructorResourceFolders, constructorTestSourceFolders, constructorTestResourceFolders,
-+            constructorGeneratedSourceFolders, constructorExcludeFolders, constructorInheritOutputDirs, constructorOutputDir, constructorTestOutputDir, constructorModuleDependencies, constructorJavaVersion)
- 
-         then:
-         module.sourceFolders == customSourceFolders + constructorSourceFolders
-+        module.resourceFolders == customResourceFolders + constructorResourceFolders
-         module.testSourceFolders == customTestSourceFolders + constructorTestSourceFolders
-+        module.testResourceFolders == customTestResourceFolders + constructorTestResourceFolders
-         module.excludeFolders == customExcludeFolders + constructorExcludeFolders
-         module.generatedSourceFolders == customGeneratedSourceFolders + constructorGeneratedSourceFolders
-         module.outputDir == constructorOutputDir
-@@ -82,7 +90,7 @@
- 
-     def "configures default java version"() {
-         when:
--        module.configure(null, [] as Set, [] as Set, [] as Set, [] as Set,
-+        module.configure(null, [] as Set, [] as Set, [] as Set, [] as Set, [] as Set, [] as Set,
-                 true, null, null, [] as Set, null)
- 
-         then:
-@@ -107,7 +115,8 @@
- 
-         when:
-         module.loadDefaults()
--        module.configure(null, constructorSourceFolders, [] as Set, [] as Set, [] as Set, false, constructorOutputDir, constructorTestOutputDir, [] as Set, null)
-+        module.configure(null, constructorSourceFolders, [] as Set, [] as Set, [] as Set, [] as Set, [] as Set,
-+            false, constructorOutputDir, constructorTestOutputDir, [] as Set, null)
-         def xml = toXmlReader
-         def newModule = new Module(xmlTransformer, pathFactory)
-         newModule.load(xml)
-@@ -129,4 +138,4 @@
-     private Path path(String url) {
-         pathFactory.path(url)
-     }
--}
-\ No newline at end of file
+--- src/test/java/au/com/finsyn/hibernate/tools/SortOrderTest.java	(revision 30357+:74eeb64d8cfc+)
++++ src/test/java/au/com/finsyn/hibernate/tools/SortOrderTest.java	(revision 30357+:74eeb64d8cfc+)
+@@ -0,0 +1,48 @@
++package au.com.finsyn.hibernate.tools;
++
++import org.junit.Test;
++
++import static au.com.finsyn.hibernate.tools.SortOrder.ASCENDING;
++import static au.com.finsyn.hibernate.tools.SortOrder.DESCENDING;
++import static au.com.finsyn.hibernate.tools.SortOrder.fromAscending;
++import static au.com.finsyn.hibernate.tools.SortOrder.fromDescending;
++import static au.com.finsyn.hibernate.tools.SortOrder.theDefault;
++import static org.junit.Assert.assertEquals;
++
++public class SortOrderTest {
++
++    @Test
++    public void testGetSqlCode() throws Exception {
++        assertEquals("ASC", ASCENDING.getSqlCode());
++        assertEquals("DESC", DESCENDING.getSqlCode());
++    }
++
++    @Test
++    public void testRender() throws Exception {
++        assertEquals("Ascending", ASCENDING.render());
++        assertEquals("Descending", DESCENDING.render());
++    }
++
++    @Test
++    public void testInvert() throws Exception {
++        assertEquals(DESCENDING, ASCENDING.invert());
++        assertEquals(ASCENDING, DESCENDING.invert());
++    }
++
++    @Test
++    public void testFromAscending() throws Exception {
++        assertEquals(ASCENDING, fromAscending(true));
++        assertEquals(DESCENDING, fromAscending(false));
++    }
++
++    @Test
++    public void testFromDescending() throws Exception {
++        assertEquals(ASCENDING, fromDescending(false));
++        assertEquals(DESCENDING, fromDescending(true));
++    }
++
++    @Test
++    public void testTheDefault() throws Exception {
++        assertEquals(ASCENDING, theDefault());
++    }
 +}
-Index: subprojects/ide/src/main/groovy/org/gradle/plugins/ide/idea/model/Module.groovy
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
---- subprojects/ide/src/main/groovy/org/gradle/plugins/ide/idea/model/Module.groovy	(revision fcd3b59307f1353c0d79e7313f4d114ed7f054f2)
-+++ subprojects/ide/src/main/groovy/org/gradle/plugins/ide/idea/model/Module.groovy	(revision )
-@@ -23,6 +23,8 @@
-  */
- class Module extends XmlPersistableConfigurationObject {
-     static final String INHERITED = "inherited"
-+    static final String RESOURCE_TYPE = 'java-resource'
-+    static final String TEST_RESOURCE_TYPE = 'java-test-resource'
- 
-     /**
-      * The directory for the content root of the module.  Defaults to the project directory.
-@@ -36,11 +38,21 @@
-     Set<Path> sourceFolders = [] as LinkedHashSet
- 
-     /**
-+     * The directories containing the production resources. Must not be null.
-+     */
-+    Set<Path> resourceFolders = [] as LinkedHashSet
-+
-+    /**
-      * The directories containing the test sources. Must not be null.
-      */
-     Set<Path> testSourceFolders = [] as LinkedHashSet
- 
-     /**
-+     * The directories containing the test resources. Must not be null.
-+     */
-+    Set<Path> testResourceFolders = [] as LinkedHashSet
-+
-+    /**
-      * The directories containing generated the production sources. Must not be null.
-      */
-     Set<Path> generatedSourceFolders = [] as LinkedHashSet
-@@ -101,6 +113,10 @@
-         findSourceFolder().each { sourceFolder ->
-             if (sourceFolder.@isTestSource == 'false') {
-                 sourceFolders.add(pathFactory.path(sourceFolder.@url))
-+            } else if (sourceFolder.@type == RESOURCE_TYPE) {
-+                resourceFolders.add(pathFactory.path(sourceFolder.@url))
-+            } else if (sourceFolder.@type == TEST_RESOURCE_TYPE) {
-+                testResourceFolders.add(pathFactory.path(sourceFolder.@url))
-             } else {
-                 testSourceFolders.add(pathFactory.path(sourceFolder.@url))
-             }
-@@ -147,12 +163,15 @@
-         }
-     }
- 
--    protected def configure(Path contentPath, Set sourceFolders, Set testSourceFolders, Set generatedSourceFolders, Set excludeFolders,
--                            Boolean inheritOutputDirs, Path outputDir, Path testOutputDir, Set dependencies, String jdkName) {
-+    protected def configure(Path contentPath, Set sourceFolders, Set resourceFolders, Set testSourceFolders, Set testResourceFolders,
-+                            Set generatedSourceFolders, Set excludeFolders, Boolean inheritOutputDirs, Path outputDir,
-+                            Path testOutputDir, Set dependencies, String jdkName) {
-         this.contentPath = contentPath
-         this.sourceFolders.addAll(sourceFolders)
-+        this.resourceFolders.addAll(resourceFolders)
-         this.excludeFolders.addAll(excludeFolders)
-         this.testSourceFolders.addAll(testSourceFolders)
-+        this.testResourceFolders.addAll(testResourceFolders)
-         this.generatedSourceFolders.addAll(generatedSourceFolders)
-         if (inheritOutputDirs != null) {
-             this.inheritOutputDirs = inheritOutputDirs
-@@ -251,6 +270,14 @@
-             } else {
-                 findContent().appendNode('sourceFolder', [url: path.url, isTestSource: 'true'])
-             }
-+        }
-+
-+        resourceFolders.each { Path path ->
-+            findContent().appendNode('sourceFolder', [url: path.url, type: RESOURCE_TYPE])
-+        }
-+
-+        testResourceFolders.each { Path path ->
-+            findContent().appendNode('sourceFolder', [url: path.url, type: TEST_RESOURCE_TYPE])
-         }
- 
-         excludeFolders.each { Path path ->
-Index: subprojects/ide/src/test/resources/org/gradle/plugins/ide/idea/model/customModule.xml
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
---- subprojects/ide/src/test/resources/org/gradle/plugins/ide/idea/model/customModule.xml	(revision fcd3b59307f1353c0d79e7313f4d114ed7f054f2)
-+++ subprojects/ide/src/test/resources/org/gradle/plugins/ide/idea/model/customModule.xml	(revision )
-@@ -8,7 +8,9 @@
-         <content url="file://$MODULE_DIR$">
-             <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false"/>
-             <sourceFolder url="file://$MODULE_DIR$/generated-src" isTestSource="false" generated="true"/>
-+            <sourceFolder url="file://$MODULE_DIR$/custom-resources" type="java-resource" />
-             <sourceFolder url="file://$MODULE_DIR$/srcTest" isTestSource="true"/>
-+            <sourceFolder url="file://$MODULE_DIR$/custom-test-resources" type="java-test-resource" />
-             <sourceFolder url="file://$MODULE_DIR$/generated-test-src" isTestSource="true" generated="true"/>
-             <excludeFolder url="file://$MODULE_DIR$/target"/>
-         </content>
-@@ -40,4 +42,4 @@
-         <orderEntry type="module" module-name="someModule" exported="" />
-     </component>
-     <component name="ModuleRootManager"/>
--</module>
 \ No newline at end of file
-+</module>
+Index: src/test/java/au/com/finsyn/i18n/C10NTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/test/java/au/com/finsyn/i18n/C10NTest.java	(revision 30357+:74eeb64d8cfc+)
++++ src/test/java/au/com/finsyn/i18n/C10NTest.java	(revision 30357+:74eeb64d8cfc+)
+@@ -0,0 +1,21 @@
++package au.com.finsyn.i18n;
++
++import com.github.rodionmoiseev.c10n.C10N;
++import com.github.rodionmoiseev.c10n.C10NConfigBase;
++import org.junit.Before;
++import org.junit.Test;
++
++import static org.junit.Assert.assertEquals;
++import static org.junit.Assert.assertNotSame;
++
++// TODO fix up this test
++public class C10NTest {
++
++    @Test
++    public void testC10NNoCache() throws Exception {
++        FinsynCommonsBundle firstMessagesInstance = C10N.get(FinsynCommonsBundle.class);
++        FinsynCommonsBundle secondMessagesInstance = C10N.get(FinsynCommonsBundle.class);
++
++        assertNotSame(firstMessagesInstance, secondMessagesInstance);
++    }
++}
+\ No newline at end of file
+Index: src/main/java/au/com/finsyn/i18n/FinsynCommonsBundle.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/i18n/FinsynCommonsBundle.java	(revision 30357+:74eeb64d8cfc+)
++++ src/main/java/au/com/finsyn/i18n/FinsynCommonsBundle.java	(revision 30357+:74eeb64d8cfc+)
+@@ -0,0 +1,25 @@
++package au.com.finsyn.i18n;
++
++import com.github.rodionmoiseev.c10n.C10N;
++import com.github.rodionmoiseev.c10n.C10NConfigBase;
++import com.github.rodionmoiseev.c10n.C10NMessages;
++import com.github.rodionmoiseev.c10n.annotations.En;
++import com.github.rodionmoiseev.c10n.annotations.Ru;
++
++import java.util.Locale;
++
++@C10NMessages
++public interface FinsynCommonsBundle {
++
++    SortOrder sortOrder();
++
++    @C10NMessages
++    public interface SortOrder {
++        @En("Ascending")
++        @Ru("BLAH")
++        String ascending();
++
++        @En("Descending")
++        String descending();
++    }
++}
+Index: src/main/java/au/com/finsyn/i18n/I18N.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>windows-1252
+===================================================================
+--- src/main/java/au/com/finsyn/i18n/I18N.java	(revision 30357+:74eeb64d8cfc+)
++++ src/main/java/au/com/finsyn/i18n/I18N.java	(revision 30357+:74eeb64d8cfc+)
+@@ -0,0 +1,34 @@
++package au.com.finsyn.i18n;
++
++import com.github.rodionmoiseev.c10n.C10NMsgFactory;
++
++import javax.annotation.ParametersAreNonnullByDefault;
++import java.util.Locale;
++
++@ParametersAreNonnullByDefault
++public enum I18N implements C10NMsgFactory {
++
++    HELPER;
++
++    public void clearFactory() {
++        // TODO unimplemented
++        throw new UnsupportedOperationException("Unimplemented");
++    }
++
++    public void useFactory(C10NMsgFactory factory) {
++        // TODO unimplemented
++        throw new UnsupportedOperationException("Unimplemented");
++    }
++
++    @Override
++    public <T> T get(Class<T> c10nInterface) {
++        // TODO automatically generated method stub
++        throw new UnsupportedOperationException();
++    }
++
++    @Override
++    public <T> T get(Class<T> c10nInterface, Locale locale) {
++        // TODO automatically generated method stub
++        throw new UnsupportedOperationException();
++    }
++}
